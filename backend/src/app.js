@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const cookieParser = require('cookie-parser');
+const { initCronJobs } = require('./services/cronJobs');
 const path = require('path');
 require('dotenv').config();
 
@@ -12,6 +13,9 @@ const ApiResponse = require('./utils/response');
 
 // Initialize express app
 const app = express();
+
+// Initialize cron jobs
+initCronJobs();
 
 // Security middleware
 app.use(helmet({
