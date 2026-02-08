@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const generateTokens = (userId, role) => {
   const accessToken = jwt.sign(
@@ -32,8 +33,14 @@ const verifyRefreshToken = (token) => {
   }
 };
 
+// Generate CSRF token
+const generateCsrfToken = () => {
+  return crypto.randomBytes(32).toString('hex');
+};
+
 module.exports = {
   generateTokens,
   verifyAccessToken,
-  verifyRefreshToken
+  verifyRefreshToken,
+  generateCsrfToken
 };
