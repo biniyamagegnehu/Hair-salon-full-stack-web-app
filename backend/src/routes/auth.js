@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const { body } = require('express-validator');
 const { validate, userRegisterRules, loginRules } = require('../middlewares/validate');
-const { authenticate } = require('../middlewares/auth');
+const { authenticate, authorize } = require('../middlewares/auth');
 
-// Import controllers (to be created in next phase)
 const authController = require('../controllers/authController');
 
 // Public routes
@@ -12,14 +12,41 @@ router.post('/login', validate(loginRules), authController.login);
 router.post('/refresh', authController.refreshTokens);
 router.post('/logout', authenticate, authController.logout);
 
+// Google OAuth routes
+router.get('/google', authController.googleAuth);
+router.get('/google/callback', authController.googleCallback);
+
 // Protected routes
 router.get('/me', authenticate, authController.getCurrentUser);
 router.put('/language', authenticate, validate([
   body('language').isIn(['am', 'en']).withMessage('Language must be either "am" or "en"')
 ]), authController.updateLanguage);
 
-// Google OAuth routes (to be implemented in next phase)
-router.get('/google', authController.googleAuth);
-router.get('/google/callback', authController.googleCallback);
+router.put('/phone', authenticate, validate([
+  body('phoneNumber')
+    .notEmpty().withMessage('Phone number is required')
+    .matches(/^\+251[79]\d{8}$/).withMessage('Invalid Ethiopian phone number format (+251XXXXXXXXX)')
+]), authController.updatePhoneNumber);
+
+router.put('/change-password', authenticate, validate([
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword')
+    .notEmpty().withMessage('New password is required')
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+    .matches(/\d/).withMessage('Password must contain at least one number')
+]), authController.changePassword);
+
+// Admin password reset (admin only)
+router.post('/admin/reset-password', 
+  authenticate, 
+  authorize('ADMIN'),
+  validate([
+    body('userId').notEmpty().withMessage('User ID is required'),
+    body('newPassword')
+      .notEmpty().withMessage('New password is required')
+      .isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+  ]),
+  authController.adminResetPassword
+);
 
 module.exports = router;
