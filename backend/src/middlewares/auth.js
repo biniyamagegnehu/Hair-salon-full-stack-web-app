@@ -23,6 +23,11 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json(ApiResponse.unauthorized('User not found'));
     }
     
+    // Check if user is active
+    if (!user.isVerified) {
+      return res.status(403).json(ApiResponse.forbidden('Account not verified'));
+    }
+    
     // Attach user to request
     req.user = user;
     next();
@@ -46,4 +51,26 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { authenticate, authorize };
+// Optional authentication (doesn't fail if no token)
+const optionalAuthenticate = async (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+    
+    if (token) {
+      const decoded = verifyAccessToken(token);
+      if (decoded) {
+        const user = await User.findById(decoded.userId).select('-password -refreshToken');
+        if (user && user.isVerified) {
+          req.user = user;
+        }
+      }
+    }
+    
+    next();
+  } catch (error) {
+    console.error('Optional authentication error:', error);
+    next();
+  }
+};
+
+module.exports = { authenticate, authorize, optionalAuthenticate };
