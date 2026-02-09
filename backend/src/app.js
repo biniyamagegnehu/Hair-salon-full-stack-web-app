@@ -4,18 +4,18 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const cookieParser = require('cookie-parser');
-const { initCronJobs } = require('./services/cronJobs');
-const path = require('path');
+const passport = require('passport');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 require('dotenv').config();
 
 const corsOptions = require('./config/corsOptions');
 const ApiResponse = require('./utils/response');
+const { setCsrfToken, csrfProtection } = require('./middlewares/csrf');
+const { passport: googlePassport } = require('./services/googleOAuth');
 
 // Initialize express app
 const app = express();
-
-// Initialize cron jobs
-initCronJobs();
 
 // Security middleware
 app.use(helmet({
@@ -25,15 +25,15 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", process.env.FRONTEND_URL]
+      connectSrc: ["'self'", process.env.FRONTEND_URL, "https://api.chapa.co"]
     }
   }
 }));
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Too many requests from this IP, please try again later'
 });
 app.use('/api/', limiter);
@@ -45,11 +45,35 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Cookie parser
 app.use(cookieParser());
 
+// Session configuration for OAuth
+app.use(session({
+  secret: process.env.JWT_ACCESS_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions'
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // CORS
 app.use(cors(corsOptions));
 
 // Sanitize data
 app.use(mongoSanitize());
+
+// CSRF protection
+app.use(setCsrfToken);
+app.use(csrfProtection);
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -62,9 +86,10 @@ app.get('/health', (req, res) => {
   res.status(200).json(ApiResponse.success('Server is healthy'));
 });
 
-// API routes will be added here in next phases
+// API routes
 app.use('/api/auth', require('./routes/auth'));
-// Other routes will be added as we build
+app.use('/api/payments', require('./routes/payments'));
+// Other routes will be added in next phases
 
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
@@ -88,6 +113,11 @@ app.use((err, req, res, next) => {
   if (err.name === 'ValidationError') {
     const messages = Object.values(err.errors).map(val => val.message);
     return res.status(400).json(ApiResponse.error(messages.join(', ')));
+  }
+  
+  // Handle Chapa errors
+  if (err.name === 'ChapaError') {
+    return res.status(400).json(ApiResponse.error(err.message));
   }
   
   // Default error
