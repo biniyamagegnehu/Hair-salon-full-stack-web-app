@@ -83,13 +83,21 @@ app.use((req, res, next) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json(ApiResponse.success('Server is healthy'));
+  res.status(200).json(ApiResponse.success('Server is healthy', {
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  }));
 });
 
 // API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/payments', require('./routes/payments'));
-// Other routes will be added in next phases
+app.use('/api/appointments', require('./routes/appointments'));
+app.use('/api/queue', require('./routes/queue'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/services', require('./routes/services'));
+app.use('/api/working-hours', require('./routes/workingHours'));
 
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
