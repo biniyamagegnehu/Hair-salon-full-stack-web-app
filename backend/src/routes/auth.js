@@ -12,9 +12,11 @@ router.post('/login', validate(loginRules), authController.login);
 router.post('/refresh', authController.refreshTokens);
 router.post('/logout', authenticate, authController.logout);
 
-// Google OAuth routes
-router.get('/google', authController.googleAuth);
-router.get('/google/callback', authController.googleCallback);
+// Google OAuth (frontend sends token)
+router.post('/google', 
+  validate([body('token').notEmpty().withMessage('Google token is required')]),
+  authController.googleAuth
+);
 
 // Protected routes
 router.get('/me', authenticate, authController.getCurrentUser);

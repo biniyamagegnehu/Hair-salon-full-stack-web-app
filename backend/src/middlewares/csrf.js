@@ -1,9 +1,14 @@
-const { generateCsrfToken } = require('../utils/jwt');
+const crypto = require('crypto');
 const ApiResponse = require('../utils/response');
 
 const csrfProtection = (req, res, next) => {
   // Skip CSRF for GET, HEAD, OPTIONS requests
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return next();
+  }
+  
+  // Skip CSRF for health check
+  if (req.path === '/health') {
     return next();
   }
   
@@ -23,7 +28,7 @@ const csrfProtection = (req, res, next) => {
 const setCsrfToken = (req, res, next) => {
   // Generate new CSRF token if not exists
   if (!req.cookies['csrf-token']) {
-    const csrfToken = generateCsrfToken();
+    const csrfToken = crypto.randomBytes(32).toString('hex');
     res.cookie('csrf-token', csrfToken, {
       httpOnly: false, // Must be accessible by JavaScript
       secure: process.env.NODE_ENV === 'production',

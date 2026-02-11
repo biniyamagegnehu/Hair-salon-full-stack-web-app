@@ -255,18 +255,31 @@ const authController = {
     }
   },
   
-googleAuth: (req, res, next) => {
-    const { passport } = require('../services/googleOAuth');
-    
-    // Store any state or redirect URL in session
-    const state = req.query.redirect || '/';
-    const authenticator = passport.authenticate('google', {
-      scope: ['profile', 'email'],
-      state: JSON.stringify({ redirect: state }),
-      prompt: 'select_account'
-    });
-    
-    authenticator(req, res, next);
+  // Google OAuth - Frontend sends token
+  googleAuth: async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json(
+          ApiResponse.error('Google token is required')
+        );
+      }
+      
+      // Verify Google token
+      const googleUser = await verifyGoogleToken(token);
+      
+      // Handle authentication
+      const userData = await handleGoogleAuth(googleUser, res);
+      
+      res.json(ApiResponse.success('Google authentication successful', userData));
+      
+    } catch (error) {
+      console.error('Google auth error:', error);
+      res.status(401).json(
+        ApiResponse.error(error.message || 'Google authentication failed')
+      );
+    }
   },
   
   googleCallback: async (req, res, next) => {
