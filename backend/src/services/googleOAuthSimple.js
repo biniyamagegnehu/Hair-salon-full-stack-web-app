@@ -1,11 +1,11 @@
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const { generateTokens } = require('../utils/jwt');
+const crypto = require('crypto');
 
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_CALLBACK_URL
+  process.env.GOOGLE_CLIENT_SECRET
 );
 
 const verifyGoogleToken = async (token) => {
@@ -80,7 +80,6 @@ const handleGoogleAuth = async (googleUser, res) => {
     });
     
     // Generate CSRF token
-    const crypto = require('crypto');
     const csrfToken = crypto.randomBytes(32).toString('hex');
     
     res.cookie('csrf-token', csrfToken, {

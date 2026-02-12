@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const corsOptions = require('./config/corsOptions');
 const ApiResponse = require('./utils/response');
+const { setCsrfToken, csrfProtection } = require('./middlewares/csrf');
 
 // Initialize express app
 const app = express();
@@ -36,6 +37,10 @@ app.use(cors(corsOptions));
 // Sanitize data
 app.use(mongoSanitize());
 
+// CSRF protection (set token first, then verify)
+app.use(setCsrfToken);
+app.use(csrfProtection);
+
 // Request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.path} - ${req.ip}`);
@@ -51,6 +56,11 @@ app.get('/health', (req, res) => {
   }));
 });
 
+// Test route
+app.get('/api/test', (req, res) => {
+  res.json(ApiResponse.success('API is working!'));
+});
+
 // API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/payments', require('./routes/payments'));
@@ -58,11 +68,15 @@ app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/queue', require('./routes/queue'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/services', require('./routes/services'));
-app.use('/api/working-hours', require('./routes/workingHours'));
+app.use('/api/working-hours', require('./routes/working-hours'));
 
-// 404 handler for API routes
-app.use('/api/*', (req, res) => {
-  res.status(404).json(ApiResponse.notFound('API endpoint not found'));
+// 404 handler - FIXED: Don't use wildcard pattern
+app.use((req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json(ApiResponse.notFound(`API endpoint not found: ${req.method} ${req.path}`));
+  }
+  // For non-API routes
+  res.status(404).json(ApiResponse.notFound('Resource not found'));
 });
 
 // Error handling middleware

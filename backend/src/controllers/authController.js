@@ -1,8 +1,10 @@
 const User = require('../models/User');
 const { generateTokens, verifyRefreshToken } = require('../utils/jwt');
+const { verifyGoogleToken, handleGoogleAuth } = require('../services/googleOAuthSimple');
 const ApiResponse = require('../utils/response');
 
 const authController = {
+  // Register new user
   register: async (req, res) => {
     try {
       const { email, phoneNumber, fullName, password } = req.body;
@@ -28,7 +30,7 @@ const authController = {
         fullName,
         password,
         role: 'CUSTOMER',
-        isVerified: true // Auto-verify for now, can add OTP later
+        isVerified: true
       });
       
       // Generate tokens
@@ -71,6 +73,7 @@ const authController = {
     }
   },
   
+  // Login user
   login: async (req, res) => {
     try {
       const { identifier, password } = req.body;
@@ -102,12 +105,11 @@ const authController = {
       
       // Update last login
       user.lastLogin = new Date();
-      await user.save();
       
       // Generate tokens
       const { accessToken, refreshToken } = generateTokens(user._id, user.role);
       
-      // Save refresh token
+      // Save refresh token to user
       user.refreshToken = refreshToken;
       await user.save();
       
@@ -144,6 +146,7 @@ const authController = {
     }
   },
   
+  // Refresh tokens
   refreshTokens: async (req, res) => {
     try {
       const refreshToken = req.cookies.refreshToken;
@@ -198,6 +201,7 @@ const authController = {
     }
   },
   
+  // Logout
   logout: async (req, res) => {
     try {
       // Clear refresh token from database
@@ -208,6 +212,7 @@ const authController = {
       // Clear cookies
       res.clearCookie('accessToken');
       res.clearCookie('refreshToken');
+      res.clearCookie('csrf-token');
       
       res.json(ApiResponse.success('Logout successful'));
       
@@ -217,6 +222,7 @@ const authController = {
     }
   },
   
+  // Get current user
   getCurrentUser: async (req, res) => {
     try {
       const user = req.user;
@@ -239,6 +245,7 @@ const authController = {
     }
   },
   
+  // Update language preference
   updateLanguage: async (req, res) => {
     try {
       const { language } = req.body;
@@ -255,7 +262,7 @@ const authController = {
     }
   },
   
-  // Google OAuth - Frontend sends token
+  // Google OAuth
   googleAuth: async (req, res) => {
     try {
       const { token } = req.body;
@@ -282,52 +289,7 @@ const authController = {
     }
   },
   
-  googleCallback: async (req, res, next) => {
-    const { passport } = require('../services/googleOAuth');
-    
-    passport.authenticate('google', async (err, user) => {
-      try {
-        if (err) {
-          console.error('Google OAuth error:', err);
-          // Redirect to frontend with error
-          return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
-        }
-        
-        if (!user) {
-          return res.redirect(`${process.env.FRONTEND_URL}/login?error=user_not_found`);
-        }
-        
-        // Generate tokens and set cookies
-        const userData = await handleGoogleAuthSuccess(user, res);
-        
-        // Parse redirect URL from state
-        let redirectUrl = `${process.env.FRONTEND_URL}/`;
-        try {
-          const state = JSON.parse(req.query.state || '{}');
-          if (state.redirect) {
-            redirectUrl = `${process.env.FRONTEND_URL}${state.redirect}`;
-          }
-        } catch (e) {
-          console.error('Error parsing state:', e);
-        }
-        
-        // Add user data to redirect URL as query params
-        const params = new URLSearchParams({
-          id: userData.id,
-          email: userData.email,
-          fullName: userData.fullName,
-          requiresPhoneUpdate: userData.requiresPhoneUpdate
-        });
-        
-        res.redirect(`${redirectUrl}?${params.toString()}`);
-        
-      } catch (error) {
-        console.error('Google callback error:', error);
-        res.redirect(`${process.env.FRONTEND_URL}/login?error=server_error`);
-      }
-    })(req, res, next);
-  },
-  
+  // Update phone number (for Google OAuth users)
   updatePhoneNumber: async (req, res) => {
     try {
       const { phoneNumber } = req.body;
@@ -367,6 +329,7 @@ const authController = {
     }
   },
   
+  // Change password
   changePassword: async (req, res) => {
     try {
       const { currentPassword, newPassword } = req.body;
@@ -391,18 +354,46 @@ const authController = {
       user.password = newPassword;
       await user.save();
       
-      // Invalidate all refresh tokens (optional security measure)
+      // Invalidate all refresh tokens
       user.refreshToken = null;
       await user.save();
       
       // Clear cookies
       res.clearCookie('accessToken');
       res.clearCookie('refreshToken');
+      res.clearCookie('csrf-token');
       
       res.json(ApiResponse.success('Password changed successfully. Please login again.'));
       
     } catch (error) {
       console.error('Change password error:', error);
+      res.status(500).json(ApiResponse.serverError());
+    }
+  },
+  
+  // Admin reset password (admin only)
+  adminResetPassword: async (req, res) => {
+    try {
+      const { userId, newPassword } = req.body;
+      
+      const user = await User.findById(userId);
+      
+      if (!user) {
+        return res.status(404).json(ApiResponse.error('User not found'));
+      }
+      
+      // Update password
+      user.password = newPassword;
+      
+      // Invalidate refresh token
+      user.refreshToken = null;
+      
+      await user.save();
+      
+      res.json(ApiResponse.success('Password reset successfully'));
+      
+    } catch (error) {
+      console.error('Admin reset password error:', error);
       res.status(500).json(ApiResponse.serverError());
     }
   }

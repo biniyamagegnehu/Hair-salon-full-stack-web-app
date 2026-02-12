@@ -16,15 +16,15 @@ const appointmentSchema = new mongoose.Schema({
     required: true
   },
   scheduledTime: {
-    type: String, // Format: "HH:MM"
+    type: String,
     required: true
   },
   estimatedDuration: {
-    type: Number, // in minutes
+    type: Number,
     required: true
   },
   estimatedEndTime: {
-    type: String // Calculated field
+    type: String
   },
   status: {
     type: String,
@@ -49,36 +49,68 @@ const appointmentSchema = new mongoose.Schema({
     },
     paymentStatus: {
       type: String,
-      enum: ['PENDING', 'PARTIAL', 'COMPLETED', 'FAILED', 'REFUNDED'],
+      enum: ['PENDING', 'PARTIAL', 'COMPLETED', 'FAILED', 'REFUNDED', 'PENDING_REFUND'],
       default: 'PENDING'
     },
     paymentDate: {
       type: Date
+    },
+    cashPayment: {
+      amount: Number,
+      method: String,
+      receivedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      receivedAt: Date
+    },
+    refund: {
+      amount: Number,
+      reason: String,
+      processedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      processedAt: Date
     }
   },
   notes: {
     type: String,
     trim: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  adminNotes: {
+    type: String,
+    trim: true
+  },
+  checkedInAt: {
+    type: Date
+  },
+  startedAt: {
+    type: Date
+  },
+  completedAt: {
+    type: Date
+  },
+  noShowAt: {
+    type: Date
+  },
+  actualDuration: {
+    type: Number
   }
 }, {
   timestamps: true
 });
 
-// Calculate estimated end time before saving
-appointmentSchema.pre('save', function(next) {
+// Calculate estimated end time before saving - FIXED: removed next parameter
+appointmentSchema.pre('save', function() {
   if (this.scheduledTime && this.estimatedDuration) {
     const [hours, minutes] = this.scheduledTime.split(':').map(Number);
     const startDate = new Date(this.scheduledDate);
-    startDate.setHours(hours, minutes);
+    startDate.setHours(hours, minutes, 0, 0);
     
     const endDate = new Date(startDate.getTime() + this.estimatedDuration * 60000);
     this.estimatedEndTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
   }
-  next();
 });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

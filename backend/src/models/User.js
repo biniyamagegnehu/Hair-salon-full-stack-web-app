@@ -5,14 +5,15 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
-    sparse: true, // Allows null for Google OAuth users
+    sparse: true,
     lowercase: true,
     trim: true
   },
   phoneNumber: {
     type: String,
     unique: true,
-    required: true
+    required: true,
+    sparse: true
   },
   fullName: {
     type: String,
@@ -21,7 +22,6 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    // Not required for Google OAuth users
     minlength: 6
   },
   googleId: {
@@ -48,25 +48,23 @@ const userSchema = new mongoose.Schema({
   },
   refreshToken: {
     type: String
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
 }, {
   timestamps: true
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password') || !this.password) return next();
+// Hash password before saving - FIXED: removed next parameter
+userSchema.pre('save', async function() {
+  // Only hash if password is modified and exists
+  if (!this.isModified('password') || !this.password) {
+    return;
+  }
   
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
   } catch (error) {
-    next(error);
+    throw error;
   }
 });
 
