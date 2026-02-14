@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const corsOptions = require('./config/corsOptions');
 const ApiResponse = require('./utils/response');
-// const { setCsrfToken, csrfProtection } = require('./middlewares/csrf');
+const { setCsrfToken, csrfProtection } = require('./middlewares/csrf');
 
 // Initialize express app
 const app = express();
@@ -38,8 +38,8 @@ app.use(cors(corsOptions));
 // app.use(mongoSanitize());
 
 // CSRF protection (set token first, then verify)
-// app.use(setCsrfToken);
-// app.use(csrfProtection);
+app.use(setCsrfToken);
+app.use(csrfProtection);
 
 // Request logging middleware
 app.use((req, res, next) => {
