@@ -1,67 +1,11 @@
 @import "tailwindcss";
 
-/* Your custom styles below */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap');
-
-@layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-  
-  body {
-    background-color: #f9fafb;
-    color: #111827;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  }
-
-  .font-amharic {
-    font-family: 'Noto Sans Ethiopic', sans-serif;
-  }
+/* Custom styles */
+body {
+  background-color: #f9fafb;
+  color: #111827;
 }
 
-@layer components {
-  .btn-primary {
-    background-color: #2563eb;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  
-  .btn-primary:hover {
-    background-color: #1d4ed8;
-  }
-  
-  .btn-primary:focus {
-    outline: none;
-    ring: 2px solid #3b82f6;
-    ring-offset: 2px;
-  }
-  
-  .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  .input-field {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-  }
-  
-  .input-field:focus {
-    outline: none;
-    ring: 2px solid #3b82f6;
-    border-color: transparent;
-  }
-  
-  .card {
-    background-color: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    padding: 1.5rem;
-  }
+.font-amharic {
+  font-family: 'Noto Sans Ethiopic', sans-serif;
 }

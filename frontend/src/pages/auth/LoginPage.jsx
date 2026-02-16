@@ -1,43 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { toast } from 'react-toastify';
-import { GoogleLogin } from '@react-oauth/google';
-
 import { login, clearError } from '../../store/slices/authSlice';
-import { authService } from '../../services/api/auth';
-
-const schema = yup.object({
-  identifier: yup.string().required('Email or phone number is required'),
-  password: yup.string().required('Password is required'),
-});
 
 const LoginPage = () => {
-  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isLoading, error, isAuthenticated } = useSelector((state) => state.auth);
   
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearError());
-    }
-  }, [error, dispatch]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -45,118 +18,85 @@ const LoginPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const onSubmit = async (data) => {
-    const result = await dispatch(login(data));
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = await dispatch(login({ identifier, password }));
     if (login.fulfilled.match(result)) {
-      toast.success(t('auth.loginSuccess'));
+      // Login successful - will redirect via useEffect
     }
-  };
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      const response = await authService.googleAuth(credentialResponse.credential);
-      if (response.success) {
-        toast.success(t('auth.loginSuccess'));
-        navigate('/');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Google login failed');
-    }
-  };
-
-  const handleGoogleError = () => {
-    toast.error('Google login failed');
   };
 
   return (
     <div>
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
-              {t('auth.email')} / {t('auth.phone')}
-            </label>
-            <input
-              id="identifier"
-              type="text"
-              {...register('identifier')}
-              className="mt-1 input-field"
-              placeholder="example@email.com or +251911223344"
-            />
-            {errors.identifier && (
-              <p className="mt-1 text-sm text-red-600">{errors.identifier.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              {t('auth.password')}
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                {...register('password')}
-                className="mt-1 input-field pr-10"
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-            )}
-          </div>
+      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Welcome Back</h2>
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
         </div>
+      )}
 
-        <div className="flex items-center justify-between">
-          <div className="text-sm">
-            <Link to="/forgot-password" className="text-primary-600 hover:text-primary-500">
-              {t('auth.forgotPassword')}
-            </Link>
-          </div>
-          <div className="text-sm">
-            <Link to="/register" className="text-primary-600 hover:text-primary-500">
-              {t('auth.noAccount')}
-            </Link>
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email or Phone Number
+          </label>
+          <input
+            type="text"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your email or phone"
+            required
+          />
         </div>
 
         <div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? t('common.loading') : t('auth.login')}
-          </button>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your password"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2 text-gray-500"
+            >
+              {showPassword ? '👁️' : '👁️‍🗨️'}
+            </button>
+          </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or continue with</span>
-          </div>
-        </div>
-
-        <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-            useOneTap
-            theme="filled_blue"
-            shape="rectangular"
-            size="large"
-            text="signin_with"
-          />
-        </div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
+
+      <div className="mt-6 text-center">
+        <p className="text-sm text-gray-600">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+            Register here
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };

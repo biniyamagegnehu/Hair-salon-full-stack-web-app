@@ -19,7 +19,7 @@ api.interceptors.request.use(
       .find(row => row.startsWith('csrf-token='))
       ?.split('=')[1];
 
-    if (csrfToken && !config.method?.toUpperCase() === 'GET') {
+    if (csrfToken && !['get', 'head', 'options'].includes(config.method?.toLowerCase() || '')) {
       config.headers['X-CSRF-Token'] = csrfToken;
     }
     return config;
