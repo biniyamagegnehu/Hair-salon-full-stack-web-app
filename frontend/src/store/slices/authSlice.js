@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/api/auth';
 
+// Regular login
 export const login = createAsyncThunk(
   'auth/login',
   async ({ identifier, password }, { rejectWithValue }) => {
@@ -13,6 +14,20 @@ export const login = createAsyncThunk(
   }
 );
 
+// Google login
+export const googleLogin = createAsyncThunk(
+  'auth/googleLogin',
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await authService.googleLogin(token);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Google login failed');
+    }
+  }
+);
+
+// Register
 export const register = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
@@ -25,6 +40,7 @@ export const register = createAsyncThunk(
   }
 );
 
+// Logout
 export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
@@ -37,6 +53,7 @@ export const logout = createAsyncThunk(
   }
 );
 
+// Get current user
 export const getCurrentUser = createAsyncThunk(
   'auth/getCurrentUser',
   async (_, { rejectWithValue }) => {
@@ -49,11 +66,25 @@ export const getCurrentUser = createAsyncThunk(
   }
 );
 
+// Update phone number (for Google users)
+export const updatePhoneNumber = createAsyncThunk(
+  'auth/updatePhoneNumber',
+  async (phoneNumber, { rejectWithValue }) => {
+    try {
+      const response = await authService.updatePhoneNumber(phoneNumber);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update phone');
+    }
+  }
+);
+
 const initialState = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  requiresPhoneUpdate: false
 };
 
 const authSlice = createSlice({
@@ -63,6 +94,9 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setRequiresPhoneUpdate: (state, action) => {
+      state.requiresPhoneUpdate = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -75,11 +109,29 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
+        state.requiresPhoneUpdate = action.payload.requiresPhoneUpdate || false;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
+      
+      // Google Login
+      .addCase(googleLogin.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload;
+        state.requiresPhoneUpdate = action.payload.requiresPhoneUpdate || false;
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      
       // Register
       .addCase(register.pending, (state) => {
         state.isLoading = true;
@@ -94,11 +146,14 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+      
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
+        state.requiresPhoneUpdate = false;
       })
+      
       // Get current user
       .addCase(getCurrentUser.pending, (state) => {
         state.isLoading = true;
@@ -112,9 +167,15 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = false;
         state.user = null;
+      })
+      
+      // Update phone number
+      .addCase(updatePhoneNumber.fulfilled, (state, action) => {
+        state.user.phoneNumber = action.payload.phoneNumber;
+        state.requiresPhoneUpdate = false;
       });
-  },
+  }
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, setRequiresPhoneUpdate } = authSlice.actions;
 export default authSlice.reducer;
