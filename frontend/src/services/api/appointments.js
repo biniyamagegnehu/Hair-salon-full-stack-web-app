@@ -4,7 +4,7 @@ export const appointmentsService = {
   // Get available time slots
   getAvailableSlots: async (date, serviceId) => {
     const response = await api.get('/appointments/available-slots', {
-      params: { date, serviceId },
+      params: { date, serviceId }
     });
     return response.data;
   },
@@ -16,29 +16,8 @@ export const appointmentsService = {
   },
 
   // Get customer appointments
-  getMyAppointments: async (params = {}) => {
-    const response = await api.get('/appointments', { params });
+  getMyAppointments: async () => {
+    const response = await api.get('/appointments');
     return response.data;
-  },
-
-  // Get single appointment
-  getAppointmentById: async (id) => {
-    const response = await api.get(`/appointments/${id}`);
-    return response.data;
-  },
-
-  // Cancel appointment
-  cancelAppointment: async (id) => {
-    const response = await api.put(`/appointments/${id}/cancel`);
-    return response.data;
-  },
-
-  // Reschedule appointment
-  rescheduleAppointment: async (id, newDate, newTime) => {
-    const response = await api.put(`/appointments/${id}/reschedule`, {
-      newDate,
-      newTime,
-    });
-    return response.data;
-  },
+  }
 };

@@ -1,55 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import { format, addDays } from 'date-fns';
-import { toast } from 'react-toastify';
-import 'react-datepicker/dist/react-datepicker.css';
+import { toast } from 'react-hot-toast';
+import "react-datepicker/dist/react-datepicker.css";
 
-import { servicesService } from '../../services/api/services';
+import { fetchServices } from '../../store/slices/serviceSlice';
 import { appointmentsService } from '../../services/api/appointments';
-import { queueService } from '../../services/api/queue';
+import { createAppointment } from '../../store/slices/appointmentSlice';
 
 const BookingPage = () => {
-  const { t } = useTranslation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const location = useLocation();
+  const { services } = useSelector((state) => state.services);
+  const { isLoading } = useSelector((state) => state.appointments);
 
   const [step, setStep] = useState(1);
-  const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [queueStatus, setQueueStatus] = useState(null);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
+  // Check if service was passed from Services page
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
+    dispatch(fetchServices());
+    
+    if (location.state?.selectedServiceId) {
+      const service = services.find(s => s._id === location.state.selectedServiceId);
+      if (service) {
+        setSelectedService(service);
+        setStep(2);
+      }
     }
-    loadServices();
-    loadQueueStatus();
-  }, [isAuthenticated, navigate]);
-
-  const loadServices = async () => {
-    try {
-      const response = await servicesService.getAllServices();
-      setServices(response.data.services);
-    } catch (error) {
-      toast.error('Failed to load services');
-    }
-  };
-
-  const loadQueueStatus = async () => {
-    try {
-      const response = await queueService.getQueueStatus();
-      setQueueStatus(response.data);
-    } catch (error) {
-      console.error('Failed to load queue status');
-    }
-  };
+  }, [dispatch, location.state, services]);
 
   const handleServiceSelect = (service) => {
     setSelectedService(service);
@@ -61,7 +47,7 @@ const BookingPage = () => {
     setSelectedTime(null);
     
     if (date && selectedService) {
-      setLoading(true);
+      setLoadingSlots(true);
       try {
         const formattedDate = format(date, 'yyyy-MM-dd');
         const response = await appointmentsService.getAvailableSlots(
@@ -72,7 +58,7 @@ const BookingPage = () => {
       } catch (error) {
         toast.error('Failed to load available slots');
       } finally {
-        setLoading(false);
+        setLoadingSlots(false);
       }
     }
   };
@@ -85,62 +71,54 @@ const BookingPage = () => {
   const handleConfirmBooking = async () => {
     if (!selectedService || !selectedDate || !selectedTime) return;
 
-    setLoading(true);
-    try {
-      const response = await appointmentsService.createAppointment({
-        serviceId: selectedService._id,
-        scheduledDate: format(selectedDate, 'yyyy-MM-dd'),
-        scheduledTime: selectedTime.time,
-      });
+    const appointmentData = {
+      serviceId: selectedService._id,
+      scheduledDate: format(selectedDate, 'yyyy-MM-dd'),
+      scheduledTime: selectedTime.time,
+      notes: ''
+    };
 
-      if (response.success) {
-        toast.success(t('booking.bookingSuccess'));
-        // Redirect to payment
-        navigate(`/payment/${response.data.appointment.id}`);
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('booking.bookingError'));
-    } finally {
-      setLoading(false);
+    const result = await dispatch(createAppointment(appointmentData));
+    
+    if (createAppointment.fulfilled.match(result)) {
+      toast.success('Appointment created successfully!');
+      // Navigate to payment
+      navigate(`/payment/${result.payload.appointment.id}`);
+    } else {
+      toast.error(result.payload || 'Failed to create appointment');
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('booking.title')}</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Book an Appointment</h1>
 
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`flex items-center ${
-                s < step ? 'text-primary-600' : s === step ? 'text-primary-800' : 'text-gray-400'
-              }`}
-            >
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                  s < step
-                    ? 'border-primary-600 bg-primary-600 text-white'
-                    : s === step
-                    ? 'border-primary-800 bg-white text-primary-800'
-                    : 'border-gray-300 bg-white text-gray-400'
-                }`}
-              >
-                {s < step ? '✓' : s}
+          {[
+            { num: 1, label: 'Select Service' },
+            { num: 2, label: 'Select Date & Time' },
+            { num: 3, label: 'Confirm Booking' }
+          ].map((s) => (
+            <div key={s.num} className="flex items-center">
+              <div className={`
+                w-8 h-8 rounded-full flex items-center justify-center font-medium
+                ${s.num < step ? 'bg-green-500 text-white' : 
+                  s.num === step ? 'bg-blue-600 text-white' : 
+                  'bg-gray-200 text-gray-600'}
+              `}>
+                {s.num < step ? '✓' : s.num}
               </div>
-              <span className="ml-2 text-sm font-medium">
-                {s === 1 && t('booking.selectService')}
-                {s === 2 && t('booking.selectDate')}
-                {s === 3 && t('booking.confirmBooking')}
+              <span className="ml-2 text-sm font-medium text-gray-700 hidden sm:block">
+                {s.label}
               </span>
             </div>
           ))}
         </div>
         <div className="mt-4 h-2 bg-gray-200 rounded-full">
           <div
-            className="h-2 bg-primary-600 rounded-full transition-all duration-300"
+            className="h-2 bg-blue-600 rounded-full transition-all duration-300"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
@@ -153,19 +131,13 @@ const BookingPage = () => {
             <button
               key={service._id}
               onClick={() => handleServiceSelect(service)}
-              className="text-left p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-transparent hover:border-primary-500"
+              className="text-left p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-transparent hover:border-blue-500"
             >
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {service.name.en}
-              </h3>
-              <p className="text-gray-600 mb-4">{service.description?.en}</p>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">{service.name.en}</h3>
+              <p className="text-gray-600 mb-4">{service.description?.en || 'Premium service'}</p>
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-primary-600">
-                  {service.price} ETB
-                </span>
-                <span className="text-sm text-gray-500">
-                  {service.duration} {t('booking.minutes')}
-                </span>
+                <span className="text-2xl font-bold text-blue-600">{service.price} ETB</span>
+                <span className="text-sm text-gray-500">{service.duration} min</span>
               </div>
             </button>
           ))}
@@ -173,130 +145,102 @@ const BookingPage = () => {
       )}
 
       {/* Step 2: Select Date & Time */}
-      {step === 2 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('booking.selectDate')}
-            </label>
-            <DatePicker
-              selected={selectedDate}
-              onChange={handleDateChange}
-              minDate={new Date()}
-              maxDate={addDays(new Date(), 30)}
-              dateFormat="MMMM d, yyyy"
-              className="input-field"
-              placeholderText="Select a date"
-            />
-          </div>
-
-          {selectedDate && (
+      {step === 2 && selectedService && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Selected Service: {selectedService.name.en}</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('booking.selectTime')}
+                Select Date
               </label>
-              {loading ? (
-                <p>{t('common.loading')}</p>
-              ) : availableSlots.length > 0 ? (
-                <div className="grid grid-cols-3 gap-2">
-                  {availableSlots.map((slot) => (
-                    <button
-                      key={slot.time}
-                      onClick={() => handleTimeSelect(slot)}
-                      className={`p-2 text-sm font-medium rounded-lg border ${
-                        selectedTime?.time === slot.time
-                          ? 'bg-primary-600 text-white border-primary-600'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-primary-500'
-                      }`}
-                    >
-                      {slot.time}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500">{t('booking.noSlots')}</p>
-              )}
+              <DatePicker
+                selected={selectedDate}
+                onChange={handleDateChange}
+                minDate={new Date()}
+                maxDate={addDays(new Date(), 30)}
+                dateFormat="MMMM d, yyyy"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholderText="Click to select date"
+              />
             </div>
-          )}
+
+            {selectedDate && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Available Time Slots
+                </label>
+                {loadingSlots ? (
+                  <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : availableSlots.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    {availableSlots.map((slot) => (
+                      <button
+                        key={slot.time}
+                        onClick={() => handleTimeSelect(slot)}
+                        className={`
+                          p-2 text-sm font-medium rounded-lg border transition-colors
+                          ${selectedTime?.time === slot.time
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-blue-500'
+                          }
+                        `}
+                      >
+                        {slot.time}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No available slots for this date</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Step 3: Confirm Booking */}
       {step === 3 && selectedService && selectedDate && selectedTime && (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {t('booking.confirmBooking')}
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Confirm Your Booking</h2>
 
           <div className="space-y-4 mb-6">
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">{t('booking.selectService')}:</span>
+              <span className="text-gray-600">Service:</span>
               <span className="font-medium">{selectedService.name.en}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">{t('booking.selectDate')}:</span>
-              <span className="font-medium">
-                {format(selectedDate, 'MMMM d, yyyy')}
-              </span>
+              <span className="text-gray-600">Date:</span>
+              <span className="font-medium">{format(selectedDate, 'MMMM d, yyyy')}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">{t('booking.selectTime')}:</span>
+              <span className="text-gray-600">Time:</span>
               <span className="font-medium">{selectedTime.time}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">{t('booking.duration')}:</span>
-              <span className="font-medium">
-                {selectedService.duration} {t('booking.minutes')}
-              </span>
+              <span className="text-gray-600">Duration:</span>
+              <span className="font-medium">{selectedService.duration} minutes</span>
             </div>
             <div className="flex justify-between py-2 border-b text-lg font-bold">
-              <span>{t('booking.totalAmount')}:</span>
-              <span className="text-primary-600">{selectedService.price} ETB</span>
+              <span>Total Amount:</span>
+              <span className="text-blue-600">{selectedService.price} ETB</span>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                Note: 50% advance payment is required to confirm your booking.
+              </p>
             </div>
           </div>
 
           <button
             onClick={handleConfirmBooking}
-            disabled={loading}
-            className="w-full btn-primary disabled:opacity-50"
+            disabled={isLoading}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg font-medium"
           >
-            {loading ? t('common.loading') : t('booking.confirmBooking')}
+            {isLoading ? 'Processing...' : 'Confirm & Proceed to Payment'}
           </button>
-        </div>
-      )}
-
-      {/* Queue Status Sidebar */}
-      {queueStatus && (
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            {t('queue.title')}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm text-gray-600">{t('queue.currentlyServing')}</p>
-              <p className="text-2xl font-bold text-primary-600">
-                {queueStatus.stats.inProgress}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">{t('queue.checkedIn')}</p>
-              <p className="text-2xl font-bold text-green-600">
-                {queueStatus.stats.checkedIn}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">{t('queue.estimatedWait')}</p>
-              <p className="text-2xl font-bold text-orange-600">
-                {queueStatus.stats.estimatedCurrentWait} min
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">{t('queue.lastUpdated')}</p>
-              <p className="text-sm text-gray-900">
-                {new Date(queueStatus.lastUpdated).toLocaleTimeString()}
-              </p>
-            </div>
-          </div>
         </div>
       )}
     </div>
