@@ -7,7 +7,7 @@ export const queueService = {
     return response.data;
   },
 
-  // Get queue position for an appointment
+  // Get queue position for a specific appointment
   getQueuePosition: async (appointmentId) => {
     const response = await api.get(`/queue/position/${appointmentId}`);
     return response.data;
@@ -27,10 +27,7 @@ export const queueService = {
 
   // Admin: Update appointment status
   updateAppointmentStatus: async (appointmentId, status, notes = '') => {
-    const response = await api.put(`/queue/${appointmentId}/status`, {
-      status,
-      notes,
-    });
+    const response = await api.put(`/queue/${appointmentId}/status`, { status, notes });
     return response.data;
   },
 
@@ -38,5 +35,5 @@ export const queueService = {
   reorderQueue: async (appointments) => {
     const response = await api.put('/queue/reorder', { appointments });
     return response.data;
-  },
+  }
 };
