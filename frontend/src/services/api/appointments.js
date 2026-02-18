@@ -1,11 +1,9 @@
 import api from './config';
 
 export const appointmentsService = {
-  // Get available time slots
-  getAvailableSlots: async (date, serviceId) => {
-    const response = await api.get('/appointments/available-slots', {
-      params: { date, serviceId }
-    });
+  // Get customer appointments
+  getMyAppointments: async () => {
+    const response = await api.get('/appointments');
     return response.data;
   },
 
@@ -15,9 +13,17 @@ export const appointmentsService = {
     return response.data;
   },
 
-  // Get customer appointments
-  getMyAppointments: async () => {
-    const response = await api.get('/appointments');
+  // Get available slots
+  getAvailableSlots: async (date, serviceId) => {
+    const response = await api.get('/appointments/available-slots', {
+      params: { date, serviceId }
+    });
+    return response.data;
+  },
+
+  // Cancel appointment
+  cancelAppointment: async (id) => {
+    const response = await api.put(`/appointments/${id}/cancel`);
     return response.data;
   }
 };

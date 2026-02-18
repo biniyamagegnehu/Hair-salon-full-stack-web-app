@@ -72,9 +72,15 @@ const queueSlice = createSlice({
       })
       .addCase(fetchQueueStatus.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.queue = action.payload.queue;
-        state.stats = action.payload.stats;
-        state.lastUpdated = action.payload.lastUpdated;
+        state.queue = action.payload.queue || [];
+        state.stats = action.payload.stats || {
+          totalInQueue: 0,
+          inProgress: 0,
+          checkedIn: 0,
+          confirmed: 0,
+          estimatedCurrentWait: 0
+        };
+        state.lastUpdated = action.payload.lastUpdated || new Date().toISOString();
       })
       .addCase(fetchQueueStatus.rejected, (state, action) => {
         state.isLoading = false;
@@ -88,13 +94,7 @@ const queueSlice = createSlice({
       })
       .addCase(checkInToAppointment.fulfilled, (state, action) => {
         state.isLoading = false;
-        // Update the queue with new status
-        const updatedAppointment = action.payload;
-        const index = state.queue.findIndex(a => a._id === updatedAppointment.appointmentId);
-        if (index !== -1) {
-          state.queue[index].status = updatedAppointment.status;
-          state.queue[index].queuePosition = updatedAppointment.queuePosition;
-        }
+        // We'll refresh the queue after check-in
       })
       .addCase(checkInToAppointment.rejected, (state, action) => {
         state.isLoading = false;
