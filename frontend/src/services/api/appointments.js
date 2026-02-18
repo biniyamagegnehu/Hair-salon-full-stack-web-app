@@ -25,5 +25,20 @@ export const appointmentsService = {
   cancelAppointment: async (id) => {
     const response = await api.put(`/appointments/${id}/cancel`);
     return response.data;
+  },
+
+  // Get appointment by ID
+  getAppointmentById: async (id) => {
+    const response = await api.get(`/appointments/${id}`);
+    return response.data;
+  },
+
+  // Reschedule appointment
+  rescheduleAppointment: async (id, newDate, newTime) => {
+    const response = await api.put(`/appointments/${id}/reschedule`, {
+      newDate,
+      newTime
+    });
+    return response.data;
   }
 };

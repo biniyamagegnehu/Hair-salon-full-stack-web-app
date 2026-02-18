@@ -8,14 +8,15 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import { fetchServices } from '../../store/slices/serviceSlice';
 import { appointmentsService } from '../../services/api/appointments';
-import { createAppointment } from '../../store/slices/appointmentSlice';
+import { createAppointment } from '../../store/slices/appointmentSlice'; // This should now work
 
 const BookingPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { services } = useSelector((state) => state.services);
+  const { services, isLoading: servicesLoading } = useSelector((state) => state.services);
   const { isLoading } = useSelector((state) => state.appointments);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState(null);
@@ -24,18 +25,28 @@ const BookingPage = () => {
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
-  // Check if service was passed from Services page
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Fetch services on mount
   useEffect(() => {
     dispatch(fetchServices());
-    
-    if (location.state?.selectedServiceId) {
+  }, [dispatch]);
+
+  // Check if service was passed from Services page
+  useEffect(() => {
+    if (location.state?.selectedServiceId && services.length > 0) {
       const service = services.find(s => s._id === location.state.selectedServiceId);
       if (service) {
         setSelectedService(service);
         setStep(2);
       }
     }
-  }, [dispatch, location.state, services]);
+  }, [location.state, services]);
 
   const handleServiceSelect = (service) => {
     setSelectedService(service);
@@ -89,8 +100,14 @@ const BookingPage = () => {
     }
   };
 
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Book an Appointment</h1>
 
       {/* Progress Steps */}
@@ -126,28 +143,44 @@ const BookingPage = () => {
 
       {/* Step 1: Select Service */}
       {step === 1 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {services.map((service) => (
-            <button
-              key={service._id}
-              onClick={() => handleServiceSelect(service)}
-              className="text-left p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-transparent hover:border-blue-500"
-            >
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{service.name.en}</h3>
-              <p className="text-gray-600 mb-4">{service.description?.en || 'Premium service'}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-blue-600">{service.price} ETB</span>
-                <span className="text-sm text-gray-500">{service.duration} min</span>
-              </div>
-            </button>
-          ))}
+        <div>
+          {servicesLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {services.map((service) => (
+                <button
+                  key={service._id}
+                  onClick={() => handleServiceSelect(service)}
+                  className="text-left p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-all border-2 border-transparent hover:border-blue-500"
+                >
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{service.name?.en || 'Service'}</h3>
+                  <p className="text-gray-600 mb-4">{service.description?.en || 'Premium service'}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-2xl font-bold text-blue-600">{service.price} ETB</span>
+                    <span className="text-sm text-gray-500">{service.duration} min</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Step 2: Select Date & Time */}
       {step === 2 && selectedService && (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Selected Service: {selectedService.name.en}</h2>
+          <div className="flex items-center mb-6">
+            <button
+              onClick={handleBack}
+              className="text-gray-600 hover:text-gray-800 mr-4"
+            >
+              ← Back
+            </button>
+            <h2 className="text-xl font-semibold">Selected Service: {selectedService.name?.en}</h2>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
@@ -204,12 +237,20 @@ const BookingPage = () => {
       {/* Step 3: Confirm Booking */}
       {step === 3 && selectedService && selectedDate && selectedTime && (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Confirm Your Booking</h2>
+          <div className="flex items-center mb-6">
+            <button
+              onClick={handleBack}
+              className="text-gray-600 hover:text-gray-800 mr-4"
+            >
+              ← Back
+            </button>
+            <h2 className="text-2xl font-bold text-gray-800">Confirm Your Booking</h2>
+          </div>
 
           <div className="space-y-4 mb-6">
             <div className="flex justify-between py-2 border-b">
               <span className="text-gray-600">Service:</span>
-              <span className="font-medium">{selectedService.name.en}</span>
+              <span className="font-medium">{selectedService.name?.en}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="text-gray-600">Date:</span>
@@ -239,7 +280,17 @@ const BookingPage = () => {
             disabled={isLoading}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg font-medium"
           >
-            {isLoading ? 'Processing...' : 'Confirm & Proceed to Payment'}
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </span>
+            ) : (
+              'Confirm & Proceed to Payment'
+            )}
           </button>
         </div>
       )}
