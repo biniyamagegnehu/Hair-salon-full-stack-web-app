@@ -9,3 +9,38 @@ body {
 .font-amharic {
   font-family: 'Noto Sans Ethiopic', sans-serif;
 }
+
+/* Queue animations */
+@keyframes pulse-green {
+  0%, 100% {
+    background-color: #10b981;
+  }
+  50% {
+    background-color: #34d399;
+  }
+}
+
+.animate-pulse-green {
+  animation: pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.queue-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.queue-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.queue-exit {
+  opacity: 1;
+}
+
+.queue-exit-active {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 300ms, transform 300ms;
+}
