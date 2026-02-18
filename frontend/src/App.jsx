@@ -17,6 +17,8 @@ import ServicesPage from './pages/customer/ServicesPage'
 import BookingPage from './pages/customer/BookingPage'
 import QueuePage from './pages/customer/QueuePage'
 import ProfilePage from './pages/customer/ProfilePage'
+import PaymentPage from './pages/customer/PaymentPage'
+import PaymentCallbackPage from './pages/customer/PaymentCallbackPage'
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -50,6 +52,16 @@ function App() {
           <Route path="/profile" element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/payment/:appointmentId" element={
+            <ProtectedRoute>
+              <PaymentPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/payment/callback/:appointmentId" element={
+            <ProtectedRoute>
+              <PaymentCallbackPage />
             </ProtectedRoute>
           } />
         </Route>
