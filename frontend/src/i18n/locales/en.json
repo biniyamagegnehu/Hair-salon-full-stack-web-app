@@ -11,7 +11,6 @@
     "confirm": "Confirm",
     "search": "Search",
     "filter": "Filter",
-    "sort": "Sort",
     "actions": "Actions"
   },
   "nav": {
@@ -23,7 +22,8 @@
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
-    "profile": "Profile"
+    "profile": "Profile",
+    "admin": "Admin"
   },
   "auth": {
     "login": "Login",
@@ -38,7 +38,9 @@
     "hasAccount": "Already have an account?",
     "loginWithGoogle": "Login with Google",
     "loginSuccess": "Logged in successfully",
-    "registerSuccess": "Registered successfully"
+    "registerSuccess": "Registered successfully",
+    "welcomeBack": "Welcome Back",
+    "createAccount": "Create Account"
   },
   "booking": {
     "title": "Book Appointment",
@@ -54,7 +56,11 @@
     "totalAmount": "Total Amount",
     "confirmBooking": "Confirm Booking",
     "bookingSuccess": "Appointment booked successfully",
-    "bookingError": "Failed to book appointment"
+    "bookingError": "Failed to book appointment",
+    "yourBooking": "Your Booking",
+    "service": "Service",
+    "date": "Date",
+    "time": "Time"
   },
   "queue": {
     "title": "Queue Status",
@@ -67,7 +73,10 @@
     "checkedIn": "Checked In",
     "inProgress": "In Progress",
     "completed": "Completed",
-    "lastUpdated": "Last Updated"
+    "lastUpdated": "Last Updated",
+    "liveQueue": "Live Queue",
+    "myQueue": "My Queue",
+    "totalInQueue": "Total in Queue"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -80,6 +89,27 @@
     "totalRevenue": "Total Revenue",
     "totalCustomers": "Total Customers",
     "todayAppointments": "Today's Appointments",
-    "pendingPayments": "Pending Payments"
+    "pendingPayments": "Pending Payments",
+    "activeServices": "Active Services",
+    "quickActions": "Quick Actions"
+  },
+  "profile": {
+    "title": "Profile",
+    "myAppointments": "My Appointments",
+    "personalInfo": "Personal Information",
+    "memberSince": "Member Since",
+    "noAppointments": "No appointments found",
+    "updatePhone": "Update Phone Number"
+  },
+  "payment": {
+    "title": "Payment",
+    "advancePayment": "Advance Payment",
+    "totalAmount": "Total Amount",
+    "payNow": "Pay Now",
+    "payLater": "Pay at Salon",
+    "paymentMethod": "Payment Method",
+    "paymentSuccess": "Payment Successful",
+    "paymentFailed": "Payment Failed",
+    "processing": "Processing..."
   }
 }
