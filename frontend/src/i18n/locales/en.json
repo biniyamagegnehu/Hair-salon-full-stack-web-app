@@ -11,7 +11,14 @@
     "confirm": "Confirm",
     "search": "Search",
     "filter": "Filter",
-    "actions": "Actions"
+    "actions": "Actions",
+    "or": "or",
+    "customer": "Customer",
+    "service": "Service",
+    "recommended": "Recommended",
+    "seconds": "seconds",
+    "allRightsReserved": "All rights reserved.",
+    "tagline": "Premium grooming for Ethiopian men"
   },
   "nav": {
     "home": "Home",
@@ -40,7 +47,9 @@
     "loginSuccess": "Logged in successfully",
     "registerSuccess": "Registered successfully",
     "welcomeBack": "Welcome Back",
-    "createAccount": "Create Account"
+    "createAccount": "Create Account",
+    "invalidPhone": "Invalid Ethiopian phone number",
+    "phoneFormat": "Format: +251XXXXXXXXX"
   },
   "booking": {
     "title": "Book Appointment",
@@ -76,7 +85,10 @@
     "lastUpdated": "Last Updated",
     "liveQueue": "Live Queue",
     "myQueue": "My Queue",
-    "totalInQueue": "Total in Queue"
+    "totalInQueue": "Total in Queue",
+    "confirmed": "Confirmed",
+    "noQueue": "No one in queue right now",
+    "checkInConfirm": "Check in for your appointment at"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -110,30 +122,8 @@
     "paymentMethod": "Payment Method",
     "paymentSuccess": "Payment Successful",
     "paymentFailed": "Payment Failed",
-    "processing": "Processing..."
-  }
-}
-
-{
-  "common": {
-    "or": "or",
-    "customer": "Customer",
-    "service": "Service",
-    "recommended": "Recommended",
-    "seconds": "seconds",
-    "allRightsReserved": "All rights reserved.",
-    "tagline": "Premium grooming for Ethiopian men"
-  },
-  "queue": {
-    "confirmed": "Confirmed",
-    "noQueue": "No one in queue right now",
-    "checkInConfirm": "Check in for your appointment at"
-  },
-  "auth": {
-    "invalidPhone": "Invalid Ethiopian phone number",
-    "phoneFormat": "Format: +251XXXXXXXXX"
-  },
-  "payment": {
+    "processing": "Processing...",
     "redirecting": "Redirecting in"
   }
 }
+
