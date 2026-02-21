@@ -9,7 +9,10 @@ export const login = createAsyncThunk(
       const response = await authService.login(identifier, password);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+      const errorMessage = error.response && error.response.data && error.response.data.message 
+        ? error.response.data.message 
+        : 'Login failed';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -22,7 +25,10 @@ export const googleLogin = createAsyncThunk(
       const response = await authService.googleLogin(token);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Google login failed');
+      const errorMessage = error.response && error.response.data && error.response.data.message 
+        ? error.response.data.message 
+        : 'Google login failed';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -35,7 +41,10 @@ export const register = createAsyncThunk(
       const response = await authService.register(userData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Registration failed');
+      const errorMessage = error.response && error.response.data && error.response.data.message 
+        ? error.response.data.message 
+        : 'Registration failed';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -48,7 +57,10 @@ export const logout = createAsyncThunk(
       await authService.logout();
       return null;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Logout failed');
+      const errorMessage = error.response && error.response.data && error.response.data.message 
+        ? error.response.data.message 
+        : 'Logout failed';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -61,7 +73,9 @@ export const getCurrentUser = createAsyncThunk(
       const response = await authService.getCurrentUser();
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message);
+      return rejectWithValue(error.response && error.response.data && error.response.data.message 
+        ? error.response.data.message 
+        : 'Failed to get user');
     }
   }
 );
@@ -74,7 +88,26 @@ export const updatePhoneNumber = createAsyncThunk(
       const response = await authService.updatePhoneNumber(phoneNumber);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update phone');
+      const errorMessage = error.response && error.response.data && error.response.data.message 
+        ? error.response.data.message 
+        : 'Failed to update phone';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Update language preference
+export const updateLanguage = createAsyncThunk(
+  'auth/updateLanguage',
+  async (language, { rejectWithValue }) => {
+    try {
+      const response = await authService.updateLanguage(language);
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response && error.response.data && error.response.data.message 
+        ? error.response.data.message 
+        : 'Failed to update language';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -109,7 +142,9 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
-        state.requiresPhoneUpdate = action.payload.requiresPhoneUpdate || false;
+        state.requiresPhoneUpdate = action.payload && action.payload.requiresPhoneUpdate 
+          ? action.payload.requiresPhoneUpdate 
+          : false;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -125,7 +160,9 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
-        state.requiresPhoneUpdate = action.payload.requiresPhoneUpdate || false;
+        state.requiresPhoneUpdate = action.payload && action.payload.requiresPhoneUpdate 
+          ? action.payload.requiresPhoneUpdate 
+          : false;
       })
       .addCase(googleLogin.rejected, (state, action) => {
         state.isLoading = false;
@@ -170,9 +207,27 @@ const authSlice = createSlice({
       })
       
       // Update phone number
+      .addCase(updatePhoneNumber.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
       .addCase(updatePhoneNumber.fulfilled, (state, action) => {
-        state.user.phoneNumber = action.payload.phoneNumber;
+        state.isLoading = false;
+        if (state.user) {
+          state.user.phoneNumber = action.payload.phoneNumber;
+        }
         state.requiresPhoneUpdate = false;
+      })
+      .addCase(updatePhoneNumber.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      
+      // Update language
+      .addCase(updateLanguage.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user.languagePreference = action.payload.languagePreference;
+        }
       });
   }
 });
