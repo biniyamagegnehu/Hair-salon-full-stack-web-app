@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { fetchCustomers } from '../../store/slices/adminSlice';
 
 const AdminCustomers = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { customers, isLoading } = useSelector((state) => state.admin);
   const [search, setSearch] = useState('');
@@ -25,7 +27,7 @@ const AdminCustomers = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Customer Management</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('admin.customers')}</h2>
 
       {/* Search Bar */}
       <div className="mb-6">
@@ -34,14 +36,14 @@ const AdminCustomers = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, or phone..."
+            placeholder={t('common.searchPlaceholder', 'Search by name, email, or phone...')}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Search
+            {t('common.search')}
           </button>
         </form>
       </div>
@@ -52,12 +54,12 @@ const AdminCustomers = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member Since</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointments</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.customer')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('auth.phone')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('profile.memberSince')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.appointments')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.totalSpent', 'Total Spent')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -72,7 +74,7 @@ const AdminCustomers = () => {
               ) : customers.list.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
-                    No customers found
+                    {t('common.noResults', 'No customers found')}
                   </td>
                 </tr>
               ) : (
@@ -87,7 +89,7 @@ const AdminCustomers = () => {
                         </div>
                         <div>
                           <p className="font-medium text-gray-800">{customer.fullName}</p>
-                          <p className="text-sm text-gray-500">{customer.email || 'No email'}</p>
+                          <p className="text-sm text-gray-500">{customer.email || t('common.noEmail', 'No email')}</p>
                         </div>
                       </div>
                     </td>
@@ -101,7 +103,6 @@ const AdminCustomers = () => {
                       <p className="text-sm font-medium text-gray-800">
                         {customer.stats?.totalAppointments || 0}
                       </p>
-                      <p className="text-xs text-gray-500">appointments</p>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-sm font-medium text-green-600">
@@ -110,7 +111,7 @@ const AdminCustomers = () => {
                     </td>
                     <td className="px-6 py-4">
                       <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                        View Details
+                        {t('common.view', 'View')}
                       </button>
                     </td>
                   </tr>
@@ -124,9 +125,9 @@ const AdminCustomers = () => {
         {customers.pagination && customers.pagination.pages > 1 && (
           <div className="px-6 py-4 bg-gray-50 border-t flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              Showing {((customers.pagination.page - 1) * customers.pagination.limit) + 1} to{' '}
-              {Math.min(customers.pagination.page * customers.pagination.limit, customers.pagination.total)} of{' '}
-              {customers.pagination.total} results
+              {t('common.showing', 'Showing')} {((customers.pagination.page - 1) * customers.pagination.limit) + 1} {t('common.to', 'to')}{' '}
+              {Math.min(customers.pagination.page * customers.pagination.limit, customers.pagination.total)} {t('common.of', 'of')}{' '}
+              {customers.pagination.total} {t('common.results', 'results')}
             </p>
             <div className="flex space-x-2">
               <button
@@ -134,7 +135,7 @@ const AdminCustomers = () => {
                 disabled={page === 1}
                 className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Previous
+                {t('common.previous', 'Previous')}
               </button>
               <span className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm">
                 {page}
@@ -144,7 +145,7 @@ const AdminCustomers = () => {
                 disabled={page === customers.pagination.pages}
                 className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Next
+                {t('common.next', 'Next')}
               </button>
             </div>
           </div>
