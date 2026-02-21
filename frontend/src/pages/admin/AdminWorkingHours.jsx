@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { fetchWorkingHours, updateWorkingHours } from '../../store/slices/adminSlice';
 
 const AdminWorkingHours = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { workingHours, isLoading } = useSelector((state) => state.admin);
   const [hours, setHours] = useState([]);
 
   const days = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday'
+    t('days.sunday', 'Sunday'),
+    t('days.monday', 'Monday'),
+    t('days.tuesday', 'Tuesday'),
+    t('days.wednesday', 'Wednesday'),
+    t('days.thursday', 'Thursday'),
+    t('days.friday', 'Friday'),
+    t('days.saturday', 'Saturday')
   ];
 
   useEffect(() => {
@@ -26,7 +28,6 @@ const AdminWorkingHours = () => {
     if (workingHours.length > 0) {
       setHours(workingHours);
     } else {
-      // Initialize with default values
       setHours(
         days.map((_, index) => ({
           dayOfWeek: index,
@@ -53,9 +54,9 @@ const AdminWorkingHours = () => {
   const handleSave = async () => {
     try {
       await dispatch(updateWorkingHours(hours)).unwrap();
-      toast.success('Working hours updated successfully');
+      toast.success(t('common.success'));
     } catch (error) {
-      toast.error(error || 'Failed to update working hours');
+      toast.error(error || t('common.error'));
     }
   };
 
@@ -67,7 +68,7 @@ const AdminWorkingHours = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Working Hours</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('admin.workingHours')}</h2>
 
       <div className="bg-white rounded-lg shadow-md p-6">
         {isLoading ? (
@@ -90,7 +91,7 @@ const AdminWorkingHours = () => {
                       onChange={() => handleToggleClosed(index)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-600">Closed</span>
+                    <span className="ml-2 text-sm text-gray-600">{t('admin.closed', 'Closed')}</span>
                   </label>
 
                   {!day.isClosed && (
@@ -102,7 +103,7 @@ const AdminWorkingHours = () => {
                           onChange={(e) => handleTimeChange(index, 'openingTime', e.target.value)}
                           className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        <span className="text-gray-500">to</span>
+                        <span className="text-gray-500">{t('common.to', 'to')}</span>
                         <input
                           type="time"
                           value={day.closingTime}
@@ -121,20 +122,19 @@ const AdminWorkingHours = () => {
                 onClick={handleSave}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Save Changes
+                {t('common.save')}
               </button>
               <button
                 onClick={handleReset}
                 className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
               >
-                Reset
+                {t('common.reset', 'Reset')}
               </button>
             </div>
           </>
         )}
       </div>
 
-      {/* Info Card */}
       <div className="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
         <div className="flex">
           <div className="flex-shrink-0">
@@ -144,7 +144,7 @@ const AdminWorkingHours = () => {
           </div>
           <div className="ml-3">
             <p className="text-sm text-blue-700">
-              Working hours determine when customers can book appointments. Changes will take effect immediately.
+              {t('admin.workingHoursInfo', 'Working hours determine when customers can book appointments. Changes will take effect immediately.')}
             </p>
           </div>
         </div>
