@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { 
   fetchDashboardStats, 
   fetchAppointmentAnalytics 
 } from '../../store/slices/adminSlice';
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { stats, analytics, isLoading } = useSelector((state) => state.admin);
   const [period, setPeriod] = useState('week');
@@ -38,37 +40,37 @@ const AdminDashboard = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('admin.dashboard')}</h2>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
-          title="Total Customers"
+          title={t('admin.totalCustomers')}
           value={stats?.customers?.total || 0}
           icon="👥"
           color="blue"
-          subtitle="All time"
+          subtitle={t('common.allTime', 'All time')}
         />
         <StatCard
-          title="Today's Appointments"
+          title={t('admin.todayAppointments')}
           value={stats?.appointments?.today || 0}
           icon="📅"
           color="green"
-          subtitle={`${stats?.appointments?.completedToday || 0} completed`}
+          subtitle={`${stats?.appointments?.completedToday || 0} ${t('common.completed', 'completed')}`}
         />
         <StatCard
-          title="Today's Revenue"
+          title={t('admin.totalRevenue')}
           value={`${stats?.revenue?.today?.total || 0} ETB`}
           icon="💰"
           color="purple"
-          subtitle={`${stats?.revenue?.today?.advance || 0} advance`}
+          subtitle={`${stats?.revenue?.today?.advance || 0} ${t('payment.advancePayment')}`}
         />
         <StatCard
-          title="Active Services"
+          title={t('admin.activeServices')}
           value={stats?.services?.active || 0}
           icon="💇"
           color="orange"
-          subtitle="Services offered"
+          subtitle={t('admin.servicesOffered', 'Services offered')}
         />
       </div>
 
@@ -77,15 +79,15 @@ const AdminDashboard = () => {
         {/* Appointment Trends */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Appointment Trends</h3>
+            <h3 className="text-lg font-semibold text-gray-800">{t('admin.appointmentTrends', 'Appointment Trends')}</h3>
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-1 text-sm"
             >
-              <option value="week">Last 7 Days</option>
-              <option value="month">Last 30 Days</option>
-              <option value="year">Last 12 Months</option>
+              <option value="week">{t('common.last7Days', 'Last 7 Days')}</option>
+              <option value="month">{t('common.last30Days', 'Last 30 Days')}</option>
+              <option value="year">{t('common.last12Months', 'Last 12 Months')}</option>
             </select>
           </div>
           
@@ -107,13 +109,13 @@ const AdminDashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">No appointment data available</p>
+            <p className="text-gray-500 text-center py-8">{t('common.noData', 'No data available')}</p>
           )}
         </div>
 
         {/* Popular Services */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Popular Services</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('admin.popularServices', 'Popular Services')}</h3>
           
           {analytics?.popularServices && analytics.popularServices.length > 0 ? (
             <div className="space-y-4">
@@ -121,9 +123,9 @@ const AdminDashboard = () => {
                 <div key={service._id} className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-gray-800">
-                      {service.serviceDetails?.name?.en || 'Service'}
+                      {service.serviceDetails?.name?.en || t('common.service')}
                     </p>
-                    <p className="text-sm text-gray-500">{service.count} bookings</p>
+                    <p className="text-sm text-gray-500">{service.count} {t('booking.bookings', 'bookings')}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-green-600">{service.revenue} ETB</p>
@@ -132,30 +134,30 @@ const AdminDashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">No service data available</p>
+            <p className="text-gray-500 text-center py-8">{t('common.noData', 'No data available')}</p>
           )}
         </div>
       </div>
 
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('admin.quickActions')}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <button className="p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
             <div className="text-2xl mb-2">📊</div>
-            <div className="text-sm font-medium text-gray-700">View Reports</div>
+            <div className="text-sm font-medium text-gray-700">{t('admin.reports')}</div>
           </button>
           <button className="p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
             <div className="text-2xl mb-2">📅</div>
-            <div className="text-sm font-medium text-gray-700">Manage Queue</div>
+            <div className="text-sm font-medium text-gray-700">{t('admin.manageQueue', 'Manage Queue')}</div>
           </button>
           <button className="p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
             <div className="text-2xl mb-2">💇</div>
-            <div className="text-sm font-medium text-gray-700">Add Service</div>
+            <div className="text-sm font-medium text-gray-700">{t('admin.addService', 'Add Service')}</div>
           </button>
           <button className="p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
             <div className="text-2xl mb-2">⚙️</div>
-            <div className="text-sm font-medium text-gray-700">Settings</div>
+            <div className="text-sm font-medium text-gray-700">{t('admin.settings')}</div>
           </button>
         </div>
       </div>
