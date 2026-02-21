@@ -33,7 +33,7 @@ const ProfilePage = () => {
 
   const handleUpdatePhone = async () => {
     if (!validatePhoneNumber(phoneNumber)) {
-      setPhoneError(t('auth.invalidPhone', 'Invalid Ethiopian phone number'));
+      setPhoneError(t('auth.invalidPhone'));
       return;
     }
 
@@ -42,6 +42,7 @@ const ProfilePage = () => {
     if (updatePhoneNumber.fulfilled.match(result)) {
       setShowPhoneModal(false);
       setPhoneNumber('');
+      setPhoneError('');
     }
     setUpdatingPhone(false);
   };
@@ -58,6 +59,11 @@ const ProfilePage = () => {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
   if (authLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -71,7 +77,6 @@ const ProfilePage = () => {
       <h1 className="text-3xl font-bold text-gray-800 mb-8">{t('profile.title')}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Profile Information */}
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="text-center mb-4">
@@ -100,21 +105,20 @@ const ProfilePage = () => {
               <div className="flex items-center text-sm">
                 <span className="font-medium text-gray-600 w-24">{t('profile.memberSince')}:</span>
                 <span className="text-gray-800">
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                  {user?.createdAt ? formatDate(user.createdAt) : 'N/A'}
                 </span>
               </div>
             </div>
 
             <button
               onClick={() => setShowPhoneModal(true)}
-              className="w-full mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200"
+              className="w-full mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm"
             >
               {t('profile.updatePhone')}
             </button>
           </div>
         </div>
 
-        {/* Appointments */}
         <div className="md:col-span-2">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('profile.myAppointments')}</h3>
@@ -130,15 +134,20 @@ const ProfilePage = () => {
             ) : (
               <div className="space-y-4">
                 {appointments.map((appointment) => (
-                  <div key={appointment.id} className="border rounded-lg p-4">
+                  <div key={appointment.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-medium text-gray-800">
-                          {appointment.service?.name?.en || t('common.service', 'Service')}
+                          {appointment.service?.name?.en || t('common.service')}
                         </h4>
                         <p className="text-sm text-gray-600">
-                          {new Date(appointment.scheduledDate).toLocaleDateString()} at {appointment.scheduledTime}
+                          {formatDate(appointment.scheduledDate)} {t('common.at', 'at')} {appointment.scheduledTime}
                         </p>
+                        {appointment.queuePosition && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            {t('queue.yourPosition')}: {appointment.queuePosition}
+                          </p>
+                        )}
                       </div>
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(appointment.status)}`}>
                         {appointment.status.replace('_', ' ')}
@@ -152,10 +161,9 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Phone Update Modal */}
       {showPhoneModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">{t('profile.updatePhone')}</h3>
             
             <div className="mb-4">
@@ -178,7 +186,7 @@ const ProfilePage = () => {
                 <p className="text-sm text-red-600 mt-1">{phoneError}</p>
               )}
               <p className="text-xs text-gray-500 mt-1">
-                {t('auth.phoneFormat', 'Format: +251XXXXXXXXX')}
+                {t('auth.phoneFormat')}
               </p>
             </div>
 
@@ -186,13 +194,17 @@ const ProfilePage = () => {
               <button
                 onClick={handleUpdatePhone}
                 disabled={updatingPhone}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {updatingPhone ? t('common.loading') : t('common.save')}
               </button>
               <button
-                onClick={() => setShowPhoneModal(false)}
-                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300"
+                onClick={() => {
+                  setShowPhoneModal(false);
+                  setPhoneNumber('');
+                  setPhoneError('');
+                }}
+                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
               >
                 {t('common.cancel')}
               </button>
