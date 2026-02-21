@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { fetchSalonConfig, updateSalonConfig } from '../../store/slices/adminSlice';
 
 const AdminSettings = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { salonConfig, isLoading } = useSelector((state) => state.admin);
   const [formData, setFormData] = useState({
@@ -53,15 +55,15 @@ const AdminSettings = () => {
     e.preventDefault();
     try {
       await dispatch(updateSalonConfig(formData)).unwrap();
-      toast.success('Settings updated successfully');
+      toast.success(t('common.success'));
     } catch (error) {
-      toast.error(error || 'Failed to update settings');
+      toast.error(error || t('common.error'));
     }
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Salon Settings</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('admin.settings')}</h2>
 
       <div className="bg-white rounded-lg shadow-md p-6">
         {isLoading ? (
@@ -74,7 +76,7 @@ const AdminSettings = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Salon Name (English)
+                  {t('admin.salonName')} (English) *
                 </label>
                 <input
                   type="text"
@@ -86,7 +88,7 @@ const AdminSettings = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Salon Name (Amharic)
+                  {t('admin.salonName')} (Amharic) *
                 </label>
                 <input
                   type="text"
@@ -102,7 +104,7 @@ const AdminSettings = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location (English)
+                  {t('admin.location')} (English) *
                 </label>
                 <input
                   type="text"
@@ -114,7 +116,7 @@ const AdminSettings = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location (Amharic)
+                  {t('admin.location')} (Amharic) *
                 </label>
                 <input
                   type="text"
@@ -130,7 +132,7 @@ const AdminSettings = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description (English)
+                  {t('admin.description')} (English)
                 </label>
                 <textarea
                   value={formData.description.en}
@@ -141,7 +143,7 @@ const AdminSettings = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description (Amharic)
+                  {t('admin.description')} (Amharic)
                 </label>
                 <textarea
                   value={formData.description.am}
@@ -156,7 +158,7 @@ const AdminSettings = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
+                  {t('admin.phoneNumber')}
                 </label>
                 <input
                   type="tel"
@@ -168,7 +170,7 @@ const AdminSettings = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  {t('admin.email')}
                 </label>
                 <input
                   type="email"
@@ -183,7 +185,7 @@ const AdminSettings = () => {
             {/* Advance Payment Percentage */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Advance Payment Percentage
+                {t('admin.advancePaymentPercentage')}
               </label>
               <div className="flex items-center space-x-4">
                 <input
@@ -199,7 +201,7 @@ const AdminSettings = () => {
                 </span>
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                Percentage of total price required as advance payment
+                {t('admin.advancePaymentInfo', 'Percentage of total price required as advance payment')}
               </p>
             </div>
 
@@ -208,7 +210,7 @@ const AdminSettings = () => {
                 type="submit"
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Save Settings
+                {t('common.save')}
               </button>
             </div>
           </form>
