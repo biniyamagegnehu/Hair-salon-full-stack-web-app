@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { fetchServices } from '../../store/slices/serviceSlice';
 import { adminService } from '../../services/api/admin';
 
 const AdminServices = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { services, isLoading } = useSelector((state) => state.services);
   const [showModal, setShowModal] = useState(false);
@@ -17,7 +19,7 @@ const AdminServices = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchServices(false)); // Get all services including inactive
+    dispatch(fetchServices(false));
   }, [dispatch]);
 
   const handleInputChange = (field, lang, value) => {
@@ -43,28 +45,28 @@ const AdminServices = () => {
     try {
       if (editingService) {
         await adminService.updateService(editingService._id, formData);
-        toast.success('Service updated successfully');
+        toast.success(t('common.success'));
       } else {
         await adminService.createService(formData);
-        toast.success('Service created successfully');
+        toast.success(t('common.success'));
       }
       
       dispatch(fetchServices(false));
       setShowModal(false);
       resetForm();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+      toast.error(error.response?.data?.message || t('common.error'));
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to deactivate this service?')) {
+    if (window.confirm(t('admin.confirmDeactivate', 'Are you sure you want to deactivate this service?'))) {
       try {
         await adminService.deleteService(id);
-        toast.success('Service deactivated');
+        toast.success(t('common.success'));
         dispatch(fetchServices(false));
       } catch (error) {
-        toast.error(error.response?.data?.message || 'Failed to deactivate service');
+        toast.error(error.response?.data?.message || t('common.error'));
       }
     }
   };
@@ -72,10 +74,10 @@ const AdminServices = () => {
   const handleActivate = async (id) => {
     try {
       await adminService.activateService(id);
-      toast.success('Service activated');
+      toast.success(t('common.success'));
       dispatch(fetchServices(false));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to activate service');
+      toast.error(error.response?.data?.message || t('common.error'));
     }
   };
 
@@ -103,7 +105,7 @@ const AdminServices = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Service Management</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{t('admin.services')}</h2>
         <button
           onClick={() => {
             resetForm();
@@ -111,11 +113,10 @@ const AdminServices = () => {
           }}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
-          + Add New Service
+          + {t('admin.addService', 'Add New Service')}
         </button>
       </div>
 
-      {/* Services Grid */}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -131,15 +132,15 @@ const AdminServices = () => {
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{service.name.en}</h3>
-                  <p className="text-sm text-gray-500">{service.name.am}</p>
+                  <h3 className="text-lg font-semibold text-gray-800">{service.name?.en}</h3>
+                  <p className="text-sm text-gray-500">{service.name?.am}</p>
                 </div>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                   service.isActive 
                     ? 'bg-green-100 text-green-800' 
                     : 'bg-gray-100 text-gray-800'
                 }`}>
-                  {service.isActive ? 'Active' : 'Inactive'}
+                  {service.isActive ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
                 </span>
               </div>
 
@@ -147,7 +148,7 @@ const AdminServices = () => {
 
               <div className="flex justify-between items-center mb-4">
                 <span className="text-2xl font-bold text-blue-600">{service.price} ETB</span>
-                <span className="text-sm text-gray-500">{service.duration} min</span>
+                <span className="text-sm text-gray-500">{service.duration} {t('booking.minutes')}</span>
               </div>
 
               <div className="flex space-x-2">
@@ -155,21 +156,21 @@ const AdminServices = () => {
                   onClick={() => handleEdit(service)}
                   className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors text-sm"
                 >
-                  Edit
+                  {t('common.edit')}
                 </button>
                 {service.isActive ? (
                   <button
                     onClick={() => handleDelete(service._id)}
                     className="flex-1 bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors text-sm"
                   >
-                    Deactivate
+                    {t('common.deactivate', 'Deactivate')}
                   </button>
                 ) : (
                   <button
                     onClick={() => handleActivate(service._id)}
                     className="flex-1 bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition-colors text-sm"
                   >
-                    Activate
+                    {t('common.activate', 'Activate')}
                   </button>
                 )}
               </div>
@@ -184,14 +185,13 @@ const AdminServices = () => {
           <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
             <div className="p-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4">
-                {editingService ? 'Edit Service' : 'Add New Service'}
+                {editingService ? t('common.edit') : t('admin.addService')}
               </h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* English Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Service Name (English) *
+                    {t('admin.serviceName')} (English) *
                   </label>
                   <input
                     type="text"
@@ -202,10 +202,9 @@ const AdminServices = () => {
                   />
                 </div>
 
-                {/* Amharic Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Service Name (Amharic) *
+                    {t('admin.serviceName')} (Amharic) *
                   </label>
                   <input
                     type="text"
@@ -216,10 +215,9 @@ const AdminServices = () => {
                   />
                 </div>
 
-                {/* English Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description (English)
+                    {t('admin.description')} (English)
                   </label>
                   <textarea
                     value={formData.description.en}
@@ -229,10 +227,9 @@ const AdminServices = () => {
                   />
                 </div>
 
-                {/* Amharic Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description (Amharic)
+                    {t('admin.description')} (Amharic)
                   </label>
                   <textarea
                     value={formData.description.am}
@@ -242,11 +239,10 @@ const AdminServices = () => {
                   />
                 </div>
 
-                {/* Price and Duration */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Price (ETB) *
+                      {t('booking.price')} (ETB) *
                     </label>
                     <input
                       type="number"
@@ -259,7 +255,7 @@ const AdminServices = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Duration (minutes) *
+                      {t('booking.duration')} ({t('booking.minutes')}) *
                     </label>
                     <input
                       type="number"
@@ -273,13 +269,12 @@ const AdminServices = () => {
                   </div>
                 </div>
 
-                {/* Form Actions */}
                 <div className="flex space-x-3 pt-4">
                   <button
                     type="submit"
                     className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    {editingService ? 'Update Service' : 'Create Service'}
+                    {editingService ? t('common.update', 'Update') : t('common.create', 'Create')}
                   </button>
                   <button
                     type="button"
@@ -289,7 +284,7 @@ const AdminServices = () => {
                     }}
                     className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                 </div>
               </form>
