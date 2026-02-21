@@ -113,3 +113,27 @@
     "processing": "በሂደት ላይ..."
   }
 }
+
+{
+  "common": {
+    "or": "ወይም",
+    "customer": "ደንበኛ",
+    "service": "አገልግሎት",
+    "recommended": "የሚመከር",
+    "seconds": "ሰከንዶች",
+    "allRightsReserved": "መብቱ በህግ የተጠበቀ ነው",
+    "tagline": "ለኢትዮጵያውያን ወንዶች የላቀ አገልግሎት"
+  },
+  "queue": {
+    "confirmed": "ተረጋግጧል",
+    "noQueue": "አሁን ማንም በወረፋ የለም",
+    "checkInConfirm": "በሚከተለው ሰዓት ይግቡ"
+  },
+  "auth": {
+    "invalidPhone": "ልክ ያልሆነ የኢትዮጵያ ስልክ ቁጥር",
+    "phoneFormat": "ቅርጸት፡ +251XXXXXXXXX"
+  },
+  "payment": {
+    "redirecting": "በማዛወር ላይ"
+  }
+}

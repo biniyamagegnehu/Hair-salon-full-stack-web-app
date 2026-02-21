@@ -113,3 +113,27 @@
     "processing": "Processing..."
   }
 }
+
+{
+  "common": {
+    "or": "or",
+    "customer": "Customer",
+    "service": "Service",
+    "recommended": "Recommended",
+    "seconds": "seconds",
+    "allRightsReserved": "All rights reserved.",
+    "tagline": "Premium grooming for Ethiopian men"
+  },
+  "queue": {
+    "confirmed": "Confirmed",
+    "noQueue": "No one in queue right now",
+    "checkInConfirm": "Check in for your appointment at"
+  },
+  "auth": {
+    "invalidPhone": "Invalid Ethiopian phone number",
+    "phoneFormat": "Format: +251XXXXXXXXX"
+  },
+  "payment": {
+    "redirecting": "Redirecting in"
+  }
+}
