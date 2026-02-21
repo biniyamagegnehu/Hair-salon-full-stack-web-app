@@ -18,7 +18,34 @@
     "recommended": "Recommended",
     "seconds": "seconds",
     "allRightsReserved": "All rights reserved.",
-    "tagline": "Premium grooming for Ethiopian men"
+    "tagline": "Premium grooming for Ethiopian men",
+    "allTime": "All time",
+    "completed": "completed",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last12Months": "Last 12 Months",
+    "noData": "No data available",
+    "searchPlaceholder": "Search by name, email, or phone...",
+    "noResults": "No customers found",
+    "noEmail": "No email",
+    "view": "View",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "results",
+    "previous": "Previous",
+    "next": "Next",
+    "active": "Active",
+    "inactive": "Inactive",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "update": "Update",
+    "create": "Create",
+    "reset": "Reset",
+    "comingSoon": "Coming soon...",
+    "at": "at",
+    "tryAgain": "Try Again",
+    "cancelled": "Cancelled"
   },
   "nav": {
     "home": "Home",
@@ -69,7 +96,13 @@
     "yourBooking": "Your Booking",
     "service": "Service",
     "date": "Date",
-    "time": "Time"
+    "time": "Time",
+    "bookings": "bookings",
+    "todayAppointments": "Today's Appointments",
+    "upcomingAppointments": "Upcoming Appointments",
+    "pastAppointments": "Past Appointments",
+    "bookNowPrompt": "Book an appointment to see your queue position",
+    "bookNow": "Book Now"
   },
   "queue": {
     "title": "Queue Status",
@@ -103,7 +136,35 @@
     "todayAppointments": "Today's Appointments",
     "pendingPayments": "Pending Payments",
     "activeServices": "Active Services",
-    "quickActions": "Quick Actions"
+    "quickActions": "Quick Actions",
+    "customer": "Customer",
+    "totalSpent": "Total Spent",
+    "appointmentTrends": "Appointment Trends",
+    "popularServices": "Popular Services",
+    "bookings": "bookings",
+    "manageQueue": "Manage Queue",
+    "addService": "Add Service",
+    "servicesOffered": "Services offered",
+    "serviceName": "Service Name",
+    "description": "Description",
+    "closed": "Closed",
+    "workingHoursInfo": "Working hours determine when customers can book appointments. Changes will take effect immediately.",
+    "salonName": "Salon Name",
+    "location": "Location",
+    "phoneNumber": "Phone Number",
+    "email": "Email",
+    "advancePaymentPercentage": "Advance Payment Percentage",
+    "advancePaymentInfo": "Percentage of total price required as advance payment",
+    "confirmDeactivate": "Are you sure you want to deactivate this service?"
+  },
+   "days": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
   },
   "profile": {
     "title": "Profile",
@@ -123,7 +184,12 @@
     "paymentSuccess": "Payment Successful",
     "paymentFailed": "Payment Failed",
     "processing": "Processing...",
-    "redirecting": "Redirecting in"
+    "redirecting": "Redirecting in",
+    "chapaDescription": "Pay securely with Chapa using Telebirr, CBE Birr, or any Ethiopian bank card.",
+    "payLaterDescription": "You can also pay the advance amount when you arrive at the salon.",
+    "securePayment": "Secure payment powered by Chapa",
+    "waitingConfirmation": "Please complete the payment in the opened tab.",
+    "paymentFailedMessage": "Your payment could not be processed. Please try again."
   }
 }
 
