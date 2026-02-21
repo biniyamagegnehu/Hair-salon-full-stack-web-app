@@ -48,10 +48,10 @@ const ServicesPage = () => {
           <div key={service._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                {service.name && service.name.en}
+                {service.name?.en || t('common.service')}
               </h2>
               <p className="text-gray-600 mb-4 h-12">
-                {service.description && service.description.en}
+                {service.description?.en || ''}
               </p>
               
               <div className="flex justify-between items-center mb-4">
