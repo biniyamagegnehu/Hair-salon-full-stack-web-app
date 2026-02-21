@@ -7,11 +7,11 @@ import translationAM from './locales/am.json';
 
 const resources = {
   en: {
-    translation: translationEN,
+    translation: translationEN
   },
   am: {
-    translation: translationAM,
-  },
+    translation: translationAM
+  }
 };
 
 i18n
@@ -23,13 +23,15 @@ i18n
     detection: {
       order: ['cookie', 'localStorage', 'navigator'],
       caches: ['cookie'],
+      lookupCookie: 'i18next',
+      lookupLocalStorage: 'i18nextLng'
     },
     interpolation: {
-      escapeValue: false,
+      escapeValue: false
     },
     react: {
-      useSuspense: false,
-    },
+      useSuspense: false
+    }
   });
 
 export default i18n;
