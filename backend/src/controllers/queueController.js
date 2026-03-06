@@ -2,6 +2,7 @@ const Appointment = require('../models/Appointment');
 const Service = require('../models/Service');
 const User = require('../models/User');
 const ApiResponse = require('../utils/response');
+const { emitQueueUpdate, emitAppointmentUpdate, emitCheckInConfirmation } = require('../services/socketService');
 
 const queueController = {
   // Get real-time queue status
@@ -150,7 +151,7 @@ const queueController = {
         _id: appointmentId,
         customer: customerId,
         status: 'CONFIRMED'
-      });
+      }).populate('customer service');
 
       if (!appointment) {
         return res.status(404).json(
@@ -184,6 +185,13 @@ const queueController = {
         );
       }
 
+      // Check if it's too late (more than 15 minutes after)
+      if (minutesBefore < -15) {
+        return res.status(400).json(
+          ApiResponse.error('You are more than 15 minutes late for your appointment. Please contact the salon.')
+        );
+      }
+
       // Update appointment status
       appointment.status = 'CHECKED_IN';
       appointment.checkedInAt = new Date();
@@ -198,6 +206,36 @@ const queueController = {
       }
 
       await appointment.save();
+
+      // Get updated queue data for WebSocket broadcast
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const updatedQueue = await Appointment.find({
+        scheduledDate: { $gte: today, $lt: tomorrow },
+        status: { $in: ['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS'] }
+      })
+      .populate('customer', 'fullName phoneNumber')
+      .populate('service', 'name duration')
+      .sort({ queuePosition: 1, scheduledTime: 1 });
+
+      // Calculate queue stats
+      const stats = {
+        totalInQueue: updatedQueue.length,
+        inProgress: updatedQueue.filter(a => a.status === 'IN_PROGRESS').length,
+        checkedIn: updatedQueue.filter(a => a.status === 'CHECKED_IN').length,
+        confirmed: updatedQueue.filter(a => a.status === 'CONFIRMED').length,
+        estimatedCurrentWait: updatedQueue.length * 30
+      };
+
+      // Emit WebSocket events
+      emitQueueUpdate({
+        queue: updatedQueue,
+        stats,
+        lastUpdated: new Date().toISOString()
+      });
+
+      emitCheckInConfirmation(customerId, appointment.queuePosition);
 
       res.json(ApiResponse.success('Checked in successfully', {
         appointmentId: appointment._id,
@@ -225,7 +263,8 @@ const queueController = {
       }
 
       const appointment = await Appointment.findById(appointmentId)
-        .populate('customer', 'fullName phoneNumber');
+        .populate('customer', 'fullName phoneNumber email')
+        .populate('service', 'name duration price');
 
       if (!appointment) {
         return res.status(404).json(ApiResponse.error('Appointment not found'));
@@ -245,6 +284,9 @@ const queueController = {
           ApiResponse.error(`Cannot change status from ${appointment.status} to ${status}`)
         );
       }
+
+      // Store previous status for response
+      const previousStatus = appointment.status;
 
       // Update appointment
       appointment.status = status;
@@ -278,11 +320,52 @@ const queueController = {
         await recalculateQueuePositions(appointment.scheduledDate);
       }
 
+      // Get updated queue data for WebSocket broadcast
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const updatedQueue = await Appointment.find({
+        scheduledDate: { $gte: today, $lt: tomorrow },
+        status: { $in: ['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS'] }
+      })
+      .populate('customer', 'fullName phoneNumber')
+      .populate('service', 'name duration')
+      .sort({ queuePosition: 1, scheduledTime: 1 });
+
+      const stats = {
+        totalInQueue: updatedQueue.length,
+        inProgress: updatedQueue.filter(a => a.status === 'IN_PROGRESS').length,
+        checkedIn: updatedQueue.filter(a => a.status === 'CHECKED_IN').length,
+        confirmed: updatedQueue.filter(a => a.status === 'CONFIRMED').length,
+        estimatedCurrentWait: updatedQueue.length * 30
+      };
+
+      // Emit WebSocket events
+      emitQueueUpdate({
+        queue: updatedQueue,
+        stats,
+        lastUpdated: new Date().toISOString()
+      });
+
+      emitAppointmentUpdate(appointment.customer._id, {
+        appointmentId: appointment._id,
+        status: appointment.status,
+        queuePosition: appointment.queuePosition,
+        serviceName: appointment.service?.name?.en,
+        scheduledTime: appointment.scheduledTime
+      });
+
       res.json(ApiResponse.success('Appointment status updated', {
         appointmentId: appointment._id,
         status: appointment.status,
+        previousStatus,
         customerName: appointment.customer.fullName,
-        previousStatus: appointment.previousStatus
+        customerEmail: appointment.customer.email,
+        customerPhone: appointment.customer.phoneNumber,
+        serviceName: appointment.service?.name?.en,
+        scheduledTime: appointment.scheduledTime
       }));
 
     } catch (error) {
@@ -377,6 +460,33 @@ const queueController = {
 
       await Promise.all(updatePromises);
 
+      // Get updated queue data for WebSocket broadcast
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const updatedQueue = await Appointment.find({
+        scheduledDate: { $gte: today, $lt: tomorrow },
+        status: { $in: ['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS'] }
+      })
+      .populate('customer', 'fullName phoneNumber')
+      .populate('service', 'name duration')
+      .sort({ queuePosition: 1, scheduledTime: 1 });
+
+      const stats = {
+        totalInQueue: updatedQueue.length,
+        inProgress: updatedQueue.filter(a => a.status === 'IN_PROGRESS').length,
+        checkedIn: updatedQueue.filter(a => a.status === 'CHECKED_IN').length,
+        confirmed: updatedQueue.filter(a => a.status === 'CONFIRMED').length,
+        estimatedCurrentWait: updatedQueue.length * 30
+      };
+
+      // Emit WebSocket event
+      emitQueueUpdate({
+        queue: updatedQueue,
+        stats,
+        lastUpdated: new Date().toISOString()
+      });
+
       res.json(ApiResponse.success('Queue reordered successfully', {
         updatedCount: appointments.length
       }));
@@ -385,26 +495,92 @@ const queueController = {
       console.error('Reorder queue error:', error);
       res.status(500).json(ApiResponse.serverError());
     }
+  },
+
+  // Get queue history for analytics
+  getQueueHistory: async (req, res) => {
+    try {
+      const { date } = req.query;
+      let targetDate;
+
+      if (date) {
+        targetDate = new Date(date);
+      } else {
+        targetDate = new Date();
+      }
+      
+      targetDate.setHours(0, 0, 0, 0);
+      const nextDay = new Date(targetDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      const appointments = await Appointment.find({
+        scheduledDate: { $gte: targetDate, $lt: nextDay }
+      })
+      .populate('customer', 'fullName')
+      .populate('service', 'name price')
+      .sort({ scheduledTime: 1 })
+      .lean();
+
+      // Calculate statistics
+      const totalAppointments = appointments.length;
+      const completedAppointments = appointments.filter(a => a.status === 'COMPLETED').length;
+      const noShowAppointments = appointments.filter(a => a.status === 'NO_SHOW').length;
+      const cancelledAppointments = appointments.filter(a => a.status === 'CANCELLED').length;
+      
+      const totalRevenue = appointments
+        .filter(a => a.status === 'COMPLETED')
+        .reduce((sum, apt) => sum + (apt.payment?.totalAmount || 0), 0);
+
+      const averageWaitTime = appointments
+        .filter(a => a.checkedInAt && a.startedAt)
+        .reduce((sum, apt) => {
+          const waitTime = (apt.startedAt - apt.checkedInAt) / (1000 * 60);
+          return sum + waitTime;
+        }, 0) / (completedAppointments || 1);
+
+      res.json(ApiResponse.success('Queue history retrieved', {
+        date: targetDate.toISOString().split('T')[0],
+        stats: {
+          totalAppointments,
+          completedAppointments,
+          noShowAppointments,
+          cancelledAppointments,
+          totalRevenue,
+          averageWaitTime: Math.round(averageWaitTime)
+        },
+        appointments
+      }));
+
+    } catch (error) {
+      console.error('Get queue history error:', error);
+      res.status(500).json(ApiResponse.serverError());
+    }
   }
 };
 
 // Helper function to recalculate queue positions
 async function recalculateQueuePositions(date) {
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
-  
-  const endOfDay = new Date(startOfDay);
-  endOfDay.setDate(endOfDay.getDate() + 1);
+  try {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
 
-  const appointments = await Appointment.find({
-    scheduledDate: { $gte: startOfDay, $lt: endOfDay },
-    status: { $in: ['CHECKED_IN', 'IN_PROGRESS'] }
-  }).sort({ scheduledTime: 1, checkedInAt: 1 });
+    const appointments = await Appointment.find({
+      scheduledDate: { $gte: startOfDay, $lt: endOfDay },
+      status: { $in: ['CHECKED_IN', 'IN_PROGRESS'] }
+    }).sort({ scheduledTime: 1, checkedInAt: 1 });
 
-  // Update queue positions
-  for (let i = 0; i < appointments.length; i++) {
-    appointments[i].queuePosition = i + 1;
-    await appointments[i].save();
+    // Update queue positions
+    for (let i = 0; i < appointments.length; i++) {
+      appointments[i].queuePosition = i + 1;
+      await appointments[i].save();
+    }
+
+    console.log(`Recalculated queue positions for ${appointments.length} appointments`);
+  } catch (error) {
+    console.error('Error recalculating queue positions:', error);
   }
 }
 
