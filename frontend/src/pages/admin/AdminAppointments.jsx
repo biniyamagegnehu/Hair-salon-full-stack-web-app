@@ -13,8 +13,12 @@ import {
 const AdminAppointments = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { appointments, isLoading, filters } = useSelector((state) => state.admin.appointments);
-  const { services } = useSelector((state) => state.services);
+  const { appointments, isLoading, filters } = useSelector((state) => state.admin.appointments || {
+    appointments: [],
+    isLoading: false,
+    filters: {}
+  });
+  const { services } = useSelector((state) => state.services || { services: [] });
   
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -102,6 +106,7 @@ const AdminAppointments = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'short',
       year: 'numeric',
@@ -117,6 +122,10 @@ const AdminAppointments = () => {
       minimumFractionDigits: 0
     }).format(amount || 0);
   };
+
+  // Safely get appointments array
+  const appointmentsList = appointments?.list || [];
+  const appointmentsPagination = appointments?.pagination || { page: 1, limit: 20, total: 0, pages: 1 };
 
   return (
     <div className="space-y-6">
@@ -239,7 +248,7 @@ const AdminAppointments = () => {
               </div>
             </div>
           </div>
-        ) : appointments?.length === 0 ? (
+        ) : appointmentsList.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -275,28 +284,28 @@ const AdminAppointments = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {appointments.map((apt) => (
+                {appointmentsList.map((apt) => (
                   <tr key={apt._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
                           <span className="text-white text-sm font-medium">
-                            {apt.customer?.fullName?.charAt(0).toUpperCase()}
+                            {apt.customer?.fullName?.charAt(0).toUpperCase() || '?'}
                           </span>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-800">{apt.customer?.fullName}</p>
-                          <p className="text-xs text-gray-400">{apt.customer?.phoneNumber}</p>
+                          <p className="font-medium text-gray-800">{apt.customer?.fullName || 'Unknown'}</p>
+                          <p className="text-xs text-gray-400">{apt.customer?.phoneNumber || 'No phone'}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-medium text-gray-800">{apt.service?.name?.en}</p>
-                      <p className="text-xs text-gray-400">{apt.service?.duration} min</p>
+                      <p className="font-medium text-gray-800">{apt.service?.name?.en || 'Unknown Service'}</p>
+                      <p className="text-xs text-gray-400">{apt.service?.duration || '?'} min</p>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-sm text-gray-800">{formatDate(apt.scheduledDate)}</p>
-                      <p className="text-xs text-gray-400">{apt.scheduledTime}</p>
+                      <p className="text-xs text-gray-400">{apt.scheduledTime || 'N/A'}</p>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(apt.status)}`}>
@@ -351,24 +360,30 @@ const AdminAppointments = () => {
         )}
 
         {/* Pagination */}
-        {appointments?.pagination && appointments.pagination.pages > 1 && (
+        {appointmentsPagination.pages > 1 && (
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
             <p className="text-sm text-gray-500">
-              {t('common.showing', 'Showing')} {((appointments.pagination.page - 1) * appointments.pagination.limit) + 1} -{' '}
-              {Math.min(appointments.pagination.page * appointments.pagination.limit, appointments.pagination.total)} of{' '}
-              {appointments.pagination.total}
+              {t('common.showing', 'Showing')} {((appointmentsPagination.page - 1) * appointmentsPagination.limit) + 1} -{' '}
+              {Math.min(appointmentsPagination.page * appointmentsPagination.limit, appointmentsPagination.total)} of{' '}
+              {appointmentsPagination.total}
             </p>
             <div className="flex gap-2">
               <button
-                onClick={() => dispatch(fetchAllAppointments({ ...filters, page: appointments.pagination.page - 1 }))}
-                disabled={appointments.pagination.page === 1}
+                onClick={() => dispatch(fetchAllAppointments({ 
+                  ...filters, 
+                  page: appointmentsPagination.page - 1 
+                }))}
+                disabled={appointmentsPagination.page === 1}
                 className="px-3 py-1 border border-gray-200 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 {t('common.previous', 'Previous')}
               </button>
               <button
-                onClick={() => dispatch(fetchAllAppointments({ ...filters, page: appointments.pagination.page + 1 }))}
-                disabled={appointments.pagination.page === appointments.pagination.pages}
+                onClick={() => dispatch(fetchAllAppointments({ 
+                  ...filters, 
+                  page: appointmentsPagination.page + 1 
+                }))}
+                disabled={appointmentsPagination.page === appointmentsPagination.pages}
                 className="px-3 py-1 border border-gray-200 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 {t('common.next', 'Next')}
@@ -392,7 +407,7 @@ const AdminAppointments = () => {
               {opt.label}
             </span>
             <p className="text-2xl font-bold text-gray-800 mt-2">
-              {appointments?.filter(a => a.status === opt.value).length || 0}
+              {appointmentsList.filter(a => a.status === opt.value).length || 0}
             </p>
           </button>
         ))}
@@ -415,7 +430,7 @@ const AdminAppointments = () => {
                 </button>
               </div>
 
-              {/* Details content - similar to the edit form but read-only */}
+              {/* Details content */}
               <div className="space-y-4">
                 {/* Customer Info */}
                 <div className="bg-gray-50 rounded-xl p-4">
@@ -423,13 +438,13 @@ const AdminAppointments = () => {
                   <div className="flex items-center">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4">
                       <span className="text-white text-lg font-medium">
-                        {selectedAppointment.customer?.fullName?.charAt(0).toUpperCase()}
+                        {selectedAppointment.customer?.fullName?.charAt(0).toUpperCase() || '?'}
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800">{selectedAppointment.customer?.fullName}</p>
-                      <p className="text-sm text-gray-500">{selectedAppointment.customer?.email}</p>
-                      <p className="text-sm text-gray-500">{selectedAppointment.customer?.phoneNumber}</p>
+                      <p className="font-medium text-gray-800">{selectedAppointment.customer?.fullName || 'Unknown'}</p>
+                      <p className="text-sm text-gray-500">{selectedAppointment.customer?.email || 'No email'}</p>
+                      <p className="text-sm text-gray-500">{selectedAppointment.customer?.phoneNumber || 'No phone'}</p>
                     </div>
                   </div>
                 </div>
@@ -438,13 +453,13 @@ const AdminAppointments = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 mb-1">{t('booking.service', 'Service')}</p>
-                    <p className="font-medium text-gray-800">{selectedAppointment.service?.name?.en}</p>
-                    <p className="text-xs text-gray-400 mt-1">{selectedAppointment.service?.duration} min</p>
+                    <p className="font-medium text-gray-800">{selectedAppointment.service?.name?.en || 'Unknown'}</p>
+                    <p className="text-xs text-gray-400 mt-1">{selectedAppointment.service?.duration || '?'} min</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 mb-1">{t('booking.date', 'Date & Time')}</p>
                     <p className="font-medium text-gray-800">{formatDate(selectedAppointment.scheduledDate)}</p>
-                    <p className="text-xs text-gray-400 mt-1">{selectedAppointment.scheduledTime}</p>
+                    <p className="text-xs text-gray-400 mt-1">{selectedAppointment.scheduledTime || 'N/A'}</p>
                   </div>
                 </div>
 
@@ -463,7 +478,7 @@ const AdminAppointments = () => {
                     <div className="flex justify-between text-sm pt-2 border-t border-gray-200">
                       <span className="text-gray-600">{t('payment.status')}:</span>
                       <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${getStatusBadge(selectedAppointment.payment?.paymentStatus)}`}>
-                        {selectedAppointment.payment?.paymentStatus}
+                        {selectedAppointment.payment?.paymentStatus || 'N/A'}
                       </span>
                     </div>
                   </div>
@@ -508,7 +523,7 @@ const AdminAppointments = () => {
             <div className="p-6">
               <h3 className="text-xl font-bold text-gray-800 mb-6">{t('admin.editAppointment', 'Edit Appointment')}</h3>
               
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                 {/* Status Update */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -532,7 +547,7 @@ const AdminAppointments = () => {
                   </label>
                   <input
                     type="date"
-                    value={selectedAppointment.scheduledDate?.split('T')[0]}
+                    value={selectedAppointment.scheduledDate?.split('T')[0] || ''}
                     onChange={(e) => setSelectedAppointment({ ...selectedAppointment, scheduledDate: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -545,7 +560,7 @@ const AdminAppointments = () => {
                   </label>
                   <input
                     type="time"
-                    value={selectedAppointment.scheduledTime}
+                    value={selectedAppointment.scheduledTime || ''}
                     onChange={(e) => setSelectedAppointment({ ...selectedAppointment, scheduledTime: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
