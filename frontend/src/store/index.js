@@ -15,4 +15,8 @@ export const store = configureStore({
     payment: paymentReducer,
     admin: adminReducer
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 });
