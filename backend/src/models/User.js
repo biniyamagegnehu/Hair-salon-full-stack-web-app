@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Hash password before saving - FIXED: removed next parameter
+// Hash password before saving - FIXED for Mongoose 7+ (no next parameter)
 userSchema.pre('save', async function() {
   // Only hash if password is modified and exists
   if (!this.isModified('password') || !this.password) {
@@ -70,8 +70,17 @@ userSchema.pre('save', async function() {
 
 // Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  if (!this.password) return false;
-  return await bcrypt.compare(candidatePassword, this.password);
+  try {
+    if (!this.password) {
+      console.log('No password stored for user');
+      return false;
+    }
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+    return isMatch;
+  } catch (error) {
+    console.error('Error comparing passwords:', error);
+    return false;
+  }
 };
 
 module.exports = mongoose.model('User', userSchema);

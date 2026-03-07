@@ -2,19 +2,22 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-// const mongoSanitize = require('express-mongo-sanitize');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const corsOptions = require('./config/corsOptions');
 const ApiResponse = require('./utils/response');
-const { setCsrfToken, csrfProtection } = require('./middlewares/csrf');
 
 // Initialize express app
 const app = express();
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// CORS - This MUST be the first middleware
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -31,19 +34,10 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Cookie parser
 app.use(cookieParser());
 
-// CORS
-app.use(cors(corsOptions));
-
-// Sanitize data
-// app.use(mongoSanitize());
-
-// CSRF protection (set token first, then verify)
-app.use(setCsrfToken);
-app.use(csrfProtection);
-
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} ${req.method} ${req.path} - ${req.ip}`);
+  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  console.log('Origin:', req.headers.origin);
   next();
 });
 
@@ -70,12 +64,11 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/working-hours', require('./routes/working-hours'));
 
-// 404 handler - FIXED: Don't use wildcard pattern
+// 404 handler - FIXED: No wildcard pattern
 app.use((req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json(ApiResponse.notFound(`API endpoint not found: ${req.method} ${req.path}`));
   }
-  // For non-API routes
   res.status(404).json(ApiResponse.notFound('Resource not found'));
 });
 
