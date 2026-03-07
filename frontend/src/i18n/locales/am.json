@@ -45,7 +45,20 @@
     "comingSoon": "በቅርቡ ይገኛል...",
     "at": "ላይ",
     "tryAgain": "እንደገና ይሞክሩ",
-    "cancelled": "ተሰርዟል"
+    "cancelled": "ተሰርዟል",
+     "from": "ከ",
+    "status": "ሁኔታ",
+    "activeFilters": "ንቁ ማጣሪያዎች:",
+    "clearAll": "ሁሉንም አጽዳ",
+    "close": "ዝጋ",
+    "all": "ሁሉም",
+    "notes": "ማስታወሻዎች",
+    "thisWeek": "በዚህ ሳምንት",
+    "thisMonth": "በዚህ ወር",
+    "thisYear": "በዚህ አመት",
+    "export": "ሪፖርት ላክ",
+    "viewAll": "ሁሉንም ተመልከት",
+    "manage": "አስተዳድር"
   },
   "nav": {
     "home": "መነሻ",
@@ -121,8 +134,9 @@
     "totalInQueue": "ጠቅላላ በወረፋ",
     "confirmed": "ተረጋግጧል",
     "noQueue": "አሁን ማንም በወረፋ የለም",
-    "checkInConfirm": "በሚከተለው ሰዓት ይግቡ"
-  },
+    "checkInConfirm": "በሚከተለው ሰዓት ይግቡ",
+    "noShow": "አልተገኙም"
+    },
   "admin": {
     "dashboard": "ዳሽቦርድ",
     "customers": "ደንበኞች",
@@ -155,7 +169,16 @@
     "email": "ኢሜይል",
     "advancePaymentPercentage": "ቅድመ ክፍያ መቶኛ",
     "advancePaymentInfo": "ከጠቅላላ ዋጋ ቅድመ ክፍያ የሚፈለግ መቶኛ",
-    "confirmDeactivate": "እርግጠኛ ነዎት ይህን አገልግሎት ማቦዘን ይፈልጋሉ?"
+    "confirmDeactivate": "እርግጠኛ ነዎት ይህን አገልግሎት ማቦዘን ይፈልጋሉ?",
+    "manageAppointments": "ቀጠሮዎችን ያስተዳድሩ እና ይከታተሉ",
+    "newAppointment": "አዲስ ቀጠሮ",
+    "appointmentDetails": "የቀጠሮ ዝርዝሮች",
+    "editAppointment": "ቀጠሮ ያርትዑ",
+    "noAppointments": "ምንም ቀጠሮዎች አልተገኙም",
+    "tryAdjustingFilters": "እባክዎ ማጣሪያዎችዎን ያስተካክሉ",
+    "confirmDelete": "ይህን ቀጠሮ መሰረዝ እንደሚፈልጉ እርግጠኛ ነዎት?",
+    "notesPlaceholder": "ስለዚህ ቀጠሮ ማስታወሻ ያክሉ...",
+    "recentActivity": "የቅርብ ጊዜ እንቅስቃሴ"
   },
     "days": {
     "sunday": "እሁድ",
@@ -189,6 +212,11 @@
     "payLaterDescription": "ቅድመ ክፍያውን ወደ ሳሎን ሲመጡ መክፈል ይችላሉ።",
     "securePayment": "በቻፓ የተጠበቀ ክፍያ",
     "waitingConfirmation": "እባክዎ ክፍያውን በተከፈተው ትር ያጠናቅቁ።",
-    "paymentFailedMessage": "ክፍያዎ ሊከናወን አልቻለም። እባክዎ እንደገና ይሞክሩ።"
+    "paymentFailedMessage": "ክፍያዎ ሊከናወን አልቻለም። እባክዎ እንደገና ይሞክሩ።",
+    "paymentDetails": "የክፍያ ዝርዝሮች",
+    "paid": "ተከፍሏል",
+    "partial": "ከፊል",
+    "pending": "በመጠባበቅ ላይ",
+    "amount": "መጠን"
   }
 }

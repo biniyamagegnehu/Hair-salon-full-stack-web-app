@@ -45,7 +45,21 @@
     "comingSoon": "Coming soon...",
     "at": "at",
     "tryAgain": "Try Again",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "from": "From",
+    "status": "Status",
+    "activeFilters": "Active filters:",
+    "clearAll": "Clear all",
+    "close": "Close",
+    "all": "All",
+    "notes": "Notes",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "thisYear": "This Year",
+    "export": "Export Report",
+    "viewAll": "View All",
+    "manage": "Manage"
+
   },
   "nav": {
     "home": "Home",
@@ -121,7 +135,8 @@
     "totalInQueue": "Total in Queue",
     "confirmed": "Confirmed",
     "noQueue": "No one in queue right now",
-    "checkInConfirm": "Check in for your appointment at"
+    "checkInConfirm": "Check in for your appointment at",
+    "noShow": "No Show"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -155,7 +170,16 @@
     "email": "Email",
     "advancePaymentPercentage": "Advance Payment Percentage",
     "advancePaymentInfo": "Percentage of total price required as advance payment",
-    "confirmDeactivate": "Are you sure you want to deactivate this service?"
+    "confirmDeactivate": "Are you sure you want to deactivate this service?",
+    "manageAppointments": "Manage and track all appointments",
+    "newAppointment": "New Appointment",
+    "appointmentDetails": "Appointment Details",
+    "editAppointment": "Edit Appointment",
+    "noAppointments": "No appointments found",
+    "tryAdjustingFilters": "Try adjusting your filters",
+    "confirmDelete": "Are you sure you want to delete this appointment?",
+    "notesPlaceholder": "Add any notes about this appointment...",
+    "recentActivity": "Recent Activity"
   },
    "days": {
     "sunday": "Sunday",
@@ -189,7 +213,12 @@
     "payLaterDescription": "You can also pay the advance amount when you arrive at the salon.",
     "securePayment": "Secure payment powered by Chapa",
     "waitingConfirmation": "Please complete the payment in the opened tab.",
-    "paymentFailedMessage": "Your payment could not be processed. Please try again."
+    "paymentFailedMessage": "Your payment could not be processed. Please try again.",
+    "paymentDetails": "Payment Details",
+    "paid": "Paid",
+    "partial": "Partial",
+    "pending": "Pending",
+    "amount": "Amount"
   }
 }
 
