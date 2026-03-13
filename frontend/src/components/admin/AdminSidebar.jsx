@@ -35,6 +35,11 @@ const AdminSidebar = () => {
       icon: '🔄' 
     },
     { 
+      path: '/admin/reports', 
+      label: 'Reports', 
+      icon: '📊' 
+    },
+    { 
       path: '/admin/services', 
       label: 'Services', 
       icon: '💇' 
