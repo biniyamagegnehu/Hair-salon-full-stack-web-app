@@ -58,7 +58,11 @@
     "thisYear": "በዚህ አመት",
     "export": "ሪፖርት ላክ",
     "viewAll": "ሁሉንም ተመልከት",
-    "manage": "አስተዳድር"
+    "manage": "አስተዳድር",
+    "email": "ኢሜይል",
+    "contactInfo": "የመገኛኛ መረጃ",
+    "searchCustomers": "በስም፣ ኢሜይል ወይም ስልክ ይፈልጉ...",
+    "clear": "አጽዳ"
   },
   "nav": {
     "home": "መነሻ",
@@ -178,7 +182,15 @@
     "tryAdjustingFilters": "እባክዎ ማጣሪያዎችዎን ያስተካክሉ",
     "confirmDelete": "ይህን ቀጠሮ መሰረዝ እንደሚፈልጉ እርግጠኛ ነዎት?",
     "notesPlaceholder": "ስለዚህ ቀጠሮ ማስታወሻ ያክሉ...",
-    "recentActivity": "የቅርብ ጊዜ እንቅስቃሴ"
+    "recentActivity": "የቅርብ ጊዜ እንቅስቃሴ",
+    "manageCustomers": "ደንበኞችን ያስተዳድሩ እና ይመልከቱ",
+    "addCustomer": "ደንበኛ ያክሉ",
+    "customerDetails": "የደንበኛ ዝርዝሮች",
+    "noCustomers": "ምንም ደንበኞች አልተገኙም",
+    "tryAdjustingSearch": "እባክዎ ፍለጋዎን ያስተካክሉ",
+    "totalAppointments": "ጠቅላላ ቀጠሮዎች",
+    "recentAppointments": "የቅርብ ጊዜ ቀጠሮዎች",
+    "noRecentAppointments": "ምንም የቅርብ ጊዜ ቀጠሮዎች የሉም"
   },
     "days": {
     "sunday": "እሁድ",

@@ -58,8 +58,11 @@
     "thisYear": "This Year",
     "export": "Export Report",
     "viewAll": "View All",
-    "manage": "Manage"
-
+    "manage": "Manage",
+    "email": "Email",
+    "contactInfo": "Contact Information",
+    "searchCustomers": "Search by name, email, or phone...",
+    "clear": "Clear"
   },
   "nav": {
     "home": "Home",
@@ -179,7 +182,15 @@
     "tryAdjustingFilters": "Try adjusting your filters",
     "confirmDelete": "Are you sure you want to delete this appointment?",
     "notesPlaceholder": "Add any notes about this appointment...",
-    "recentActivity": "Recent Activity"
+    "recentActivity": "Recent Activity",
+    "manageCustomers": "Manage and view all customers",
+    "addCustomer": "Add Customer",
+    "customerDetails": "Customer Details",
+    "noCustomers": "No customers found",
+    "tryAdjustingSearch": "Try adjusting your search",
+    "totalAppointments": "Total Appointments",
+    "recentAppointments": "Recent Appointments",
+    "noRecentAppointments": "No recent appointments"
   },
    "days": {
     "sunday": "Sunday",
