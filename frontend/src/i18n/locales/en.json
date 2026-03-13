@@ -65,7 +65,12 @@
     "clear": "Clear",
     "refresh": "Refresh",
     "current": "Current",
-    "newStatus": "New Status"
+    "newStatus": "New Status",
+    "live": "ቀጥታ",
+    "connecting": "በማገናኘት ላይ...",
+    "versus": "ካለፈው ጊዜ ጋር",
+    "liveUpdates": "የቀጥታ ማሻሻያዎች",
+    "noNotifications": "ምንም አዲስ ማሳወቂያ የለም"
   },
   "nav": {
     "home": "Home",
@@ -149,7 +154,8 @@
     "noAppointments": "No appointments in this column",
     "start": "Start",
     "complete": "Complete",
-    "update": "Update Status"
+    "update": "Update Status",
+    "queue": "Queue"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -202,7 +208,8 @@
     "recentAppointments": "Recent Appointments",
     "noRecentAppointments": "No recent appointments",
     "manageLiveQueue": "Manage live queue with drag and drop",
-    "updateStatus": "Update Appointment Status"
+    "updateStatus": "Update Appointment Status",
+    "queue": "ወረፋ"
   },
    "days": {
     "sunday": "Sunday",
