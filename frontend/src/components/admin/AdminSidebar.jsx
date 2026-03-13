@@ -30,6 +30,11 @@ const AdminSidebar = () => {
       icon: '📅' 
     },
     { 
+      path: '/admin/queue', 
+      label: 'Queue Management', 
+      icon: '🔄' 
+    },
+    { 
       path: '/admin/services', 
       label: 'Services', 
       icon: '💇' 

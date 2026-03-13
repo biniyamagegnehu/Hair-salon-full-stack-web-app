@@ -28,6 +28,7 @@ import AdminAppointments from './pages/admin/AdminAppointments'
 import AdminServices from './pages/admin/AdminServices'
 import AdminWorkingHours from './pages/admin/AdminWorkingHours'
 import AdminSettings from './pages/admin/AdminSettings'
+import AdminQueue from './pages/admin/AdminQueue'  // Add this line
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -132,6 +133,9 @@ function App() {
           
           {/* Appointment Management */}
           <Route path="appointments" element={<AdminAppointments />} />
+          
+          {/* Queue Management - NEW */}
+          <Route path="queue" element={<AdminQueue />} />
           
           {/* Service Management */}
           <Route path="services" element={<AdminServices />} />
