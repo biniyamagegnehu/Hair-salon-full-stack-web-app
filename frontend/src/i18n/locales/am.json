@@ -62,7 +62,10 @@
     "email": "ኢሜይል",
     "contactInfo": "የመገኛኛ መረጃ",
     "searchCustomers": "በስም፣ ኢሜይል ወይም ስልክ ይፈልጉ...",
-    "clear": "አጽዳ"
+    "clear": "አጽዳ",
+    "refresh": "አድስ",
+    "current": "አሁን ያለ",
+    "newStatus": "አዲስ ሁኔታ"
   },
   "nav": {
     "home": "መነሻ",
@@ -139,7 +142,14 @@
     "confirmed": "ተረጋግጧል",
     "noQueue": "አሁን ማንም በወረፋ የለም",
     "checkInConfirm": "በሚከተለው ሰዓት ይግቡ",
-    "noShow": "አልተገኙም"
+    "noShow": "አልተገኙም",
+    "dragDropTitle": "የወረፋ አስተዳደር ጎትት እና ጣል",
+    "dragDropInstructions": "ወረፋውን ለማስተካከል ቀጠሮዎችን በአምዶች መካከል ይጎትቱ። ለውጦች በራስ-ሰር ይቀመጣሉ።",
+    "reordered": "ወረፋ በተሳካ ሁኔታ ተስተካክሏል",
+    "noAppointments": "በዚህ አምድ ውስጥ ምንም ቀጠሮዎች የሉም",
+    "start": "ጀምር",
+    "complete": "አጠናቅቅ",
+    "update": "ሁኔታ አዘምን"
     },
   "admin": {
     "dashboard": "ዳሽቦርድ",
@@ -190,7 +200,9 @@
     "tryAdjustingSearch": "እባክዎ ፍለጋዎን ያስተካክሉ",
     "totalAppointments": "ጠቅላላ ቀጠሮዎች",
     "recentAppointments": "የቅርብ ጊዜ ቀጠሮዎች",
-    "noRecentAppointments": "ምንም የቅርብ ጊዜ ቀጠሮዎች የሉም"
+    "noRecentAppointments": "ምንም የቅርብ ጊዜ ቀጠሮዎች የሉም",
+    "manageLiveQueue": "የቀጥታ ወረፋን በጎትት እና ጣል ያስተዳድሩ",
+    "updateStatus": "የቀጠሮ ሁኔታ አዘምን"
   },
     "days": {
     "sunday": "እሁድ",

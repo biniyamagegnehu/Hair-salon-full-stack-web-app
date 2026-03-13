@@ -62,7 +62,10 @@
     "email": "Email",
     "contactInfo": "Contact Information",
     "searchCustomers": "Search by name, email, or phone...",
-    "clear": "Clear"
+    "clear": "Clear",
+    "refresh": "Refresh",
+    "current": "Current",
+    "newStatus": "New Status"
   },
   "nav": {
     "home": "Home",
@@ -139,7 +142,14 @@
     "confirmed": "Confirmed",
     "noQueue": "No one in queue right now",
     "checkInConfirm": "Check in for your appointment at",
-    "noShow": "No Show"
+    "noShow": "No Show",
+    "dragDropTitle": "Drag & Drop Queue Management",
+    "dragDropInstructions": "Drag appointments between columns to reorder the queue. Changes are saved automatically.",
+    "reordered": "Queue reordered successfully",
+    "noAppointments": "No appointments in this column",
+    "start": "Start",
+    "complete": "Complete",
+    "update": "Update Status"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -190,7 +200,9 @@
     "tryAdjustingSearch": "Try adjusting your search",
     "totalAppointments": "Total Appointments",
     "recentAppointments": "Recent Appointments",
-    "noRecentAppointments": "No recent appointments"
+    "noRecentAppointments": "No recent appointments",
+    "manageLiveQueue": "Manage live queue with drag and drop",
+    "updateStatus": "Update Appointment Status"
   },
    "days": {
     "sunday": "Sunday",
