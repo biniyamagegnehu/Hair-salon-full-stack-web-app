@@ -7,10 +7,7 @@ const { authenticate, authorize } = require('../middlewares/auth');
 const paymentController = require('../controllers/paymentController');
 
 // Public webhook route (no auth required for Chapa)
-router.post('/webhook', 
-  express.raw({ type: 'application/json' }), // Raw body for signature verification
-  paymentController.handleWebhook
-);
+router.post('/webhook', paymentController.handleWebhook);
 
 // Protected routes
 router.post('/initialize',

@@ -176,8 +176,16 @@ const paymentController = {
   handleWebhook: async (req, res) => {
     try {
       // Verify webhook signature
-      const signature = req.headers['x-chapa-signature'];
-      const isSignatureValid = chapaService.verifyWebhookSignature(signature, req.body);
+      const signature = req.headers['x-chapa-signature'] || req.headers['chapa-signature'];
+      
+      if (!signature) {
+        console.error('Webhook missing signature header');
+        return res.status(401).json({ error: 'Missing signature' });
+      }
+
+      // We added rawBody in express.json()
+      const rawBody = req.rawBody || JSON.stringify(req.body);
+      const isSignatureValid = chapaService.verifyWebhookSignature(signature, rawBody);
 
       if (!isSignatureValid) {
         console.error('Invalid webhook signature');
@@ -186,13 +194,17 @@ const paymentController = {
 
       const webhookData = req.body;
       const transactionId = webhookData.tx_ref || webhookData.reference;
+      const eventType = webhookData.event;
+
+      console.log('--- Chapa Webhook Received ---');
+      console.log('Event:', eventType);
+      console.log('Transaction:', transactionId);
+      console.log('Status:', webhookData.status);
 
       if (!transactionId) {
         console.error('Webhook missing transaction reference');
         return res.status(400).json({ error: 'Transaction reference is missing' });
       }
-
-      console.log('Received webhook for transaction:', transactionId);
 
       // Find appointment
       const appointment = await Appointment.findOne({
@@ -204,32 +216,45 @@ const paymentController = {
         return res.status(404).json({ error: 'Appointment not found' });
       }
 
-      // Process webhook based on event
-      switch (webhookData.event) {
+      // Process webhook based on event type or status
+      // Note: Chapa may send just status='success' if event is not defined sometimes
+      const statusToProcess = eventType || (webhookData.status === 'success' ? 'charge.success' : 'charge.failure');
+
+      switch (statusToProcess) {
         case 'charge.success':
+        case 'success':
           appointment.payment.paymentStatus = 'PARTIAL';
           appointment.payment.paymentDate = new Date();
           appointment.status = 'CONFIRMED';
+          console.log(`✅ Appointment ${appointment._id} confirmed via webhook`);
           break;
 
         case 'charge.failure':
+        case 'failed':
           appointment.payment.paymentStatus = 'FAILED';
+          console.log(`❌ Appointment ${appointment._id} payment failed via webhook`);
           break;
 
         case 'charge.completed':
           appointment.payment.paymentStatus = 'COMPLETED';
+          console.log(`✅ Appointment ${appointment._id} payment fully completed via webhook`);
           break;
 
         case 'charge.refunded':
           appointment.payment.paymentStatus = 'REFUNDED';
           appointment.status = 'CANCELLED';
+          console.log(`↩️ Appointment ${appointment._id} payment refunded via webhook`);
           break;
+          
+        default:
+          console.log(`ℹ️ Unhandled webhook event/status: ${statusToProcess}`);
       }
 
       await appointment.save();
+      console.log('--- Webhook processing finished ---');
 
-      // Send response to Chapa
-      res.json({ status: 'success' });
+      // Always return 200 OK to Chapa to acknowledge receipt
+      res.status(200).json({ status: 'success' });
 
     } catch (error) {
       console.error('Webhook handler error:', error);

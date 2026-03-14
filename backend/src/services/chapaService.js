@@ -97,10 +97,10 @@ class ChapaService {
   }
 
   // Verify webhook signature
-  verifyWebhookSignature(signature, payload) {
+  verifyWebhookSignature(signature, rawBody) {
     try {
       const hmac = crypto.createHmac('sha256', this.webhookSecret);
-      const digest = hmac.update(JSON.stringify(payload)).digest('hex');
+      const digest = hmac.update(rawBody).digest('hex');
       return signature === digest;
     } catch (error) {
       console.error('Webhook signature verification error:', error);
