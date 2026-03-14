@@ -11,6 +11,12 @@ const paymentController = {
       const { appointmentId } = req.body;
       const customerId = req.user._id;
 
+      if (!appointmentId) {
+        return res.status(400).json(
+          ApiResponse.error('Appointment ID is required')
+        );
+      }
+
       // Validate appointment
       const appointment = await Appointment.findOne({
         _id: appointmentId,
@@ -31,18 +37,35 @@ const paymentController = {
       // Calculate advance amount
       const advanceAmount = Math.ceil(appointment.payment.totalAmount * (advancePercentage / 100));
 
+      if (advanceAmount <= 0) {
+        return res.status(400).json(
+          ApiResponse.error('Advance payment amount must be greater than zero')
+        );
+      }
+
+      // Ensure customer has a valid email format for Chapa
+      let customerEmail = req.user.email;
+      if (!customerEmail) {
+        const cleanPhone = req.user.phoneNumber ? req.user.phoneNumber.replace(/\D/g, '') : 'customer';
+        customerEmail = `${cleanPhone}@xsalon.com`;
+      }
+
+      // Ensure valid name formatting
+      const [firstName = 'Customer', ...lastNameParts] = req.user.fullName ? req.user.fullName.split(' ') : [];
+      const lastName = lastNameParts.length > 0 ? lastNameParts.join(' ') : 'XSalon';
+
       // Format payment data for Chapa
       const paymentData = chapaService.formatPaymentData({
         amount: advanceAmount.toString(),
-        email: req.user.email || `${req.user.phoneNumber}@xsalon.com`,
+        email: customerEmail,
         phone_number: req.user.phoneNumber,
-        first_name: req.user.fullName.split(' ')[0],
-        last_name: req.user.fullName.split(' ').slice(1).join(' ') || 'Customer',
-        callback_url: `${process.env.BACKEND_URL}/api/payments/webhook`,
-        return_url: `${process.env.FRONTEND_URL}/appointments/${appointmentId}/payment-callback`,
+        first_name: firstName,
+        last_name: lastName,
+        callback_url: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/payments/webhook`,
+        return_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/appointments/${appointmentId}/payment-callback`,
         customization: {
-          title: 'X Men\'s Hair Salon',
-          description: `Advance payment for ${appointment.service.name.en} appointment`
+          title: 'X Mens Salon',
+          description: `Advance payment for ${appointment.service.name.en}`
         }
       });
 
@@ -78,6 +101,12 @@ const paymentController = {
   verifyPayment: async (req, res) => {
     try {
       const { transactionId } = req.params;
+
+      if (!transactionId) {
+        return res.status(400).json(
+          ApiResponse.error('Transaction ID is required')
+        );
+      }
 
       // Verify with Chapa
       const verification = await chapaService.verifyTransaction(transactionId);
@@ -156,7 +185,12 @@ const paymentController = {
       }
 
       const webhookData = req.body;
-      const transactionId = webhookData.tx_ref;
+      const transactionId = webhookData.tx_ref || webhookData.reference;
+
+      if (!transactionId) {
+        console.error('Webhook missing transaction reference');
+        return res.status(400).json({ error: 'Transaction reference is missing' });
+      }
 
       console.log('Received webhook for transaction:', transactionId);
 
@@ -228,6 +262,12 @@ const paymentController = {
       const { appointmentId } = req.params;
       const { amountPaid, paymentMethod = 'CASH' } = req.body;
 
+      if (!amountPaid || isNaN(amountPaid) || amountPaid <= 0) {
+        return res.status(400).json(
+          ApiResponse.error('Valid payment amount is required')
+        );
+      }
+
       // Find appointment (admin can update any appointment)
       const appointment = await Appointment.findOne({
         _id: appointmentId,
@@ -282,6 +322,12 @@ const paymentController = {
     try {
       const { appointmentId } = req.params;
       const { reason } = req.body;
+
+      if (!reason) {
+        return res.status(400).json(
+          ApiResponse.error('Refund reason is required')
+        );
+      }
 
       // Find appointment
       const appointment = await Appointment.findOne({

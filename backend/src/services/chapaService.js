@@ -29,10 +29,23 @@ class ChapaService {
         data: response.data
       };
     } catch (error) {
-      console.error('Chapa initialization error:', error.response?.data || error.message);
+      const responseData = error.response?.data;
+      let errorMessage = 'Payment initialization failed';
+
+      if (responseData) {
+        if (typeof responseData.message === 'string') {
+          errorMessage = responseData.message;
+        } else if (typeof responseData.message === 'object') {
+          errorMessage = Object.values(responseData.message).flat().join(', ');
+        } else if (responseData.error) {
+          errorMessage = responseData.error;
+        }
+      }
+
+      console.error('Chapa initialization error:', responseData || error.message);
       return {
         success: false,
-        error: error.response?.data?.message || 'Payment initialization failed'
+        error: errorMessage
       };
     }
   }
@@ -55,10 +68,23 @@ class ChapaService {
         data: response.data
       };
     } catch (error) {
-      console.error('Chapa verification error:', error.response?.data || error.message);
+      const responseData = error.response?.data;
+      let errorMessage = 'Transaction verification failed';
+
+      if (responseData) {
+        if (typeof responseData.message === 'string') {
+          errorMessage = responseData.message;
+        } else if (typeof responseData.message === 'object') {
+          errorMessage = Object.values(responseData.message).flat().join(', ');
+        } else if (responseData.error) {
+          errorMessage = responseData.error;
+        }
+      }
+
+      console.error('Chapa verification error:', responseData || error.message);
       return {
         success: false,
-        error: error.response?.data?.message || 'Transaction verification failed'
+        error: errorMessage
       };
     }
   }
