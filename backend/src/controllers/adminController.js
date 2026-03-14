@@ -541,6 +541,116 @@ const adminController = {
       console.error('Change admin password error:', error);
       res.status(500).json(ApiResponse.serverError());
     }
+  },
+
+  // Get all payments (Admin Payment History)
+  getAllPayments: async (req, res) => {
+    try {
+      const { 
+        page = 1, 
+        limit = 20, 
+        search = '', 
+        status = '',
+        startDate = '',
+        endDate = ''
+      } = req.query;
+      
+      const skip = (page - 1) * limit;
+
+      // Build query object
+      // We only care about appointments where payment status is not 'PENDING'
+      // Or if a specific status is provided
+      const query = {
+        'payment.paymentStatus': { $ne: 'PENDING' }
+      };
+
+      if (status && status !== 'ALL') {
+        query['payment.paymentStatus'] = status;
+      }
+
+      // Date range filtering
+      if (startDate || endDate) {
+        query.scheduledDate = {};
+        if (startDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          query.scheduledDate.$gte = start;
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          query.scheduledDate.$lte = end;
+        }
+      }
+
+      // Fetch appointments matching criteria, populated with customer and service info
+      let appointments = await Appointment.find(query)
+        .populate('customer', 'fullName email phoneNumber')
+        .populate('service', 'name')
+        .sort({ 'payment.paymentDate': -1, updatedAt: -1 })
+        .lean();
+
+      // Implement search filtering (customer name, email, or Chapa ID) in memory since these are joined or nested
+      if (search) {
+        const searchRegex = new RegExp(search, 'i');
+        appointments = appointments.filter(app => {
+          const customerMatch = app.customer && (
+            searchRegex.test(app.customer.fullName) ||
+            searchRegex.test(app.customer.email) ||
+            searchRegex.test(app.customer.phoneNumber)
+          );
+          const chapaMatch = app.payment?.chapaTransactionId && searchRegex.test(app.payment.chapaTransactionId);
+          
+          return customerMatch || chapaMatch;
+        });
+      }
+
+      // Manual pagination after in-memory search
+      const total = appointments.length;
+      const paginatedAppointments = appointments.slice(skip, skip + parseInt(limit));
+
+      // Map to a cleaner transaction structure for the frontend
+      const transactions = paginatedAppointments.map(app => ({
+        id: app._id,
+        date: app.payment?.paymentDate || app.updatedAt,
+        scheduledDate: app.scheduledDate,
+        customer: app.customer ? {
+          id: app.customer._id,
+          name: app.customer.fullName,
+          email: app.customer.email,
+          phone: app.customer.phoneNumber
+        } : null,
+        service: app.service ? {
+          name: app.service.name
+        } : null,
+        amount: {
+          total: app.payment?.totalAmount || 0,
+          advance: app.payment?.advanceAmount || 0,
+        },
+        status: app.payment?.paymentStatus || 'PENDING',
+        transactionId: app.payment?.chapaTransactionId || '-',
+        refund: app.payment?.refund || null,
+        cashPayment: app.payment?.cashPayment || null
+      }));
+
+      res.json(ApiResponse.success('Payments retrieved', {
+        transactions,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / limit)
+        },
+        summary: {
+          totalReturned: total,
+          status: status || 'ALL'
+        }
+      }));
+
+    } catch (error) {
+      console.error('Get all payments error:', error);
+      res.status(500).json(ApiResponse.serverError());
+    }
   }
 };
 

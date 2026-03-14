@@ -39,6 +39,11 @@ const AdminSidebar = () => {
       label: 'Reports', 
       icon: '📊' 
     },
+    {
+      path: '/admin/payments',
+      label: 'Payments',
+      icon: '💳'
+    },
     { 
       path: '/admin/services', 
       label: 'Services', 
