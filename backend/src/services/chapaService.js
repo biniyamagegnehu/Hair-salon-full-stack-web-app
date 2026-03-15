@@ -141,6 +141,51 @@ class ChapaService {
     };
   }
 
+  // Refund transaction
+  async refundTransaction(transactionId, amount = null) {
+    try {
+      const payload = {};
+      if (amount) {
+        payload.amount = amount.toString();
+      }
+
+      const response = await axios.post(
+        `${this.baseURL}/refund/${transactionId}`,
+        payload,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.secretKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      const responseData = error.response?.data;
+      let errorMessage = 'Refund failed';
+
+      if (responseData) {
+        if (typeof responseData.message === 'string') {
+          errorMessage = responseData.message;
+        } else if (typeof responseData.message === 'object') {
+          errorMessage = Object.values(responseData.message).flat().join(', ');
+        } else if (responseData.error) {
+          errorMessage = responseData.error;
+        }
+      }
+
+      console.error('Chapa refund error:', responseData || error.message);
+      return {
+        success: false,
+        error: errorMessage
+      };
+    }
+  }
+
   // Get payment methods
   async getPaymentMethods() {
     try {

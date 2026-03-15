@@ -372,20 +372,32 @@ const paymentController = {
       
       // Store refund details
       appointment.payment.refund = {
-        amount: appointment.payment.advanceAmount,
+        amount: appointment.payment.advanceAmount || appointment.payment.totalAmount,
         reason,
         processedBy: req.user._id,
         processedAt: new Date()
       };
 
-      await appointment.save();
+      if (appointment.payment.chapaTransactionId) {
+        const refundAmount = appointment.payment.advanceAmount || appointment.payment.totalAmount;
+        const chapaResponse = await chapaService.refundTransaction(
+          appointment.payment.chapaTransactionId,
+          refundAmount
+        );
 
-      // TODO: Integrate with Chapa API for actual refund if needed
+        if (!chapaResponse.success) {
+          return res.status(400).json(
+            ApiResponse.error(chapaResponse.error || 'Refund failed at payment gateway')
+          );
+        }
+      }
+
+      await appointment.save();
 
       res.json(ApiResponse.success('Refund processed', {
         appointmentId: appointment._id,
         status: appointment.status,
-        refundAmount: appointment.payment.advanceAmount
+        refundAmount: appointment.payment.refund.amount
       }));
 
     } catch (error) {

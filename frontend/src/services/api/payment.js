@@ -26,5 +26,13 @@ export const paymentService = {
       paymentMethod
     });
     return response.data;
+  },
+
+  // Refund payment (admin only)
+  refundPayment: async (appointmentId, reason) => {
+    const response = await api.post(`/payments/refund/${appointmentId}`, {
+      reason
+    });
+    return response.data;
   }
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { paymentService } from '../../services/api/payment';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -18,6 +19,11 @@ const AdminPayments = () => {
   // Modal
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Refund state
+  const [isRefunding, setIsRefunding] = useState(false);
+  const [refundReason, setRefundReason] = useState('');
+  const [showRefundConfirm, setShowRefundConfirm] = useState(false);
 
   const fetchPayments = async () => {
     try {
@@ -86,6 +92,34 @@ const AdminPayments = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleRefundSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!refundReason.trim()) {
+      toast.error('Refund reason is required');
+      return;
+    }
+
+    try {
+      setIsRefunding(true);
+      await paymentService.refundPayment(selectedPayment.id, refundReason);
+      
+      toast.success('Refund processed successfully');
+      
+      // Reset and close
+      setRefundReason('');
+      setShowRefundConfirm(false);
+      setIsModalOpen(false);
+      
+      // Refresh
+      fetchPayments();
+    } catch (error) {
+      console.error('Refund error:', error);
+      toast.error(error.response?.data?.message || 'Failed to process refund');
+    } finally {
+      setIsRefunding(false);
+    }
   };
 
   const getStatusBadgeClass = (status) => {
@@ -265,65 +299,133 @@ const AdminPayments = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-[scale-up_0.2s_ease-out]">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="text-lg font-bold text-gray-900">Transaction Details</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition">
+              <h3 className="text-lg font-bold text-gray-900">{showRefundConfirm ? 'Confirm Refund' : 'Transaction Details'}</h3>
+              <button 
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setShowRefundConfirm(false);
+                  setRefundReason('');
+                }} 
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-y-4 text-sm">
-                <div>
-                  <p className="text-gray-500 font-medium uppercase text-xs mb-1">Status</p>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-md border inline-block mt-1 ${getStatusBadgeClass(selectedPayment.status)}`}>
-                    {selectedPayment.status}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-gray-500 font-medium uppercase text-xs mb-1">Date</p>
-                  <p className="font-semibold text-gray-800">{new Date(selectedPayment.date).toLocaleString()}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-gray-500 font-medium uppercase text-xs mb-1">Chapa Transaction Ref</p>
-                  <p className="font-mono bg-gray-100 text-gray-800 p-2 rounded border border-gray-200 text-xs break-all">
-                    {selectedPayment.transactionId}
-                  </p>
-                </div>
-                <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
-                  <p className="text-gray-500 font-medium uppercase text-xs mb-2">Customer Profile</p>
-                  <p className="font-semibold text-gray-800">{selectedPayment.customer?.name}</p>
-                  <p className="text-gray-600">{selectedPayment.customer?.email}</p>
-                  <p className="text-gray-600">{selectedPayment.customer?.phone}</p>
-                </div>
-                <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
-                  <p className="text-gray-500 font-medium uppercase text-xs mb-2">Financial Breakdown</p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                      <span className="text-gray-600">Service:</span>
-                      <span className="font-medium">{selectedPayment.service?.name}</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                      <span className="text-gray-600">Advance Paid:</span>
-                      <span className="font-medium text-blue-600">{selectedPayment.amount.advance} ETB</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                      <span className="text-gray-600">Total Price:</span>
-                      <span className="font-bold text-gray-900">{selectedPayment.amount.total} ETB</span>
-                    </div>
+            <div className="p-6">
+              {showRefundConfirm ? (
+                <div className="space-y-4">
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+                    <p className="text-red-800 text-sm font-medium">Are you sure you want to refund this payment?</p>
+                    <p className="text-red-600 text-xs mt-1">This action will reverse the transaction via Chapa and cannot be undone.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase">Reason for Refund</label>
+                    <textarea
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      rows="3"
+                      placeholder="e.g., Appointment cancelled by customer..."
+                      value={refundReason}
+                      onChange={(e) => setRefundReason(e.target.value)}
+                      disabled={isRefunding}
+                    ></textarea>
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => {
+                        setShowRefundConfirm(false);
+                        setRefundReason('');
+                      }}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
+                      disabled={isRefunding}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleRefundSubmit}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition flex items-center justify-center gap-2"
+                      disabled={isRefunding || !refundReason.trim()}
+                    >
+                      {isRefunding ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          Refunding...
+                        </>
+                      ) : 'Confirm Refund'}
+                    </button>
                   </div>
                 </div>
-              </div>
-            </div>
-            
-            <div className="bg-gray-50 px-6 py-4 flex justify-end">
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 font-medium transition"
-              >
-                Close View
-              </button>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-y-4 text-sm">
+                    <div>
+                      <p className="text-gray-500 font-medium uppercase text-xs mb-1">Status</p>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-md border inline-block mt-1 ${getStatusBadgeClass(selectedPayment.status)}`}>
+                        {selectedPayment.status}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 font-medium uppercase text-xs mb-1">Date</p>
+                      <p className="font-semibold text-gray-800">{new Date(selectedPayment.date).toLocaleString()}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-gray-500 font-medium uppercase text-xs mb-1">Chapa Transaction Ref</p>
+                      <p className="font-mono bg-gray-100 text-gray-800 p-2 rounded border border-gray-200 text-xs break-all">
+                        {selectedPayment.transactionId}
+                      </p>
+                    </div>
+                    {selectedPayment.refund && (
+                      <div className="col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                        <p className="text-blue-800 font-bold text-xs uppercase mb-1">Refund Information</p>
+                        <p className="text-blue-700 text-sm"><span className="font-semibold">Reason:</span> {selectedPayment.refund.reason}</p>
+                        <p className="text-blue-600 text-xs mt-1">Processed on {new Date(selectedPayment.refund.processedAt).toLocaleString()}</p>
+                      </div>
+                    )}
+                    <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
+                      <p className="text-gray-500 font-medium uppercase text-xs mb-2">Customer Profile</p>
+                      <p className="font-semibold text-gray-800">{selectedPayment.customer?.name}</p>
+                      <p className="text-gray-600">{selectedPayment.customer?.email}</p>
+                      <p className="text-gray-600">{selectedPayment.customer?.phone}</p>
+                    </div>
+                    <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
+                      <p className="text-gray-500 font-medium uppercase text-xs mb-2">Financial Breakdown</p>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                          <span className="text-gray-600">Service:</span>
+                          <span className="font-medium">{selectedPayment.service?.name}</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                          <span className="text-gray-600">Advance Paid:</span>
+                          <span className="font-medium text-blue-600">{selectedPayment.amount.advance} ETB</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                          <span className="text-gray-600">Total Price:</span>
+                          <span className="font-bold text-gray-900">{selectedPayment.amount.total} ETB</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 pt-4 border-t border-gray-100">
+                    {(selectedPayment.status === 'PARTIAL' || selectedPayment.status === 'COMPLETED') && (
+                      <button
+                        onClick={() => setShowRefundConfirm(true)}
+                        className="flex-1 bg-red-50 text-red-600 py-2 rounded-lg hover:bg-red-100 font-medium transition text-sm"
+                      >
+                        Refund Payment
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => setIsModalOpen(false)}
+                      className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 font-medium transition text-sm"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

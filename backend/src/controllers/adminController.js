@@ -104,7 +104,7 @@ const adminController = {
 
       // Format revenue data
       const todayRevenue = revenueToday.length > 0 ? revenueToday[0] : { total: 0, advance: 0 };
-      const monthRevenue = monthRevenue.length > 0 ? monthRevenue[0] : { total: 0 };
+      const monthRevenue = revenueMonth.length > 0 ? revenueMonth[0] : { total: 0 };
 
       res.json(ApiResponse.success('Dashboard statistics retrieved', {
         stats: {
@@ -621,7 +621,7 @@ const adminController = {
           phone: app.customer.phoneNumber
         } : null,
         service: app.service ? {
-          name: app.service.name
+          name: app.service.name?.en || app.service.name
         } : null,
         amount: {
           total: app.payment?.totalAmount || 0,
