@@ -8,6 +8,11 @@ import {
   fetchAppointmentAnalytics,
   fetchTodayQueue
 } from '../../store/slices/adminSlice';
+import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
+import Badge from '../../components/ui/Badge/Badge';
+import Button from '../../components/ui/Button/Button';
+import Skeleton from '../../components/ui/Skeleton/Skeleton';
+import './AdminPages.css';
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
@@ -100,402 +105,279 @@ const AdminDashboard = () => {
     }).format(date);
   };
 
-  const StatCard = ({ title, value, icon, trend, color = 'blue', subtitle, onClick }) => (
-    <div 
-      onClick={onClick}
-      className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-gray-100 cursor-pointer transform hover:-translate-y-1"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 bg-${color}-50 rounded-xl`}>
-          <span className="text-2xl">{icon}</span>
-        </div>
-        {trend !== undefined && (
-          <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-            trend > 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-          }`}>
-            {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
-          </span>
-        )}
-      </div>
-      <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-      <p className="text-2xl font-bold text-gray-800 mb-1">{value}</p>
-      {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
-    </div>
-  );
-
-  const QuickAction = ({ icon, label, color, to, count }) => (
-    <Link
-      to={to}
-      className="flex flex-col items-center p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-200 group relative"
-    >
-      {count > 0 && (
-        <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-          {count}
-        </span>
-      )}
-      <div className={`w-12 h-12 bg-${color}-50 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
-        <span className="text-2xl">{icon}</span>
-      </div>
-      <span className="text-xs font-medium text-gray-600 text-center">{label}</span>
-    </Link>
-  );
-
-  const NotificationItem = ({ notification }) => (
-    <div className={`p-3 rounded-lg ${
-      notification.type === 'success' ? 'bg-green-50' :
-      notification.type === 'error' ? 'bg-red-50' :
-      'bg-blue-50'
-    }`}>
-      <div className="flex items-start gap-2">
-        <div className={`p-1 rounded-full ${
-          notification.type === 'success' ? 'bg-green-200' :
-          notification.type === 'error' ? 'bg-red-200' :
-          'bg-blue-200'
-        }`}>
-          <span className="text-xs">
-            {notification.type === 'success' ? '✓' :
-             notification.type === 'error' ? '✗' : 'ℹ'}
-          </span>
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-800">{notification.title}</p>
-          <p className="text-xs text-gray-600">{notification.message}</p>
-          <p className="text-xs text-gray-400 mt-1">{formatTime(notification.timestamp)}</p>
-        </div>
-      </div>
-    </div>
-  );
-
   if (isLoading && !stats) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-600"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xs font-medium text-gray-400">Loading...</span>
-          </div>
+      <div className="admin-page animate-fade-in">
+        <div className="admin-stats-grid">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} height="120px" variant="rectangle" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Skeleton height="500px" variant="rectangle" />
+          <Skeleton height="500px" variant="rectangle" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header with Connection Status */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="admin-page animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">{t('admin.dashboard')}</h1>
-          <p className="text-gray-500 mt-1">{formatDate(currentTime)}</p>
+          <h1 className="text-4xl font-black text-black uppercase tracking-tight">{t('admin.dashboard')}</h1>
+          <p className="text-secondary-brown font-bold opacity-60">{formatDate(currentTime)}</p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Connection Status */}
-          <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-xl">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
-            <span className="text-xs text-gray-600">
-              {isConnected ? t('common.live') : t('common.connecting', 'Connecting...')}
+          <div className="flex items-center gap-2 bg-cream/30 px-4 py-2 rounded-full border border-border-primary">
+            <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`}></div>
+            <span className="text-xs font-black uppercase tracking-widest text-secondary-brown">
+              {isConnected ? t('common.live') : t('common.connecting')}
             </span>
           </div>
 
-          {/* Period Selector */}
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 bg-white border border-border-primary rounded-xl text-xs font-black uppercase tracking-widest text-secondary-brown focus:outline-none focus:ring-2 focus:ring-accent-gold"
           >
             <option value="week">{t('common.last7Days')}</option>
             <option value="month">{t('common.last30Days')}</option>
             <option value="year">{t('common.last12Months')}</option>
           </select>
 
-          {/* Refresh Button */}
-          <button
+          <Button 
+            variant="outline" 
+            size="sm" 
             onClick={refreshData}
-            className="p-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
             title={t('common.refresh')}
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
+            <span className="text-lg">🔄</span>
+          </Button>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title={t('admin.totalRevenue')}
-          value={formatCurrency(stats?.revenue?.today?.total || 0)}
-          icon="💰"
-          trend={12}
-          color="green"
-          subtitle={`${formatCurrency(stats?.revenue?.today?.advance || 0)} ${t('payment.advancePayment')}`}
-          onClick={() => window.location.href = '/admin/reports?tab=revenue'}
-        />
-        <StatCard
-          title={t('admin.totalCustomers')}
-          value={formatNumber(stats?.customers?.total || 0)}
-          icon="👥"
-          trend={8}
-          color="blue"
-          subtitle={`+24 ${t('common.thisMonth')}`}
-          onClick={() => window.location.href = '/admin/customers'}
-        />
-        <StatCard
-          title={t('admin.todayAppointments')}
-          value={stats?.appointments?.today || 0}
-          icon="📅"
-          trend={-5}
-          color="purple"
-          subtitle={`${stats?.appointments?.completedToday || 0} ${t('common.completed')}`}
-          onClick={() => window.location.href = '/admin/appointments'}
-        />
-        <StatCard
-          title={t('admin.activeServices')}
-          value={stats?.services?.active || 0}
-          icon="💇"
-          color="orange"
-          subtitle={t('admin.servicesOffered')}
-          onClick={() => window.location.href = '/admin/services'}
-        />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Queue Status */}
-        <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-800">{t('queue.currentlyServing')}</h3>
-            <Link to="/admin/queue" className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
-              {t('common.viewAll')} 
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-
-          <div className="space-y-4">
-            {queue?.appointments?.inProgress?.length > 0 ? (
-              queue.appointments.inProgress.map((apt, index) => (
-                <div key={apt._id} className="flex items-center p-3 bg-green-50 rounded-xl border border-green-100">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                    <span className="text-green-600 font-bold">{index + 1}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-800">{apt.customer?.fullName}</p>
-                    <p className="text-xs text-gray-500">{apt.service?.name?.en} • {apt.scheduledTime}</p>
-                  </div>
-                  <span className="px-2 py-1 bg-green-200 text-green-800 text-xs font-medium rounded-full">
-                    {t('queue.inProgress')}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-gray-500">{t('queue.noQueue')}</p>
-              </div>
-            )}
-
-            {/* Queue Summary */}
-            <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-gray-100">
-              <div className="text-center">
-                <p className="text-xs text-gray-500">{t('queue.inProgress')}</p>
-                <p className="text-lg font-bold text-green-600">{queue?.stats?.inProgress || 0}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500">{t('queue.checkedIn')}</p>
-                <p className="text-lg font-bold text-blue-600">{queue?.stats?.checkedIn || 0}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500">{t('queue.confirmed')}</p>
-                <p className="text-lg font-bold text-yellow-600">{queue?.stats?.confirmed || 0}</p>
-              </div>
-            </div>
+      {/* Stats Summary */}
+      <div className="admin-stats-grid">
+        <div className="admin-stat-card">
+          <div className="admin-stat-icon">💰</div>
+          <div className="admin-stat-info">
+            <p className="admin-stat-label">Daily Revenue</p>
+            <p className="admin-stat-value">{formatCurrency(stats?.revenue?.today?.total || 0)}</p>
+            <p className="text-[10px] font-bold text-green-600 uppercase mt-1">↑ 12% vs yesterday</p>
           </div>
         </div>
-
-        {/* Appointment Trends */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-800">{t('admin.appointmentTrends')}</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-full">
-                +{analytics?.trends?.increase || 0}% {t('common.versus', 'vs last period')}
-              </span>
-            </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-icon">👤</div>
+          <div className="admin-stat-info">
+            <p className="admin-stat-label">Total Clients</p>
+            <p className="admin-stat-value">{formatNumber(stats?.customers?.total || 0)}</p>
+            <p className="text-[10px] font-bold text-secondary-brown opacity-40 uppercase mt-1">All time records</p>
           </div>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-icon">📅</div>
+          <div className="admin-stat-info">
+            <p className="admin-stat-label">Today Appts</p>
+            <p className="admin-stat-value">{stats?.appointments?.today || 0}</p>
+            <p className="text-[10px] font-bold text-accent-gold uppercase mt-1">{stats?.appointments?.completedToday || 0} COMPLETED</p>
+          </div>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-icon">✂️</div>
+          <div className="admin-stat-info">
+            <p className="admin-stat-label">Active Svcs</p>
+            <p className="admin-stat-value">{stats?.services?.active || 0}</p>
+            <p className="text-[10px] font-bold text-secondary-brown opacity-40 uppercase mt-1">Catalog items</p>
+          </div>
+        </div>
+      </div>
 
-          {analytics?.trends?.daily?.length > 0 ? (
-            <div className="space-y-4">
-              {analytics.trends.daily.slice(0, 7).map((day, index) => {
-                const max = Math.max(...analytics.trends.daily.map(d => d.count));
-                const percentage = (day.count / max) * 100;
-                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                
-                return (
-                  <div key={index} className="flex items-center group">
-                    <span className="text-xs font-medium text-gray-500 w-12">{days[index]}</span>
-                    <div className="flex-1 mx-4">
-                      <div className="h-8 bg-gray-100 rounded-lg overflow-hidden relative">
-                        <div 
-                          className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-lg group-hover:from-blue-600 group-hover:to-blue-500 transition-all duration-300"
-                          style={{ width: `${percentage}%` }}
-                        >
-                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                            {day.count}
-                          </span>
-                        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Live Queue */}
+        <div className="lg:col-span-1">
+          <Card variant="gold-border" className="h-full">
+            <CardHeader className="flex justify-between items-center p-6 border-b border-border-primary">
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-widest">{t('queue.currentlyServing')}</h3>
+                <p className="text-[10px] font-bold text-accent-gold uppercase">Real-time update</p>
+              </div>
+              <Link to="/admin/queue">
+                <Button variant="text" size="xs">View All</Button>
+              </Link>
+            </CardHeader>
+            <CardBody className="p-6">
+              <div className="space-y-4">
+                {queue?.appointments?.inProgress?.length > 0 ? (
+                  queue.appointments.inProgress.map((apt, index) => (
+                    <div key={apt._id} className="activity-item">
+                      <div className="w-10 h-10 bg-black text-gold rounded-lg flex items-center justify-center font-black">
+                        {index + 1}
                       </div>
+                      <div className="flex-1">
+                        <p className="font-black text-black uppercase text-sm">{apt.customer?.fullName}</p>
+                        <p className="text-xs font-bold text-secondary-brown opacity-60">{apt.service?.name?.en} • {apt.scheduledTime}</p>
+                      </div>
+                      <Badge variant="gold" size="xs">ACTIVE</Badge>
                     </div>
-                    <span className="text-sm font-medium text-gray-700 w-12 text-right">{day.count}</span>
+                  ))
+                ) : (
+                  <div className="text-center py-12 border-2 border-dashed border-border-primary rounded-xl">
+                    <p className="text-sm font-bold text-secondary-brown opacity-30">{t('queue.noQueue')}</p>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-gray-400">{t('common.noData')}</p>
-            </div>
-          )}
+                )}
 
-          {/* Summary Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{analytics?.summary?.weeklyTotal || 0}</p>
-              <p className="text-xs text-gray-500">{t('common.thisWeek')}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{analytics?.summary?.monthlyTotal || 0}</p>
-              <p className="text-xs text-gray-500">{t('common.thisMonth')}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{analytics?.summary?.yearlyTotal || 0}</p>
-              <p className="text-xs text-gray-500">{t('common.thisYear')}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Secondary Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Popular Services */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-800">{t('admin.popularServices')}</h3>
-            <Link to="/admin/reports?tab=services" className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
-              {t('common.viewAll')} 
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-
-          {analytics?.popularServices?.length > 0 ? (
-            <div className="space-y-4">
-              {analytics.popularServices.map((service, index) => {
-                const max = Math.max(...analytics.popularServices.map(s => s.count));
-                const percentage = (service.count / max) * 100;
-                
-                return (
-                  <div key={service._id} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-gray-700">
-                        {service.serviceDetails?.name?.en || t('common.service')}
-                      </span>
-                      <span className="text-gray-600">{service.count} {t('booking.bookings')}</span>
-                    </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-400 text-right">{formatCurrency(service.revenue)}</p>
+                {/* Queue Summary Ring */}
+                <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-border-primary">
+                  <div className="text-center">
+                    <p className="text-[10px] font-black uppercase text-secondary-brown opacity-50">{t('queue.inProgress')}</p>
+                    <p className="text-2xl font-black text-black">{queue?.stats?.inProgress || 0}</p>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-400">{t('common.noData')}</p>
-            </div>
-          )}
+                  <div className="text-center">
+                    <p className="text-[10px] font-black uppercase text-secondary-brown opacity-50">{t('queue.checkedIn')}</p>
+                    <p className="text-2xl font-black text-accent-gold">{queue?.stats?.checkedIn || 0}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-black uppercase text-secondary-brown opacity-50">{t('queue.confirmed')}</p>
+                    <p className="text-2xl font-black text-secondary-brown">{queue?.stats?.confirmed || 0}</p>
+                  </div>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
         </div>
 
-        {/* Notifications & Quick Actions */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-6">{t('admin.quickActions')}</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <QuickAction 
-                icon="📊" 
-                label={t('admin.reports')} 
-                color="blue"
-                to="/admin/reports"
-                count={0}
-              />
-              <QuickAction 
-                icon="📅" 
-                label={t('admin.appointments')} 
-                color="green"
-                to="/admin/appointments"
-                count={stats?.appointments?.pending || 0}
-              />
-              <QuickAction 
-                icon="👥" 
-                label={t('admin.customers')} 
-                color="purple"
-                to="/admin/customers"
-                count={0}
-              />
-              <QuickAction 
-                icon="🔄" 
-                label={t('admin.queue')} 
-                color="orange"
-                to="/admin/queue"
-                count={queue?.stats?.total || 0}
-              />
-              <QuickAction 
-                icon="💇" 
-                label={t('admin.services')} 
-                color="pink"
-                to="/admin/services"
-                count={0}
-              />
-              <QuickAction 
-                icon="⏰" 
-                label={t('admin.workingHours')} 
-                color="yellow"
-                to="/admin/working-hours"
-                count={0}
-              />
-            </div>
-          </div>
-
-          {/* Real-time Notifications */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              {t('common.liveUpdates', 'Live Updates')}
-            </h3>
-            
-            <div className="space-y-3 max-h-60 overflow-y-auto">
-              {notifications.length > 0 ? (
-                notifications.map(notification => (
-                  <NotificationItem key={notification.id} notification={notification} />
-                ))
+        {/* Appointment Trends Chart Placeholder */}
+        <div className="lg:col-span-2">
+          <Card className="h-full">
+            <CardHeader className="flex justify-between items-center bg-black p-6 rounded-t-xl text-white">
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-widest">{t('admin.appointmentTrends')}</h3>
+                <p className="text-[10px] font-bold text-gold uppercase">Performance analytics</p>
+              </div>
+              <Badge variant="gold">+{analytics?.trends?.increase || 0}% Increase</Badge>
+            </CardHeader>
+            <CardBody className="p-8">
+              {analytics?.trends?.daily?.length > 0 ? (
+                <div className="space-y-6">
+                  {analytics.trends.daily.slice(0, 7).map((day, index) => {
+                    const max = Math.max(...analytics.trends.daily.map(d => d.count));
+                    const percentage = (day.count / max) * 100;
+                    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+                    
+                    return (
+                      <div key={index} className="flex items-center gap-4 group">
+                        <span className="text-[10px] font-black text-secondary-brown opacity-50 w-8">{days[index]}</span>
+                        <div className="flex-1 h-10 bg-cream rounded-lg overflow-hidden relative border border-border-primary">
+                          <div 
+                            className="h-full bg-black group-hover:bg-accent-gold transition-all duration-500"
+                            style={{ width: `${Math.max(percentage, 5)}%` }}
+                          >
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-black bg-gold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                              {day.count}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-sm font-black text-black w-8 text-right">{day.count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
-                <div className="text-center py-4 text-gray-400 text-sm">
-                  {t('common.noNotifications', 'No new notifications')}
+                <div className="h-64 flex items-center justify-center border-2 border-dashed border-border-primary rounded-xl">
+                  <p className="text-sm font-bold text-secondary-brown opacity-30">NO HISTORICAL DATA AVAILABLE</p>
                 </div>
               )}
+
+              {/* Summary Totals */}
+              <div className="grid grid-cols-3 gap-8 mt-10 pt-8 border-t border-border-primary">
+                <div className="text-center">
+                  <p className="text-3xl font-black text-black">{analytics?.summary?.weeklyTotal || 0}</p>
+                  <p className="text-[10px] font-black uppercase text-secondary-brown opacity-50">{t('common.thisWeek')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-black text-black">{analytics?.summary?.monthlyTotal || 0}</p>
+                  <p className="text-[10px] font-black uppercase text-secondary-brown opacity-50">{t('common.thisMonth')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-black text-black">{analytics?.summary?.yearlyTotal || 0}</p>
+                  <p className="text-[10px] font-black uppercase text-secondary-brown opacity-50">{t('common.thisYear')}</p>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        {/* Popular Services */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="p-6 border-b border-border-primary">
+            <h3 className="text-lg font-black uppercase tracking-widest">{t('admin.popularServices')}</h3>
+          </CardHeader>
+          <CardBody className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {analytics?.popularServices?.length > 0 ? (
+                analytics.popularServices.map((service, index) => (
+                  <div key={service._id} className="p-4 rounded-xl border border-border-primary hover:border-gold transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-black text-black uppercase text-xs">{service.serviceDetails?.name?.en}</h4>
+                      <Badge variant="gold" size="xs">{service.count}x</Badge>
+                    </div>
+                    <div className="w-full h-1 bg-cream rounded-full overflow-hidden mb-2">
+                      <div 
+                        className="h-full bg-black" 
+                        style={{ width: `${(service.count / Math.max(...analytics.popularServices.map(s => s.count))) * 100}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] font-bold text-secondary-brown text-right uppercase">Yield: {formatCurrency(service.revenue)}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="col-span-2 text-center py-8 text-sm font-bold text-secondary-brown opacity-30 uppercase tracking-widest">No service data</p>
+              )}
             </div>
+          </CardBody>
+        </Card>
+
+        {/* Live Updates & Actions */}
+        <div className="space-y-6">
+          <Card variant="gold-border">
+            <CardHeader className="p-6 border-b border-border-primary">
+              <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                System Logs
+              </h3>
+            </CardHeader>
+            <CardBody className="p-4 max-h-[300px] overflow-auto">
+              {notifications.length > 0 ? (
+                <div className="space-y-3">
+                  {notifications.map(n => (
+                    <div key={n.id} className={`p-3 rounded-lg border-l-4 ${n.type === 'success' ? 'border-green-500 bg-green-50/10' : 'border-gold bg-gold/5'}`}>
+                      <p className="text-[10px] font-black text-black uppercase">{n.title}</p>
+                      <p className="text-[10px] font-bold text-secondary-brown">{n.message}</p>
+                      <p className="text-[8px] font-black text-secondary-brown opacity-50 mt-1 uppercase">{formatTime(n.timestamp)}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[10px] font-black text-secondary-brown opacity-30 text-center py-8 uppercase">No active notifications</p>
+              )}
+            </CardBody>
+          </Card>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Link to="/admin/reports">
+              <Button variant="outline" fullWidth size="sm" className="h-full py-4 flex flex-col gap-2">
+                <span className="text-xl">📊</span>
+                <span className="text-[10px] font-black uppercase">Reports</span>
+              </Button>
+            </Link>
+            <Link to="/admin/settings">
+              <Button variant="outline" fullWidth size="sm" className="h-full py-4 flex flex-col gap-2">
+                <span className="text-xl">⚙️</span>
+                <span className="text-[10px] font-black uppercase">Setup</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -503,4 +385,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default AdminDashboard;

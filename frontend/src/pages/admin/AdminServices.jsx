@@ -4,6 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { fetchServices } from '../../store/slices/serviceSlice';
 import { adminService } from '../../services/api/admin';
+import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
+import Badge from '../../components/ui/Badge/Badge';
+import Button from '../../components/ui/Button/Button';
+import Input from '../../components/ui/Input/Input';
+import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
+import Skeleton from '../../components/ui/Skeleton/Skeleton';
+import './AdminPages.css';
 
 const AdminServices = () => {
   const { t } = useTranslation();
@@ -40,7 +47,7 @@ const AdminServices = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     
     try {
       if (editingService) {
@@ -103,197 +110,190 @@ const AdminServices = () => {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">{t('admin.services')}</h2>
-        <button
+    <div className="admin-page animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+        <div>
+          <Badge variant="gold" className="mb-4">Service Catalog</Badge>
+          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Portfolio Manager</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1">Curate your professional offerings and pricing structure</p>
+        </div>
+        <Button
+          variant="black"
           onClick={() => {
             resetForm();
             setShowModal(true);
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="group"
         >
-          + {t('admin.addService', 'Add New Service')}
-        </button>
+          <span className="mr-2 group-hover:rotate-90 transition-transform inline-block">+</span>
+          {t('admin.addService', 'Register New Service')}
+        </Button>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} height="320px" variant="rectangle" />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service) => (
-            <div
+            <Card
               key={service._id}
-              className={`bg-white rounded-lg shadow-md p-6 ${
-                !service.isActive ? 'opacity-60' : ''
+              variant={service.isActive ? 'default' : 'outline'}
+              className={`group hover:-translate-y-2 transition-all duration-500 overflow-hidden relative ${
+                !service.isActive ? 'grayscale opacity-70' : ''
               }`}
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{service.name?.en}</h3>
-                  <p className="text-sm text-gray-500">{service.name?.am}</p>
+              <div className="absolute top-0 right-0 p-4">
+                <Badge variant={service.isActive ? 'success' : 'dark'} size="xs">
+                  {service.isActive ? 'LIVE' : 'ARCHIVED'}
+                </Badge>
+              </div>
+
+              <CardBody className="p-8">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-black text-black uppercase tracking-tighter leading-none group-hover:text-gold transition-colors">{service.name?.en}</h3>
+                  <p className="text-sm font-bold text-secondary-brown opacity-40 uppercase tracking-widest mt-1">{service.name?.am}</p>
                 </div>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  service.isActive 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {service.isActive ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
-                </span>
-              </div>
 
-              <p className="text-gray-600 text-sm mb-4">{service.description?.en}</p>
+                <div className="bg-background-cream/50 p-4 rounded-xl border border-border-primary mb-6 min-h-[80px]">
+                  <p className="text-xs font-bold text-secondary-brown leading-relaxed line-clamp-3 italic">
+                    {service.description?.en || 'Tactical grooming solution tailored for elite clientele.'}
+                  </p>
+                </div>
 
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-2xl font-bold text-blue-600">{service.price} ETB</span>
-                <span className="text-sm text-gray-500">{service.duration} {t('booking.minutes')}</span>
-              </div>
+                <div className="flex justify-between items-end mb-8">
+                  <div>
+                    <p className="text-[10px] font-black text-secondary-brown opacity-40 uppercase tracking-widest leading-none mb-1">Valuation</p>
+                    <p className="text-3xl font-black text-black leading-none">{service.price} <span className="text-xs text-gold">ETB</span></p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black text-secondary-brown opacity-40 uppercase tracking-widest leading-none mb-1">Time Block</p>
+                    <p className="text-xl font-bold text-black leading-none">{service.duration} <span className="text-[10px] uppercase">min</span></p>
+                  </div>
+                </div>
 
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleEdit(service)}
-                  className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                >
-                  {t('common.edit')}
-                </button>
-                {service.isActive ? (
-                  <button
-                    onClick={() => handleDelete(service._id)}
-                    className="flex-1 bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                <div className="flex space-x-3">
+                  <Button
+                    variant="black"
+                    size="sm"
+                    className="flex-1 text-[10px] font-black uppercase tracking-widest"
+                    onClick={() => handleEdit(service)}
                   >
-                    {t('common.deactivate', 'Deactivate')}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleActivate(service._id)}
-                    className="flex-1 bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition-colors text-sm"
-                  >
-                    {t('common.activate', 'Activate')}
-                  </button>
-                )}
-              </div>
-            </div>
+                    Modify
+                  </Button>
+                  {service.isActive ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-[10px] font-black uppercase tracking-widest border-error/20 text-error hover:bg-error/5"
+                      onClick={() => handleDelete(service._id)}
+                    >
+                      Disable
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="gold"
+                      size="sm"
+                      className="flex-1 text-[10px] font-black uppercase tracking-widest"
+                      onClick={() => handleActivate(service._id)}
+                    >
+                      Authorize
+                    </Button>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
           ))}
         </div>
       )}
 
-      {/* Service Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-          <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                {editingService ? t('common.edit') : t('admin.addService')}
-              </h3>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.serviceName')} (English) *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name.en}
-                    onChange={(e) => handleInputChange('name', 'en', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.serviceName')} (Amharic) *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name.am}
-                    onChange={(e) => handleInputChange('name', 'am', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.description')} (English)
-                  </label>
-                  <textarea
-                    value={formData.description.en}
-                    onChange={(e) => handleInputChange('description', 'en', e.target.value)}
-                    rows="2"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.description')} (Amharic)
-                  </label>
-                  <textarea
-                    value={formData.description.am}
-                    onChange={(e) => handleInputChange('description', 'am', e.target.value)}
-                    rows="2"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('booking.price')} (ETB) *
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) => handleInputChange('price', null, e.target.value)}
-                      min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('booking.duration')} ({t('booking.minutes')}) *
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.duration}
-                      onChange={(e) => handleInputChange('duration', null, e.target.value)}
-                      min="5"
-                      step="5"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex space-x-3 pt-4">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    {editingService ? t('common.update', 'Update') : t('common.create', 'Create')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowModal(false);
-                      resetForm();
-                    }}
-                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    {t('common.cancel')}
-                  </button>
-                </div>
-              </form>
+      {/* Service Configuration Modal */}
+      <Modal isOpen={showModal} onClose={() => { setShowModal(false); resetForm(); }}>
+        <ModalHeader>
+          <Badge variant="gold" className="mb-2">Operational Protocol</Badge>
+          <h2 className="text-3xl font-black text-black uppercase tracking-tight">
+            {editingService ? 'Modify Service' : 'Initialize Service'}
+          </h2>
+        </ModalHeader>
+        <ModalContent>
+          <form className="space-y-8 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown">Label (International)</label>
+                <Input
+                  placeholder="e.g. EXECUTIVE CROP"
+                  value={formData.name.en}
+                  onChange={(e) => handleInputChange('name', 'en', e.target.value)}
+                  noMargin
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown">Label (Amharic)</label>
+                <Input
+                  placeholder="የጸጉር መቆረጥ"
+                  value={formData.name.am}
+                  onChange={(e) => handleInputChange('name', 'am', e.target.value)}
+                  noMargin
+                />
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown">Manifesto (EN)</label>
+                <textarea
+                  className="w-full px-4 py-3 bg-cream/30 border border-border-primary rounded-xl focus:border-accent-gold transition-colors outline-none font-bold text-black text-sm min-h-[100px]"
+                  placeholder="Service specifications..."
+                  value={formData.description.en}
+                  onChange={(e) => handleInputChange('description', 'en', e.target.value)}
+                ></textarea>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown">Manifesto (AM)</label>
+                <textarea
+                  className="w-full px-4 py-3 bg-cream/30 border border-border-primary rounded-xl focus:border-accent-gold transition-colors outline-none font-bold text-black text-sm min-h-[100px]"
+                  placeholder="የአገልግሎት ዝርዝር..."
+                  value={formData.description.am}
+                  onChange={(e) => handleInputChange('description', 'am', e.target.value)}
+                ></textarea>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6 p-6 bg-black rounded-2xl">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Market Value (ETB)</label>
+                <input
+                  type="number"
+                  className="w-full bg-transparent border-b border-white/20 py-2 text-2xl font-black text-gold outline-none focus:border-gold transition-colors"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', null, e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Execution Time (Min)</label>
+                <input
+                  type="number"
+                  className="w-full bg-transparent border-b border-white/20 py-2 text-2xl font-black text-white outline-none focus:border-gold transition-colors"
+                  value={formData.duration}
+                  onChange={(e) => handleInputChange('duration', null, e.target.value)}
+                />
+              </div>
+            </div>
+          </form>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="outline" onClick={() => { setShowModal(false); resetForm(); }}>
+            Abort
+          </Button>
+          <Button variant="gold" onClick={handleSubmit}>
+            {editingService ? 'Commit Changes' : 'Propagate Service'}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 };
 
-export default AdminServices;
+export default AdminServices;

@@ -1,0 +1,130 @@
+.admin-layout {
+  min-height: 100vh;
+  display: flex;
+  background-color: var(--background-cream);
+}
+
+.admin-sidebar {
+  width: 280px;
+  background-color: var(--primary-black);
+  color: var(--background-cream);
+  left: 0;
+  top: 0;
+
+  z-index: var(--z-fixed);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-base);
+}
+
+.admin-main {
+  flex: 1;
+  margin-left: 280px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header {
+  height: 80px;
+  background-color: var(--white);
+  border-bottom: 2px solid var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-8);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-content {
+  padding: var(--spacing-8);
+  flex: 1;
+}
+
+.admin-title {
+  color: var(--primary-black);
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  position: relative;
+  display: inline-block;
+}
+
+.admin-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 40px;
+  height: 3px;
+  background-color: var(--accent-gold);
+}
+
+.admin-menu-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-4) var(--spacing-6);
+  color: var(--background-cream);
+  opacity: 0.7;
+  transition: all var(--transition-fast);
+  border-left: 4px solid transparent;
+  gap: var(--spacing-4);
+}
+
+.admin-menu-item:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--accent-gold);
+}
+
+.admin-menu-item.active {
+  opacity: 1;
+  background-color: rgba(201, 162, 39, 0.1);
+  color: var(--accent-gold);
+  border-left-color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.admin-icon {
+  color: var(--accent-gold);
+  width: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-user-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.admin-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-cream);
+  color: var(--primary-black);
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+}
+
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    width: 0;
+    overflow: hidden;
+  }
+  
+  .admin-main {
+    margin-left: 0;
+  }
+  
+  .sidebar-open .admin-sidebar {
+    width: 280px;
+  }
+}

@@ -5,22 +5,22 @@ const AdminHeader = ({ title }) => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6 sticky top-0 z-10">
-      <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
+    <header className="admin-header" aria-label="Portal Header">
+      <div className="flex flex-col">
+        <h1 className="admin-title">{title}</h1>
+      </div>
       
-      <div className="flex items-center space-x-4">
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-700">{user?.fullName}</p>
-          <p className="text-xs text-gray-500">Administrator</p>
+      <div className="admin-user-badge" aria-label={`Logged in as ${user?.fullName}`}>
+        <div className="text-right hidden sm:block">
+          <p className="font-bold text-black">{user?.fullName}</p>
+          <p className="text-xs text-brown opacity-70">Administrator</p>
         </div>
-        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-          <span className="text-blue-600 font-semibold">
-            {user?.fullName?.charAt(0).toUpperCase()}
-          </span>
+        <div className="admin-avatar" aria-hidden="true">
+          {user?.fullName?.charAt(0).toUpperCase()}
         </div>
       </div>
     </header>
   );
 };
 
-export default AdminHeader;
+export default AdminHeader;

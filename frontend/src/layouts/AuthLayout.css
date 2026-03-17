@@ -1,0 +1,100 @@
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4);
+  background-color: var(--background-cream);
+  background-image: 
+    radial-gradient(var(--accent-gold) 0.5px, transparent 0.5px), 
+    radial-gradient(var(--accent-gold) 0.5px, var(--background-cream) 0.5px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-layout::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, transparent 0%, var(--background-cream) 100%);
+  pointer-events: none;
+}
+
+.auth-lang-switcher {
+  position: absolute;
+  top: var(--spacing-6);
+  right: var(--spacing-6);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 450px;
+  background-color: var(--white);
+  border: 2px solid var(--accent-gold);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-10);
+  box-shadow: var(--shadow-gold);
+  position: relative;
+  z-index: 1;
+  animation: slideUp var(--transition-base) forwards;
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: var(--spacing-8);
+}
+
+.auth-logo h1 {
+  font-size: var(--font-size-3xl);
+  color: var(--primary-black);
+  margin-bottom: var(--spacing-2);
+  display: inline-block;
+  position: relative;
+}
+
+.auth-logo h1::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -4px;
+  width: 50%;
+  height: 3px;
+  background-color: var(--accent-gold);
+}
+
+.auth-tagline {
+  color: var(--secondary-brown);
+  opacity: 0.8;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+/* Auth specific overrides for components used inside */
+.auth-layout .btn-gold {
+  color: var(--primary-black);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.auth-layout a {
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.auth-layout a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .auth-card {
+    padding: var(--spacing-6);
+    border-radius: var(--radius-lg);
+  }
+}

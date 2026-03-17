@@ -3,7 +3,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
-require('dotenv').config();
+// Environment variables are loaded in start.js
+
 
 const corsOptions = require('./config/corsOptions');
 const ApiResponse = require('./utils/response');

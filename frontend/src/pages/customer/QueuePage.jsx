@@ -10,6 +10,12 @@ import {
   updateQueueData
 } from '../../store/slices/queueSlice';
 import { fetchMyAppointments } from '../../store/slices/appointmentSlice';
+import Button from '../../components/ui/Button/Button';
+import Card, { CardBody } from '../../components/ui/Card/Card';
+import Badge from '../../components/ui/Badge/Badge';
+import Tabs, { TabList, TabTrigger, TabContent } from '../../components/ui/Tabs/Tabs';
+import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
+import './QueuePage.css';
 
 const QueuePage = () => {
   const { t } = useTranslation();
@@ -31,23 +37,13 @@ const QueuePage = () => {
 
   // WebSocket real-time updates
   useEffect(() => {
-    // Listen for queue updates
     const unsubscribeQueue = onQueueUpdate((data) => {
-      console.log('Real-time queue update received:', data);
       dispatch(updateQueueData(data));
-      
-      // Optional: Show notification for significant changes
-      if (data.stats && data.stats.inProgress > 0) {
-        // You could show a subtle notification
-      }
     });
 
-    // Listen for appointment updates
     const unsubscribeAppointment = onAppointmentUpdate((data) => {
-      console.log('Appointment update received:', data);
-      dispatch(fetchMyAppointments()); // Refresh appointments
+      dispatch(fetchMyAppointments());
       
-      // Show notification based on status
       if (data.status === 'IN_PROGRESS') {
         toast.success(t('queue.appointmentStarted', 'Your appointment has started!'), {
           icon: '🔄',
@@ -58,18 +54,12 @@ const QueuePage = () => {
           icon: '✓',
           duration: 5000
         });
-      } else if (data.status === 'NO_SHOW') {
-        toast.error(t('queue.appointmentNoShow', 'You missed your appointment. Please contact the salon.'), {
-          duration: 7000
-        });
       }
     });
 
-    // Listen for check-in confirmation
     const unsubscribeCheckIn = onCheckInConfirmed((data) => {
-      console.log('Check-in confirmed:', data);
       setShowSuccessMessage(true);
-      toast.success(t('queue.checkInSuccess', 'Successfully checked in! Your position has been updated.'), {
+      toast.success(t('queue.checkInSuccess', 'Successfully checked in!'), {
         icon: '✅',
         duration: 4000
       });
@@ -83,88 +73,35 @@ const QueuePage = () => {
     };
   }, [onQueueUpdate, onAppointmentUpdate, onCheckInConfirmed, dispatch, t]);
 
-  // Fallback polling (in case WebSocket fails)
+  // Fallback polling
   useEffect(() => {
     if (!isConnected) {
-      console.log('WebSocket not connected, using polling fallback');
       const interval = setInterval(() => {
         dispatch(fetchQueueStatus());
       }, 30000);
-
       return () => clearInterval(interval);
     }
   }, [isConnected, dispatch]);
 
-  // Fetch user appointments if authenticated
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchMyAppointments());
     }
   }, [dispatch, isAuthenticated]);
 
-  // Auto-clear error after 5 seconds
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        dispatch(clearQueueError());
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, dispatch]);
-
   const handleCheckIn = async (appointmentId) => {
     setCheckInLoading(true);
     try {
       const result = await dispatch(checkInToAppointment(appointmentId));
       if (checkInToAppointment.fulfilled.match(result)) {
-        // Success - WebSocket will handle the update
         setSelectedAppointment(null);
       } else if (checkInToAppointment.rejected.match(result)) {
         toast.error(result.payload || t('common.error'));
       }
     } catch (error) {
-      console.error('Check-in failed:', error);
       toast.error(t('common.error'));
     } finally {
       setCheckInLoading(false);
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'IN_PROGRESS':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'CHECKED_IN':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'CONFIRMED':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'COMPLETED':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'PENDING_PAYMENT':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'IN_PROGRESS':
-        return `🔄 ${t('queue.inProgress')}`;
-      case 'CHECKED_IN':
-        return `✅ ${t('queue.checkedIn')}`;
-      case 'CONFIRMED':
-        return `⏳ ${t('queue.confirmed', 'Confirmed')}`;
-      case 'COMPLETED':
-        return `✓ ${t('queue.completed')}`;
-      case 'CANCELLED':
-        return `✗ ${t('common.cancelled', 'Cancelled')}`;
-      case 'PENDING_PAYMENT':
-        return `💳 ${t('payment.pending', 'Pending Payment')}`;
-      default:
-        return status;
     }
   };
 
@@ -181,472 +118,183 @@ const QueuePage = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    try {
-      const date = new Date(dateString);
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      if (date.toDateString() === today.toDateString()) {
-        return t('common.today', 'Today');
-      } else if (date.toDateString() === tomorrow.toDateString()) {
-        return t('common.tomorrow', 'Tomorrow');
-      } else {
-        return date.toLocaleDateString();
-      }
-    } catch (e) {
-      return '';
-    }
-  };
-
-  // Filter appointments by category
+  // Filter appointments
   const todaysAppointments = appointments.filter(apt => {
     if (!apt.scheduledDate) return false;
     const aptDate = new Date(apt.scheduledDate);
     const today = new Date();
     return aptDate.toDateString() === today.toDateString() && 
-           ['CONFIRMED', 'CHECKED_IN', 'PENDING_PAYMENT'].includes(apt.status);
+           ['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS', 'PENDING_PAYMENT'].includes(apt.status);
   });
-
-  const upcomingAppointments = appointments.filter(apt => {
-    if (!apt.scheduledDate) return false;
-    const aptDate = new Date(apt.scheduledDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return aptDate > today && 
-           !['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(apt.status);
-  }).sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
-
-  const pastAppointments = appointments.filter(apt => {
-    if (!apt.scheduledDate) return false;
-    const aptDate = new Date(apt.scheduledDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return aptDate < today || 
-           ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(apt.status);
-  }).slice(0, 5);
 
   const canCheckIn = (appointment) => {
     if (appointment.status !== 'CONFIRMED') return false;
-    
     const now = new Date();
     const appointmentTime = new Date(appointment.scheduledDate);
     const [hours, minutes] = appointment.scheduledTime.split(':').map(Number);
     appointmentTime.setHours(hours, minutes, 0, 0);
-    
     const minutesUntil = (appointmentTime - now) / (1000 * 60);
     return minutesUntil <= 30 && minutesUntil >= -15;
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Connection Status Indicator */}
-      <div className="mb-4 flex justify-end">
-        <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
-          <span className="text-xs text-gray-600">
-            {isConnected ? t('common.live', 'Live') : t('common.polling', 'Polling')}
-          </span>
-        </div>
-      </div>
-
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('queue.title')}</h1>
-      <p className="text-gray-600 mb-8">{t('queue.liveQueue')}</p>
-
-      {/* Success Message */}
-      {showSuccessMessage && (
-        <div className="mb-6 bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded animate-fade-in">
-          <div className="flex items-center">
-            <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <p className="font-medium">{t('queue.checkInSuccess', 'Successfully checked in! Your position has been updated.')}</p>
+    <div className="queue-page animate-fade-in">
+      <div className="container">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div>
+            <Badge variant={isConnected ? 'success' : 'error'} className="mb-4">
+              {isConnected ? 'LIVE CONNECTION' : 'POLLING MODE'}
+            </Badge>
+            <h1 className="text-5xl font-black text-black leading-tight">Live Salon Queue</h1>
+            <p className="text-secondary-brown opacity-60 font-medium">Real-time status of our master barbers at work.</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs font-black uppercase tracking-widest opacity-40 mb-1">Last Sync</p>
+            <p className="text-lg font-bold">{lastUpdated ? formatTime(lastUpdated) : '--:--'}</p>
           </div>
         </div>
-      )}
 
-      {/* Error Message */}
-      {error && (
-        <div className="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded animate-fade-in">
-          <div className="flex items-center">
-            <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-            <p className="font-medium">{error}</p>
+        {/* Stats Grid */}
+        <div className="queue-stats-grid">
+          <div className="stat-card">
+            <span className="stat-icon">👥</span>
+            <span className="stat-num">{stats.totalInQueue || 0}</span>
+            <span className="stat-text">Total in Queue</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">✂️</span>
+            <span className="stat-num">{stats.inProgress || 0}</span>
+            <span className="stat-text">Being Served</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">📅</span>
+            <span className="stat-num">{stats.checkedIn || 0}</span>
+            <span className="stat-text">Checked In</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">⏰</span>
+            <span className="stat-num">{stats.estimatedCurrentWait || 0}</span>
+            <span className="stat-text">Avg. Wait (Min)</span>
           </div>
         </div>
-      )}
 
-      {/* Queue Statistics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-blue-500">
-          <p className="text-sm text-gray-600 mb-1">{t('queue.totalInQueue')}</p>
-          <p className="text-2xl font-bold text-blue-600">{stats.totalInQueue || 0}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500">
-          <p className="text-sm text-gray-600 mb-1">{t('queue.inProgress')}</p>
-          <p className="text-2xl font-bold text-green-600">{stats.inProgress || 0}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-yellow-500">
-          <p className="text-sm text-gray-600 mb-1">{t('queue.checkedIn')}</p>
-          <p className="text-2xl font-bold text-yellow-600">{stats.checkedIn || 0}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-purple-500">
-          <p className="text-sm text-gray-600 mb-1">{t('queue.estimatedWait')}</p>
-          <p className="text-2xl font-bold text-purple-600">
-            {stats.estimatedCurrentWait || 0} <span className="text-sm">min</span>
-          </p>
-        </div>
-      </div>
+        {/* My Current Status (If serving today) */}
+        {isAuthenticated && todaysAppointments.length > 0 && (
+          <div className="my-queue-section animate-slide-up">
+            <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
+              <span className="text-gold">Your</span> Status Today
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+              <div className="position-display">
+                <p className="text-xs uppercase font-black tracking-widest opacity-60 mb-2">Queue Position</p>
+                <p className="position-num">{todaysAppointments[0].queuePosition || '—'}</p>
+              </div>
+              <div className="lg:col-span-2">
+                <h3 className="text-xl font-bold mb-2">{todaysAppointments[0].service?.name?.en}</h3>
+                <p className="opacity-70 mb-6">Scheduled for {todaysAppointments[0].scheduledTime}</p>
+                
+                {canCheckIn(todaysAppointments[0]) && (
+                  <div className="check-in-window">
+                    <p className="font-bold">You are at the salon? Check in now to join the live queue!</p>
+                    <Button variant="black" onClick={() => setSelectedAppointment(todaysAppointments[0])}>
+                      Check In Now
+                    </Button>
+                  </div>
+                )}
+                
+                {todaysAppointments[0].status === 'CHECKED_IN' && (
+                  <div className="bg-white/10 p-4 rounded-lg border border-gold/30">
+                    <p className="font-bold text-gold">✓ You are checked in and in the live queue.</p>
+                    <p className="text-sm opacity-60">Please stay in the lounge. We'll call your name soon.</p>
+                  </div>
+                )}
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex space-x-8">
-          <button
-            onClick={() => setActiveTab('live')}
-            className={`pb-3 px-1 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === 'live'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            {t('queue.liveQueue')}
-          </button>
-          {isAuthenticated && (
-            <button
-              onClick={() => setActiveTab('my-queue')}
-              className={`pb-3 px-1 font-medium text-sm border-b-2 transition-colors ${
-                activeTab === 'my-queue'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-            >
-              {t('queue.myQueue')}
-            </button>
-          )}
-        </nav>
-      </div>
-
-      {/* Live Queue Tab */}
-      {activeTab === 'live' && (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
-            <h2 className="font-semibold text-gray-700">{t('queue.currentlyServing')}</h2>
-            {lastUpdated && (
-              <p className="text-xs text-gray-500">
-                {t('queue.lastUpdated')}: {formatTime(lastUpdated)}
-              </p>
-            )}
-          </div>
-
-          {isLoading && queue.length === 0 ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                {todaysAppointments[0].status === 'IN_PROGRESS' && (
+                  <div className="bg-success/20 p-4 rounded-lg border border-success/30">
+                    <p className="font-bold text-white animate-pulse">✨ Your transformation is currently in progress!</p>
+                  </div>
+                )}
+              </div>
             </div>
-          ) : queue.length === 0 ? (
-            <div className="text-center py-12">
-              <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-gray-500 text-lg">{t('queue.noQueue', 'No one in queue right now')}</p>
-              <p className="text-sm text-gray-400 mt-2">{t('queue.beFirst', 'Be the first to book an appointment!')}</p>
-              <button
-                onClick={() => window.location.href = '/services'}
-                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {t('booking.bookNow')}
-              </button>
+          </div>
+        )}
+
+        {/* Main Queue Table */}
+        <div className="queue-table-container">
+          <div className="queue-header">
+            <h2 className="text-xl font-black uppercase tracking-widest">Live Live Flow</h2>
+            <span className="text-xs font-bold opacity-60">Current Status</span>
+          </div>
+          
+          {queue.length === 0 ? (
+            <div className="py-20 text-center">
+              <span className="text-6xl block mb-6">🪑</span>
+              <p className="text-xl font-bold opacity-40">The lounge is currently empty.</p>
+              <Button variant="gold" className="mt-6" onClick={() => window.location.href = '/booking'}>
+                Book a Session
+              </Button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-50">
               {queue.map((item, index) => (
-                <div key={item._id || index} className="p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                        item.status === 'IN_PROGRESS' 
-                          ? 'bg-green-100 text-green-600 animate-pulse' 
-                          : item.status === 'CHECKED_IN'
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800">
-                          {item.customer?.fullName || t('common.customer')}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {item.service?.name?.en || t('common.service')} • {item.scheduledTime}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(item.status)}`}>
-                        {getStatusText(item.status)}
-                      </span>
-                      {item.estimatedWaitTime > 0 && item.status !== 'IN_PROGRESS' && (
-                        <span className="text-sm font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">
-                          ~{item.estimatedWaitTime} min
-                        </span>
-                      )}
-                    </div>
+                <div key={item._id} className={`queue-row ${item.status === 'IN_PROGRESS' ? 'active' : ''}`}>
+                  <div className="queue-pos">{index + 1}</div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-black">
+                      {item.customer?.fullName || 'Valued Customer'}
+                    </h3>
+                    <p className="text-sm opacity-50 font-medium">
+                      {item.service?.name?.en} • {item.scheduledTime}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant={
+                      item.status === 'IN_PROGRESS' ? 'success' : 
+                      item.status === 'CHECKED_IN' ? 'gold' : 'brown'
+                    }>
+                      {item.status.replace('_', ' ')}
+                    </Badge>
+                    {item.estimatedWaitTime > 0 && item.status !== 'IN_PROGRESS' && (
+                      <p className="text-xs font-black text-gold mt-2 uppercase tracking-tighter">
+                        ~{item.estimatedWaitTime} MIN WAIT
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      {/* My Queue Tab */}
-      {activeTab === 'my-queue' && isAuthenticated && (
-        <div className="space-y-6">
-          {/* Today's Appointments */}
-          {todaysAppointments.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-4 bg-blue-50 border-b border-blue-100">
-                <h2 className="font-semibold text-blue-800 flex items-center">
-                  <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {t('booking.todayAppointments', "Today's Appointments")}
-                </h2>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {todaysAppointments.map((appointment) => (
-                  <div key={appointment.id} className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-800">
-                          {appointment.service?.name?.en || t('common.service')}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {appointment.scheduledTime} • {appointment.service?.duration || 30} min
-                        </p>
-                        {appointment.status === 'PENDING_PAYMENT' && (
-                          <p className="text-xs text-purple-600 mt-1">
-                            {t('payment.pendingPayment', 'Pending payment confirmation')}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        {appointment.queuePosition && (
-                          <div className="text-center">
-                            <p className="text-xs text-gray-500">{t('queue.yourPosition')}</p>
-                            <p className="text-2xl font-bold text-blue-600">{appointment.queuePosition}</p>
-                          </div>
-                        )}
-                        {appointment.status === 'CONFIRMED' && canCheckIn(appointment) && (
-                          <button
-                            onClick={() => setSelectedAppointment(appointment)}
-                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                          >
-                            {t('queue.checkIn')}
-                          </button>
-                        )}
-                        {appointment.status === 'CONFIRMED' && !canCheckIn(appointment) && (
-                          <span className="text-xs text-gray-500">
-                            {t('queue.checkInSoon', 'Check-in available 30min before')}
-                          </span>
-                        )}
-                        {appointment.status === 'CHECKED_IN' && (
-                          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                            {t('queue.checkedIn')}
-                          </span>
-                        )}
-                        {appointment.status === 'IN_PROGRESS' && (
-                          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium animate-pulse">
-                            {t('queue.inProgress')}
-                          </span>
-                        )}
-                        {appointment.status === 'PENDING_PAYMENT' && (
-                          <button
-                            onClick={() => window.location.href = `/payment/${appointment.id}`}
-                            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                          >
-                            {t('payment.payNow')}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Wait Time Progress */}
-                    {appointment.queuePosition && appointment.status !== 'IN_PROGRESS' && appointment.status !== 'COMPLETED' && (
-                      <div className="mt-3 bg-gray-50 p-3 rounded-lg">
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="text-gray-600">{t('queue.estimatedWait')}:</span>
-                          <span className="font-medium text-orange-600">
-                            {appointment.queuePosition * 30} min
-                          </span>
-                        </div>
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-orange-500 rounded-full transition-all duration-500"
-                            style={{ width: `${Math.min(100, ((appointment.queuePosition - 1) / (stats.totalInQueue || 1)) * 100)}%` }}
-                          ></div>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {appointment.queuePosition - 1} {t('queue.peopleAhead')}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Upcoming Appointments */}
-          {upcomingAppointments.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-4 bg-gray-50 border-b">
-                <h2 className="font-semibold text-gray-700">{t('booking.upcomingAppointments', 'Upcoming Appointments')}</h2>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {upcomingAppointments.map((appointment) => (
-                  <div key={appointment.id} className="p-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-gray-800">
-                          {appointment.service?.name?.en || t('common.service')}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {formatDate(appointment.scheduledDate)} at {appointment.scheduledTime}
-                        </p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        appointment.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
-                        appointment.status === 'PENDING_PAYMENT' ? 'bg-purple-100 text-purple-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {appointment.status.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Past Appointments */}
-          {pastAppointments.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-4 bg-gray-50 border-b">
-                <h2 className="font-semibold text-gray-700">{t('booking.pastAppointments', 'Past Appointments')}</h2>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {pastAppointments.map((appointment) => (
-                  <div key={appointment.id} className="p-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-gray-800">
-                          {appointment.service?.name?.en || t('common.service')}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {formatDate(appointment.scheduledDate)} at {appointment.scheduledTime}
-                        </p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        appointment.status === 'COMPLETED' ? 'bg-gray-100 text-gray-800' :
-                        appointment.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {appointment.status.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* No Appointments */}
-          {todaysAppointments.length === 0 && upcomingAppointments.length === 0 && pastAppointments.length === 0 && (
-            <div className="bg-white rounded-lg shadow-md p-12 text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p className="text-gray-500 text-lg">{t('profile.noAppointments')}</p>
-              <p className="text-sm text-gray-400 mt-2">
-                {t('booking.bookNowPrompt', 'Book an appointment to see your queue position')}
-              </p>
-              <button
-                onClick={() => window.location.href = '/services'}
-                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {t('booking.bookNow', 'Book Now')}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Check-in Confirmation Modal */}
+      {/* Check-in Modal */}
       {selectedAppointment && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div className="p-6">
-              <div className="text-center mb-4">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                  <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {t('queue.checkIn')}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {t('queue.checkInConfirm', 'Check in for your appointment at')} {selectedAppointment.scheduledTime}
-                </p>
+        <Modal isOpen={!!selectedAppointment} onClose={() => setSelectedAppointment(null)}>
+          <ModalHeader>Confirm Check-In</ModalHeader>
+          <ModalContent>
+            <div className="text-center py-6">
+              <div className="w-20 h-20 bg-cream rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-gold text-4xl">
+                📍
               </div>
-
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-yellow-700">
-                      {t('queue.checkInInfo', 'You can only check in up to 30 minutes before your appointment time.')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => handleCheckIn(selectedAppointment.id)}
-                  disabled={checkInLoading}
-                  className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {checkInLoading ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      {t('common.loading')}
-                    </span>
-                  ) : t('common.confirm')}
-                </button>
-                <button
-                  onClick={() => setSelectedAppointment(null)}
-                  className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-                >
-                  {t('common.cancel')}
-                </button>
-              </div>
+              <p className="text-lg font-bold mb-2">Ready for your transformation?</p>
+              <p className="opacity-60">Checking in confirms you are physically at the salon and ready to be served.</p>
             </div>
-          </div>
-        </div>
+          </ModalContent>
+          <ModalFooter>
+            <Button variant="outline" onClick={() => setSelectedAppointment(null)}>Not Yet</Button>
+            <Button 
+              variant="gold" 
+              loading={checkInLoading} 
+              onClick={() => handleCheckIn(selectedAppointment.id)}
+            >
+              I Am Here
+            </Button>
+          </ModalFooter>
+        </Modal>
       )}
     </div>
   );
 };
 
-export default QueuePage;
+export default QueuePage;

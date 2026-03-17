@@ -1,0 +1,211 @@
+.main-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-cream);
+}
+
+.header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background-color: var(--primary-black);
+  transition: all var(--transition-base);
+}
+
+.header-scrolled {
+  background-color: rgba(15, 15, 15, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-md);
+}
+
+.nav-container {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-text {
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  color: var(--white);
+  position: relative;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.logo-text::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 60%;
+  height: 3px;
+  background-color: var(--accent-gold);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+}
+
+.nav-link {
+  color: var(--background-cream);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-2) 0;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.nav-link:hover {
+  color: var(--accent-gold);
+}
+
+.nav-link-active {
+  color: var(--accent-gold);
+  font-weight: 700;
+}
+
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background-color: var(--accent-gold);
+}
+
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--background-cream);
+  cursor: pointer;
+}
+
+.chevron-gold {
+  color: var(--accent-gold);
+  width: 20px;
+  height: 20px;
+}
+
+/* Mobile Menu */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: var(--z-modal-backdrop);
+}
+
+.mobile-menu-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  background-color: var(--background-cream);
+  z-index: var(--z-modal);
+  padding: var(--spacing-8) var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  box-shadow: var(--shadow-xl);
+  transform: translateX(100%);
+  transition: transform var(--transition-base);
+}
+
+.mobile-menu-open .mobile-menu-drawer {
+  transform: translateX(0);
+}
+
+.mobile-nav-link {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--primary-black);
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Footer Styles */
+.footer {
+  background-color: var(--secondary-brown);
+  color: var(--background-cream);
+  padding: var(--spacing-16) 0 var(--spacing-8);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-12);
+}
+
+@media (min-width: 768px) {
+  .footer-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.footer-heading {
+  color: var(--accent-gold);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-6);
+}
+
+.footer-link {
+  display: block;
+  margin-bottom: var(--spacing-3);
+  transition: color var(--transition-fast);
+}
+
+.footer-link:hover {
+  color: var(--accent-gold);
+  transform: translateX(4px);
+}
+
+.social-icons {
+  display: flex;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-6);
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-base);
+}
+
+.social-icon:hover {
+  background-color: var(--accent-gold);
+  color: var(--primary-black);
+  border-color: var(--accent-gold);
+}
+
+.back-to-top {
+  position: fixed;
+  bottom: var(--spacing-8);
+  right: var(--spacing-8);
+  background-color: var(--accent-gold);
+  color: var(--primary-black);
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-base);
+  z-index: var(--z-fixed);
+}
+
+.back-to-top:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-gold);
+}

@@ -37,7 +37,7 @@ const AdminSidebar = () => {
     { 
       path: '/admin/reports', 
       label: 'Reports', 
-      icon: '📊' 
+      icon: '📈' 
     },
     {
       path: '/admin/payments',
@@ -62,41 +62,40 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gray-900 text-white h-screen fixed left-0 top-0 overflow-y-auto">
-      <div className="p-4 border-b border-gray-800">
-        <h2 className="text-xl font-bold text-white">Admin Panel</h2>
-        <p className="text-sm text-gray-400 mt-1">X Men's Hair Salon</p>
+    <aside className="admin-sidebar">
+      <div className="p-8 border-b border-white/5">
+        <h2 className="text-accent-gold text-xl font-black tracking-tighter uppercase mb-1">X-MEN</h2>
+        <p className="text-xs font-bold uppercase tracking-widest opacity-50">Salon Admin</p>
       </div>
 
-      <nav className="mt-6">
+      <nav className="flex-1 py-6 overflow-y-auto" aria-label="Administrative modules">
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             end={item.exact}
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 text-sm transition-colors ${
-                isActive 
-                  ? 'bg-blue-600 text-white border-l-4 border-blue-400' 
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-              }`
+            className={({ isActive }) => 
+              `admin-menu-item ${isActive ? 'active' : ''}`
             }
           >
-            <span className="mr-3 text-lg">{item.icon}</span>
-            {item.label}
+            <span className="admin-icon" role="img" aria-hidden="true">{item.icon}</span>
+            <span>{item.label}</span>
           </NavLink>
         ))}
+      </nav>
 
+      <div className="p-6 border-t border-white/5">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center px-4 py-3 mt-4 text-sm text-gray-300 hover:bg-red-600 hover:text-white transition-colors"
+          className="admin-menu-item w-full !border-none !bg-transparent hover:!text-error"
+          aria-label="Log out of administrator account"
         >
-          <span className="mr-3 text-lg">🚪</span>
-          Logout
+          <span className="admin-icon" role="img" aria-hidden="true">🚪</span>
+          <span>Logout</span>
         </button>
-      </nav>
-    </div>
+      </div>
+    </aside>
   );
 };
 
-export default AdminSidebar;
+export default AdminSidebar;

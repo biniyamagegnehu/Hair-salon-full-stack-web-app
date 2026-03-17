@@ -22,21 +22,31 @@ const LanguageSwitcher = () => {
     <div className="flex items-center space-x-2 ml-4">
       <button
         onClick={() => changeLanguage('am')}
-        className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+        className={`px-3 py-1 rounded-md text-sm font-semibold transition-all duration-300 border-2 ${
           i18n.language === 'am'
-            ? 'bg-green-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            ? 'border-accent-gold bg-accent-gold text-black'
+            : 'border-accent-gold text-accent-gold hover:bg-gold-transparent'
         }`}
+        style={{
+          borderColor: 'var(--accent-gold)',
+          color: i18n.language === 'am' ? 'var(--primary-black)' : 'var(--accent-gold)',
+          backgroundColor: i18n.language === 'am' ? 'var(--accent-gold)' : 'transparent'
+        }}
       >
         አማ
       </button>
       <button
         onClick={() => changeLanguage('en')}
-        className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+        className={`px-3 py-1 rounded-md text-sm font-semibold transition-all duration-300 border-2 ${
           i18n.language === 'en'
-            ? 'bg-green-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            ? 'border-accent-gold bg-accent-gold text-black'
+            : 'border-accent-gold text-accent-gold hover:bg-gold-transparent'
         }`}
+        style={{
+          borderColor: 'var(--accent-gold)',
+          color: i18n.language === 'en' ? 'var(--primary-black)' : 'var(--accent-gold)',
+          backgroundColor: i18n.language === 'en' ? 'var(--accent-gold)' : 'transparent'
+        }}
       >
         EN
       </button>
@@ -44,4 +54,4 @@ const LanguageSwitcher = () => {
   );
 };
 
-export default LanguageSwitcher;
+export default LanguageSwitcher;

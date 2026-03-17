@@ -4,6 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { fetchMyAppointments } from '../../store/slices/appointmentSlice';
 import { updatePhoneNumber } from '../../store/slices/authSlice';
+import Button from '../../components/ui/Button/Button';
+import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
+import Badge from '../../components/ui/Badge/Badge';
+import Input from '../../components/ui/Input/Input';
+import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
+import Skeleton from '../../components/ui/Skeleton/Skeleton';
+import './ProfilePage.css';
 
 const ProfilePage = () => {
   const { t } = useTranslation();
@@ -47,173 +54,203 @@ const ProfilePage = () => {
     setUpdatingPhone(false);
   };
 
-  const getStatusBadge = (status) => {
-    const colors = {
-      'CONFIRMED': 'bg-green-100 text-green-800',
-      'PENDING_PAYMENT': 'bg-yellow-100 text-yellow-800',
-      'CHECKED_IN': 'bg-blue-100 text-blue-800',
-      'IN_PROGRESS': 'bg-purple-100 text-purple-800',
-      'COMPLETED': 'bg-gray-100 text-gray-800',
-      'CANCELLED': 'bg-red-100 text-red-800'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+  const getStatusVariant = (status) => {
+    switch (status) {
+      case 'CONFIRMED': return 'success';
+      case 'PENDING_PAYMENT': return 'gold';
+      case 'CHECKED_IN': return 'black';
+      case 'IN_PROGRESS': return 'gold';
+      case 'COMPLETED': return 'cream';
+      case 'CANCELLED': return 'error';
+      default: return 'brown';
+    }
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const getDateParts = (dateString) => {
+    const d = new Date(dateString);
+    return {
+      day: d.getDate(),
+      month: d.toLocaleString('en-US', { month: 'short' }).toUpperCase()
+    };
   };
 
   if (authLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="container py-20">
+        <div className="profile-grid">
+          <Skeleton height="400px" variant="rectangle" />
+          <Skeleton height="600px" variant="rectangle" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">{t('profile.title')}</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="text-center mb-4">
-              <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl font-bold text-blue-600">
-                  {user?.fullName?.charAt(0).toUpperCase() || '?'}
-                </span>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-800">{user?.fullName}</h2>
-              <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center text-sm">
-                <span className="font-medium text-gray-600 w-24">{t('auth.phone')}:</span>
-                <span className="text-gray-800">{user?.phoneNumber}</span>
-              </div>
-
-              {user?.email && (
-                <div className="flex items-center text-sm">
-                  <span className="font-medium text-gray-600 w-24">{t('auth.email')}:</span>
-                  <span className="text-gray-800">{user.email}</span>
-                </div>
-              )}
-
-              <div className="flex items-center text-sm">
-                <span className="font-medium text-gray-600 w-24">{t('profile.memberSince')}:</span>
-                <span className="text-gray-800">
-                  {user?.createdAt ? formatDate(user.createdAt) : 'N/A'}
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowPhoneModal(true)}
-              className="w-full mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-            >
-              {t('profile.updatePhone')}
-            </button>
-          </div>
+    <div className="profile-page animate-fade-in">
+      <div className="container">
+        <div className="mb-12">
+          <Badge variant="gold" className="mb-4">Member Profile</Badge>
+          <h1 className="text-5xl font-black text-black">Member Dashboard</h1>
         </div>
 
-        <div className="md:col-span-2">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('profile.myAppointments')}</h3>
-            
-            {appointmentsLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            ) : appointments.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">{t('profile.noAppointments')}</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {appointments.map((appointment) => (
-                  <div key={appointment.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium text-gray-800">
-                          {appointment.service?.name?.en || t('common.service')}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {formatDate(appointment.scheduledDate)} {t('common.at', 'at')} {appointment.scheduledTime}
-                        </p>
-                        {appointment.queuePosition && (
-                          <p className="text-xs text-blue-600 mt-1">
-                            {t('queue.yourPosition')}: {appointment.queuePosition}
-                          </p>
-                        )}
-                      </div>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(appointment.status)}`}>
-                        {appointment.status.replace('_', ' ')}
-                      </span>
-                    </div>
+        <div className="profile-grid">
+          {/* Sidebar / User Info */}
+          <div className="user-sidebar">
+            <Card variant="gold-border" className="overflow-visible">
+              <CardBody className="p-8">
+                <div className="profile-avatar-container">
+                  <div className="profile-avatar">
+                    {user?.fullName?.charAt(0).toUpperCase()}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+                
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-black text-black mb-1">{user?.fullName}</h2>
+                  <Badge variant="brown" size="sm" className="uppercase tracking-widest">{user?.role}</Badge>
+                </div>
+
+                <div className="space-y-2 mb-8">
+                  <div className="profile-info-item">
+                    <span className="profile-info-label">Phone</span>
+                    <span className="profile-info-value">{user?.phoneNumber}</span>
+                  </div>
+                  {user?.email && (
+                    <div className="profile-info-item">
+                      <span className="profile-info-label">Email</span>
+                      <span className="profile-info-value">{user.email}</span>
+                    </div>
+                  )}
+                  <div className="profile-info-item">
+                    <span className="profile-info-label">Joined</span>
+                    <span className="profile-info-value">{formatDate(user?.createdAt)}</span>
+                  </div>
+                </div>
+
+                <Button 
+                  variant="outline" 
+                  fullWidth 
+                  size="sm"
+                  onClick={() => setShowPhoneModal(true)}
+                >
+                  Edit Information
+                </Button>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Appointment History */}
+          <div className="appointment-history-section">
+            <Card className="appointment-history-card">
+              <CardHeader className="flex justify-between items-center p-8 bg-black text-white rounded-t-xl">
+                <div>
+                  <h3 className="text-xl font-black uppercase tracking-widest">Appointment Archive</h3>
+                  <p className="text-xs text-gold font-bold">Your journey with us</p>
+                </div>
+                <Badge variant="gold">{appointments.length} Total</Badge>
+              </CardHeader>
+              
+              <CardBody className="p-8">
+                {appointmentsLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => <Skeleton key={i} height="100px" variant="rectangle" />)}
+                  </div>
+                ) : appointments.length === 0 ? (
+                  <div className="empty-history">
+                    <span className="empty-icon">✂️</span>
+                    <p className="text-xl font-bold opacity-30 mb-6">No appointments found.</p>
+                    <Button variant="gold" onClick={() => window.location.href = '/booking'}>
+                      Book Your First Session
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="appointment-list">
+                    {appointments.map((appointment) => {
+                      const { day, month } = getDateParts(appointment.scheduledDate);
+                      return (
+                        <div key={appointment.id} className="appointment-item">
+                          <div className="apt-date-box">
+                            <span className="apt-month">{month}</span>
+                            <span className="apt-day">{day}</span>
+                          </div>
+                          
+                          <div className="apt-content">
+                            <h4 className="apt-title">
+                              {appointment.service?.name?.en || 'Premium Service'}
+                            </h4>
+                            <p className="apt-meta">
+                              {appointment.scheduledTime} • {appointment.service?.duration || 30} Minutes
+                            </p>
+                          </div>
+                          
+                          <div className="apt-status text-right">
+                            <Badge 
+                              variant={getStatusVariant(appointment.status)}
+                              size="sm"
+                              className="mb-2"
+                            >
+                              {appointment.status.replace('_', ' ')}
+                            </Badge>
+                            {appointment.queuePosition && (
+                              <p className="text-xs font-black text-gold uppercase tracking-tighter">
+                                POS #{appointment.queuePosition}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>
 
-      {showPhoneModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('profile.updatePhone')}</h3>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('auth.phone')}
-              </label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => {
-                  setPhoneNumber(e.target.value);
-                  setPhoneError('');
-                }}
-                placeholder="+251911223344"
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  phoneError ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {phoneError && (
-                <p className="text-sm text-red-600 mt-1">{phoneError}</p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                {t('auth.phoneFormat')}
-              </p>
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={handleUpdatePhone}
-                disabled={updatingPhone}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {updatingPhone ? t('common.loading') : t('common.save')}
-              </button>
-              <button
-                onClick={() => {
-                  setShowPhoneModal(false);
-                  setPhoneNumber('');
-                  setPhoneError('');
-                }}
-                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-            </div>
+      {/* Phone Modal */}
+      <Modal isOpen={showPhoneModal} onClose={() => setShowPhoneModal(false)}>
+        <ModalHeader>Update Phone Number</ModalHeader>
+        <ModalContent>
+          <div className="py-4">
+            <p className="text-secondary-brown opacity-60 mb-6 font-medium">
+              We use your phone number to coordinate appointments and send vital updates about your session.
+            </p>
+            <Input
+              label="Phone Number"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => {
+                setPhoneNumber(e.target.value);
+                setPhoneError('');
+              }}
+              placeholder="+251911223344"
+              error={phoneError}
+              helperText="Format: +251 9/7 [8 digits]"
+            />
           </div>
-        </div>
-      )}
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="outline" onClick={() => setShowPhoneModal(false)}>Discard</Button>
+          <Button 
+            variant="gold" 
+            loading={updatingPhone} 
+            onClick={handleUpdatePhone}
+          >
+            Save Changes
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 };
 
-export default ProfilePage;
+export default ProfilePage;

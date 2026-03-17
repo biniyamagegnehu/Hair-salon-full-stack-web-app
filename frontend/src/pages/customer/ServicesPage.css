@@ -1,0 +1,73 @@
+.services-page {
+  padding-bottom: var(--spacing-16);
+}
+
+.services-hero {
+  background-color: var(--primary-black);
+  color: var(--white);
+  padding: var(--spacing-16) 0;
+  text-align: center;
+  margin-bottom: var(--spacing-12);
+}
+
+.services-filters {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-12);
+  flex-wrap: wrap;
+}
+
+.service-card-image {
+  height: 200px;
+  background-color: var(--secondary-brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  transition: transform var(--transition-base);
+}
+
+.card:hover .service-card-image {
+  transform: scale(1.05);
+}
+
+.service-price {
+  font-size: var(--font-size-2xl);
+  font-weight: 900;
+  color: var(--accent-gold);
+}
+
+.service-duration {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-brown);
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.service-description {
+  min-height: 4.5rem;
+  margin-bottom: var(--spacing-6);
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-8);
+}
+
+@media (min-width: 768px) {
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .services-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

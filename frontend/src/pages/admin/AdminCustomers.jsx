@@ -7,19 +7,23 @@ import {
   fetchCustomerDetails,
   updateCustomerStatus 
 } from '../../store/slices/adminSlice';
+import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
+import Badge from '../../components/ui/Badge/Badge';
+import Button from '../../components/ui/Button/Button';
+import Input from '../../components/ui/Input/Input';
+import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
+import Skeleton from '../../components/ui/Skeleton/Skeleton';
+import './AdminPages.css';
 
 const AdminCustomers = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   
-  // Get admin state with safe defaults
   const adminState = useSelector((state) => state.admin || {});
   const customersData = adminState.customers || { list: [], pagination: { page: 1, limit: 20, total: 0, pages: 1 } };
   const isLoading = adminState.isLoading || false;
   const error = adminState.error || null;
   
-  console.log('AdminCustomers - Redux State:', { customersData, isLoading, error });
-
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -27,9 +31,8 @@ const AdminCustomers = () => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
-    console.log('Loading customers with params:', { page, searchTerm, filterStatus });
     loadCustomers();
-  }, [page, searchTerm, filterStatus]);
+  }, [page, searchTerm, filterStatus, dispatch]);
 
   useEffect(() => {
     if (error) {
@@ -74,7 +77,7 @@ const AdminCustomers = () => {
       toast.success(t('common.success'));
       loadCustomers();
     } catch (error) {
-      toast.error(error || t('common.error'));
+      toast.error(error?.message || t('common.error'));
     }
   };
 
@@ -98,390 +101,280 @@ const AdminCustomers = () => {
   const customersList = customersData?.list || [];
   const pagination = customersData?.pagination || { page: 1, limit: 20, total: 0, pages: 1 };
 
-  console.log('Rendering with customersList:', customersList.length);
-
   return (
-    <div className="space-y-6">
+    <div className="admin-page animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">{t('admin.customers')}</h1>
-          <p className="text-gray-500 mt-1">{t('admin.manageCustomers', 'Manage and view all customers')}</p>
+          <Badge variant="gold" className="mb-4">Customer Directory</Badge>
+          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Client Hub</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1">Manage relationships and lifetime value</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <select
             value={filterStatus}
             onChange={(e) => {
               setFilterStatus(e.target.value);
               setPage(1);
             }}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-6 py-2 bg-black text-white border-none rounded-xl text-sm font-black uppercase tracking-widest cursor-pointer hover:bg-zinc-800 transition-colors"
           >
-            <option value="all">{t('common.all', 'All Customers')}</option>
-            <option value="active">{t('common.active', 'Active')}</option>
-            <option value="inactive">{t('common.inactive', 'Inactive')}</option>
+            <option value="all">All Clients</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive</option>
           </select>
-          <button
+          <Button
+            variant="gold"
             onClick={() => window.location.href = '/admin/customers/new'}
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
+            className="flex items-center gap-2"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-            </svg>
-            {t('admin.addCustomer', 'Add Customer')}
-          </button>
+            <span className="text-xl">+</span> Add Client
+          </Button>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <form onSubmit={handleSearch} className="flex gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t('common.searchCustomers', 'Search by name, email, or phone...')}
-              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
-            type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
-            {t('common.search', 'Search')}
-          </button>
-          {searchTerm && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchTerm('');
-                setPage(1);
-              }}
-              className="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
-            >
-              {t('common.clear', 'Clear')}
-            </button>
-          )}
-        </form>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl flex items-center justify-between">
-          <span>{error}</span>
-          <button
-            onClick={loadCustomers}
-            className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm"
-          >
-            {t('common.retry', 'Retry')}
-          </button>
-        </div>
-      )}
-
-      {/* Customers Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs font-medium text-gray-400">Loading...</span>
-              </div>
+      {/* Search Matrix */}
+      <Card variant="default" className="mb-8">
+        <CardBody className="p-8">
+          <form onSubmit={handleSearch} className="flex gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Search by name, email, or telephone network identifier..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                noMargin
+              />
             </div>
-          </div>
-        ) : customersList.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-700 mb-1">{t('admin.noCustomers', 'No customers found')}</h3>
-            <p className="text-sm text-gray-400">{t('admin.tryAdjustingSearch', 'Try adjusting your search')}</p>
+            <Button type="submit" variant="black" className="px-8">Execute Search</Button>
             {searchTerm && (
-              <button
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => {
                   setSearchTerm('');
                   setPage(1);
                 }}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
               >
-                {t('common.clearSearch', 'Clear Search')}
-              </button>
+                Reset
+              </Button>
             )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('common.customer', 'Customer')}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('auth.phone', 'Phone')}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('common.email', 'Email')}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('profile.memberSince', 'Member Since')}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('admin.totalAppointments', 'Appointments')}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('admin.totalSpent', 'Total Spent')}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('common.status', 'Status')}
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('common.actions', 'Actions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {customersList.map((customer) => (
-                  <tr key={customer._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
-                          <span className="text-white text-sm font-medium">
-                            {customer.fullName?.charAt(0).toUpperCase() || '?'}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-800">{customer.fullName || 'Unknown'}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600">{customer.phoneNumber || 'N/A'}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600">{customer.email || 'N/A'}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600">{formatDate(customer.createdAt)}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-gray-800">{customer.stats?.totalAppointments || 0}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-green-600">{formatCurrency(customer.stats?.totalSpent)}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        customer.isActive !== false 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {customer.isActive !== false ? t('common.active') : t('common.inactive')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleViewDetails(customer)}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title={t('common.view', 'View')}
-                        >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleStatusToggle(customer._id, customer.isActive)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            customer.isActive !== false
-                              ? 'text-gray-400 hover:text-yellow-600 hover:bg-yellow-50'
-                              : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
-                          }`}
-                          title={customer.isActive !== false ? t('common.deactivate') : t('common.activate')}
-                        >
-                          {customer.isActive !== false ? (
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                            </svg>
-                          ) : (
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          )}
-                        </button>
-                      </div>
-                    </td>
+          </form>
+        </CardBody>
+      </Card>
+
+      {/* Database View */}
+      <Card className="overflow-visible">
+        <CardHeader className="bg-black p-6 rounded-t-xl flex justify-between items-center text-white">
+          <h3 className="text-sm font-black uppercase tracking-widest">Customer Ledger</h3>
+          <Badge variant="gold">{pagination.total} Registered</Badge>
+        </CardHeader>
+        <CardBody className="p-0">
+          {isLoading ? (
+            <div className="p-8 space-y-4">
+              {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} height="70px" variant="rectangle" />)}
+            </div>
+          ) : customersList.length === 0 ? (
+            <div className="py-24 text-center">
+              <p className="text-xl font-black text-secondary-brown opacity-20 uppercase tracking-widest">No matching records</p>
+            </div>
+          ) : (
+            <div className="admin-table-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Customer Identity</th>
+                    <th>Contact Details</th>
+                    <th>Engagement</th>
+                    <th>Value Assets</th>
+                    <th>Access Status</th>
+                    <th className="text-right">Operations</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {pagination.pages > 1 && customersList.length > 0 && (
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              {t('common.showing', 'Showing')} {((pagination.page - 1) * pagination.limit) + 1} -{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1 border border-gray-200 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                {t('common.previous', 'Previous')}
-              </button>
-              <span className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm">
-                {page}
-              </span>
-              <button
-                onClick={() => setPage(p => Math.min(pagination.pages, p + 1))}
-                disabled={page === pagination.pages}
-                className="px-3 py-1 border border-gray-200 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                {t('common.next', 'Next')}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Customer Details Modal - Keep existing modal code */}
-      {showDetailsModal && selectedCustomer && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          {/* Modal content - same as before */}
-          <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-800">{t('admin.customerDetails', 'Customer Details')}</h3>
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Customer Info */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Profile Card */}
-                <div className="md:col-span-1">
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-                    <div className="w-20 h-20 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                      <span className="text-4xl font-bold text-white">
-                        {selectedCustomer.fullName?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <h4 className="text-xl font-bold text-center mb-1">{selectedCustomer.fullName}</h4>
-                    <p className="text-center text-white/80 text-sm mb-4">{selectedCustomer.role}</p>
-                    <div className="border-t border-white/20 pt-4 space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/80">{t('common.status')}:</span>
-                        <span className="font-medium">
-                          {selectedCustomer.isActive !== false ? t('common.active') : t('common.inactive')}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/80">{t('profile.memberSince')}:</span>
-                        <span className="font-medium">{formatDate(selectedCustomer.createdAt)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Details Card */}
-                <div className="md:col-span-2 space-y-4">
-                  {/* Contact Info */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <h4 className="text-sm font-medium text-gray-500 mb-3">{t('common.contactInfo', 'Contact Information')}</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center">
-                        <svg className="w-5 h-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span className="text-gray-600">{selectedCustomer.email || 'No email provided'}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <svg className="w-5 h-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        <span className="text-gray-600">{selectedCustomer.phoneNumber}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <p className="text-xs text-gray-500 mb-1">{t('admin.totalAppointments')}</p>
-                      <p className="text-2xl font-bold text-gray-800">{selectedCustomer.stats?.totalAppointments || 0}</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <p className="text-xs text-gray-500 mb-1">{t('admin.totalSpent')}</p>
-                      <p className="text-2xl font-bold text-green-600">{formatCurrency(selectedCustomer.stats?.totalSpent)}</p>
-                    </div>
-                  </div>
-
-                  {/* Recent Appointments */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <h4 className="text-sm font-medium text-gray-500 mb-3">{t('admin.recentAppointments', 'Recent Appointments')}</h4>
-                    {selectedCustomer.recentAppointments?.length > 0 ? (
-                      <div className="space-y-2">
-                        {selectedCustomer.recentAppointments.slice(0, 3).map((apt) => (
-                          <div key={apt._id} className="flex items-center justify-between p-2 bg-white rounded-lg">
-                            <div>
-                              <p className="text-sm font-medium text-gray-800">{apt.service?.name?.en || 'Service'}</p>
-                              <p className="text-xs text-gray-500">{formatDate(apt.scheduledDate)} at {apt.scheduledTime}</p>
-                            </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              apt.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                              apt.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                              'bg-blue-100 text-blue-800'
-                            }`}>
-                              {apt.status}
-                            </span>
+                </thead>
+                <tbody>
+                  {customersList.map((customer) => (
+                    <tr key={customer._id}>
+                      <td>
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-black text-gold flex items-center justify-center rounded-xl font-black text-xl shadow-card">
+                            {customer.fullName?.charAt(0).toUpperCase()}
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-400 text-center py-4">{t('admin.noRecentAppointments', 'No recent appointments')}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-100">
-                <button
-                  onClick={() => handleStatusToggle(selectedCustomer._id, selectedCustomer.isActive)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                    selectedCustomer.isActive !== false
-                      ? 'bg-yellow-600 text-white hover:bg-yellow-700'
-                      : 'bg-green-600 text-white hover:bg-green-700'
-                  }`}
-                >
-                  {selectedCustomer.isActive !== false ? t('common.deactivate') : t('common.activate')}
-                </button>
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
-                >
-                  {t('common.close', 'Close')}
-                </button>
-              </div>
+                          <div>
+                            <p className="font-black text-black uppercase text-sm">{customer.fullName || 'Anonymous'}</p>
+                            <p className="text-[10px] font-bold text-secondary-brown opacity-40">ID: {customer._id.slice(-8).toUpperCase()}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <p className="font-bold text-black text-sm">{customer.phoneNumber}</p>
+                        <p className="text-[10px] font-medium text-secondary-brown">{customer.email || 'NO_MAIL_SYNC'}</p>
+                      </td>
+                      <td>
+                        <p className="text-xs font-bold text-black">{formatDate(customer.createdAt)}</p>
+                        <p className="text-[10px] font-black text-secondary-brown opacity-40 uppercase">Registration Date</p>
+                      </td>
+                      <td>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black uppercase opacity-40">Sessions:</span>
+                            <span className="text-sm font-black text-black">{customer.stats?.totalAppointments || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black uppercase opacity-40">Revenue:</span>
+                            <span className="text-sm font-black text-green-600">{formatCurrency(customer.stats?.totalSpent)}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <Badge variant={customer.isActive !== false ? 'success' : 'brown'} size="sm">
+                          {customer.isActive !== false ? 'AUTHENTICATED' : 'RESTRICTED'}
+                        </Badge>
+                      </td>
+                      <td className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            className="admin-btn-icon" 
+                            title="Profile View"
+                            onClick={() => handleViewDetails(customer)}
+                          >👤</button>
+                          <button 
+                            className={`admin-btn-icon ${customer.isActive !== false ? 'text-error hover:bg-error/10' : 'text-green-600 hover:bg-green-50'}`}
+                            title={customer.isActive !== false ? 'Block' : 'Authorize'}
+                            onClick={() => handleStatusToggle(customer._id, customer.isActive)}
+                          >
+                            {customer.isActive !== false ? '🚫' : '✅'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* Pagination */}
+      {pagination.pages > 1 && (
+        <div className="mt-8 flex items-center justify-between bg-black p-4 rounded-xl text-white">
+          <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
+            Node {page} of {pagination.pages}
+          </p>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="border-white/20 text-white hover:bg-white/10"
+              disabled={page === 1}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+            >
+              Previous
+            </Button>
+            <Button 
+              variant="gold" 
+              size="sm" 
+              disabled={page === pagination.pages}
+              onClick={() => setPage(p => Math.min(pagination.pages, p + 1))}
+            >
+              Next
+            </Button>
           </div>
         </div>
       )}
+
+      {/* CRM Profile Modal */}
+      <Modal isOpen={showDetailsModal} onClose={() => setShowDetailsModal(false)}>
+        <ModalHeader>Client Intelligence</ModalHeader>
+        <ModalContent>
+          {selectedCustomer && (
+            <div className="space-y-8 py-4">
+              <div className="flex items-center gap-6 bg-black p-8 rounded-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -mr-16 -mt-16 blur-3xl transition-all group-hover:bg-gold/20" />
+                <div className="w-24 h-24 bg-gold text-black flex items-center justify-center rounded-2xl font-black text-4xl shadow-xl border-4 border-zinc-900">
+                  {selectedCustomer.fullName?.charAt(0).toUpperCase()}
+                </div>
+                <div className="relative z-10">
+                  <h4 className="text-3xl font-black text-white uppercase tracking-tight mb-2">{selectedCustomer.fullName}</h4>
+                  <div className="flex gap-2">
+                    <Badge variant="gold">Level: Platinum</Badge>
+                    <Badge variant={selectedCustomer.isActive !== false ? 'success' : 'error'}>
+                      {selectedCustomer.isActive !== false ? 'ACTIVE_ACCOUNT' : 'SUSPENDED'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h5 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Communication nodes</h5>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 bg-cream/30 p-4 rounded-xl border border-border-primary">
+                      <span className="text-xl">📞</span>
+                      <div>
+                        <p className="text-[10px] font-black uppercase opacity-40">Secure Line</p>
+                        <p className="font-bold text-black">{selectedCustomer.phoneNumber}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 bg-cream/30 p-4 rounded-xl border border-border-primary">
+                      <span className="text-xl">✉️</span>
+                      <div>
+                        <p className="text-[10px] font-black uppercase opacity-40">Digital Relay</p>
+                        <p className="font-bold text-black">{selectedCustomer.email || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h5 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Performance metrics</h5>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-black text-white p-4 rounded-xl border border-white/10">
+                      <p className="text-[10px] font-black uppercase opacity-40 mb-1">Lifetime Value</p>
+                      <p className="text-xl font-black text-gold">{formatCurrency(selectedCustomer.stats?.totalSpent)}</p>
+                    </div>
+                    <div className="bg-black text-white p-4 rounded-xl border border-white/10">
+                      <p className="text-[10px] font-black uppercase opacity-40 mb-1">Session Count</p>
+                      <p className="text-xl font-black text-gold">{selectedCustomer.stats?.totalAppointments || 0}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Operational history (Recent)</h5>
+                {selectedCustomer.recentAppointments?.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedCustomer.recentAppointments.slice(0, 3).map((apt) => (
+                      <div key={apt._id} className="flex items-center justify-between p-4 bg-background-cream rounded-xl border border-border-primary hover:border-accent-gold transition-colors">
+                        <div>
+                          <p className="font-black text-black uppercase text-sm">{apt.service?.name?.en}</p>
+                          <p className="text-[10px] font-bold text-secondary-brown">{formatDate(apt.scheduledDate)} at {apt.scheduledTime}</p>
+                        </div>
+                        <Badge variant={apt.status === 'COMPLETED' ? 'success' : 'brown'} size="xs">{apt.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-background-cream rounded-xl border border-dashed border-border-primary">
+                    <p className="text-[10px] font-black uppercase opacity-40">No historical data available</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="outline" onClick={() => setShowDetailsModal(false)}>Close Portal</Button>
+          <Button 
+            variant={selectedCustomer?.isActive !== false ? 'error' : 'success'}
+            onClick={() => handleStatusToggle(selectedCustomer._id, selectedCustomer.isActive)}
+          >
+            {selectedCustomer?.isActive !== false ? 'Restrain Account' : 'Re-Authorize Client'}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 };
 
-export default AdminCustomers;
+export default AdminCustomers;
