@@ -417,7 +417,7 @@ const AdminPayments = () => {
               <Button 
                 variant="error" 
                 onClick={handleRefundSubmit}
-                loading={isRefunding}
+                isLoading={isRefunding}
                 disabled={!refundReason.trim()}
               >
                 Confirm Reversal

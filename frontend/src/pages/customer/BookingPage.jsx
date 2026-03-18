@@ -297,7 +297,7 @@ const BookingPage = () => {
                     onClick={handleConfirmBooking}
                     variant="gold"
                     fullWidth
-                    loading={isLoading}
+                    isLoading={isLoading}
                     className="flex-[2] py-4 text-black font-black uppercase tracking-widest"
                   >
                     Confirm & Pay

@@ -285,7 +285,7 @@ const QueuePage = () => {
             <Button variant="outline" onClick={() => setSelectedAppointment(null)}>Not Yet</Button>
             <Button 
               variant="gold" 
-              loading={checkInLoading} 
+              isLoading={checkInLoading} 
               onClick={() => handleCheckIn(selectedAppointment.id)}
             >
               I Am Here

@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { initializePayment, verifyPayment, clearPaymentState } from '../../store/slices/paymentSlice';
+import Button from '../../components/ui/Button/Button';
+import Badge from '../../components/ui/Badge/Badge';
 
 const PaymentPage = () => {
   const { t } = useTranslation();

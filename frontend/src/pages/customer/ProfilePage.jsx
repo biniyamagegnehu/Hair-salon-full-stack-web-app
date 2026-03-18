@@ -242,7 +242,7 @@ const ProfilePage = () => {
           <Button variant="outline" onClick={() => setShowPhoneModal(false)}>Discard</Button>
           <Button 
             variant="gold" 
-            loading={updatingPhone} 
+            isLoading={updatingPhone} 
             onClick={handleUpdatePhone}
           >
             Save Changes
