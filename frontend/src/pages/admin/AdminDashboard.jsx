@@ -158,38 +158,38 @@ const AdminDashboard = () => {
 
       {/* Stats Summary */}
       <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <div className="admin-stat-icon">💰</div>
+        <Card variant="interactive" padding={false} className="flex-row items-center gap-4 p-6">
+          <div className="admin-stat-icon shrink-0">💰</div>
           <div className="admin-stat-info">
             <p className="admin-stat-label">Daily Revenue</p>
             <p className="admin-stat-value">{formatCurrency(stats?.revenue?.today?.total || 0)}</p>
             <p className="text-[10px] font-bold text-success uppercase mt-1">↑ 12% vs yesterday</p>
           </div>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-icon">👤</div>
+        </Card>
+        <Card variant="interactive" padding={false} className="flex-row items-center gap-4 p-6">
+          <div className="admin-stat-icon shrink-0">👤</div>
           <div className="admin-stat-info">
             <p className="admin-stat-label">Total Clients</p>
             <p className="admin-stat-value">{formatNumber(stats?.customers?.total || 0)}</p>
             <p className="text-[10px] font-bold text-secondary-brown opacity-40 uppercase mt-1">All time records</p>
           </div>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-icon">📅</div>
+        </Card>
+        <Card variant="interactive" padding={false} className="flex-row items-center gap-4 p-6">
+          <div className="admin-stat-icon shrink-0">📅</div>
           <div className="admin-stat-info">
             <p className="admin-stat-label">Today Appts</p>
             <p className="admin-stat-value">{stats?.appointments?.today || 0}</p>
             <p className="text-[10px] font-bold text-accent-gold uppercase mt-1">{stats?.appointments?.completedToday || 0} COMPLETED</p>
           </div>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-icon">✂️</div>
+        </Card>
+        <Card variant="interactive" padding={false} className="flex-row items-center gap-4 p-6">
+          <div className="admin-stat-icon shrink-0">✂️</div>
           <div className="admin-stat-info">
             <p className="admin-stat-label">Active Svcs</p>
             <p className="admin-stat-value">{stats?.services?.active || 0}</p>
             <p className="text-[10px] font-bold text-secondary-brown opacity-40 uppercase mt-1">Catalog items</p>
           </div>
-        </div>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">

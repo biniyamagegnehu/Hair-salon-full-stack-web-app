@@ -121,10 +121,10 @@ const AdminQueue = () => {
       onDragStart={(e) => handleDragStart(e, appointment, status, index)}
       onDragOver={(e) => handleDragOver(e, status, index)}
       onDrop={(e) => handleDrop(e, status, index)}
-      className={`bg-white rounded-[2rem] p-6 border-2 transition-all cursor-grab active:cursor-grabbing mb-4 group ${
+      className={`bg-white rounded-2xl p-6 border-2 transition-all cursor-grab active:cursor-grabbing mb-4 group ${
         dragOverItem?.category === status && dragOverItem?.index === index
-          ? 'border-gold bg-gold/5 scale-[1.02]'
-          : 'border-border-primary hover:border-black hover:shadow-2xl'
+          ? 'border-gold bg-gold/5 scale-[1.02] shadow-gold'
+          : 'border-border-primary hover:border-black hover:shadow-xl'
       } ${draggedItem?.item?._id === appointment._id ? 'opacity-20 grayscale scale-95' : ''}`}
     >
       <div className="flex justify-between items-start mb-6">
@@ -136,37 +136,43 @@ const AdminQueue = () => {
             {appointment.service?.name?.en || 'Standard Operation'}
           </p>
         </div>
-        <Badge variant="dark" size="sm">#{appointment.queuePosition || index + 1}</Badge>
+        <Badge variant="gold" size="sm" className="font-mono">#{appointment.queuePosition || index + 1}</Badge>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-auto">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-cream flex items-center justify-center border border-border-primary shadow-inner">
+          <div className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center border border-border-primary shadow-sm group-hover:border-gold/50 transition-colors">
             <span className="text-sm">⌚</span>
           </div>
           <p className="text-sm font-black text-black">{appointment.scheduledTime || 'ON CALL'}</p>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-2">
           {status === 'confirmed' && (
-            <button 
+            <Button 
+              variant="black" 
+              size="xs"
               onClick={() => handleStatusUpdate(appointment._id, 'CHECKED_IN')}
-              className="w-8 h-8 bg-black text-white rounded-lg flex items-center justify-center hover:bg-gold transition-colors text-xs"
+              className="w-10 h-10 p-0 flex items-center justify-center"
               title="Check In"
-            >✓</button>
+            >✓</Button>
           )}
           {status === 'checkedIn' && (
-            <button 
+            <Button 
+              variant="black" 
+              size="xs"
               onClick={() => handleStatusUpdate(appointment._id, 'IN_PROGRESS')}
-              className="w-8 h-8 bg-black text-white rounded-lg flex items-center justify-center hover:bg-gold transition-colors text-xs"
+              className="w-10 h-10 p-0 flex items-center justify-center"
               title="Start Session"
-            >▶</button>
+            >▶</Button>
           )}
           {status === 'inProgress' && (
-            <button 
+            <Button 
+              variant="success" 
+              size="xs"
               onClick={() => handleStatusUpdate(appointment._id, 'COMPLETED')}
-              className="w-8 h-8 bg-success text-white rounded-lg flex items-center justify-center hover:bg-black transition-colors text-xs"
+              className="w-10 h-10 p-0 flex items-center justify-center"
               title="Finalize"
-            >🏁</button>
+            >🏁</Button>
           )}
         </div>
       </div>

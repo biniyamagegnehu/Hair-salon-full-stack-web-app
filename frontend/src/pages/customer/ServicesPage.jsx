@@ -90,15 +90,15 @@ const ServicesPage = () => {
                 <div className="service-card-image">
                   {getServiceIcon(service.name.en || '')}
                 </div>
-                <CardBody className="p-8 flex-grow">
+                <CardBody className="p-8">
                   <h2 className="text-2xl font-black mb-3">
                     {i18n.language === 'am' ? service.name.am : service.name.en}
                   </h2>
-                  <p className="service-description">
+                  <p className="service-description flex-grow">
                     {i18n.language === 'am' ? service.description?.am : service.description?.en}
                   </p>
                   
-                  <div className="flex justify-between items-end mb-8">
+                  <div className="flex justify-between items-end mb-8 mt-auto pt-6 border-t border-border-primary/10">
                     <div>
                       <span className="text-xs uppercase font-bold opacity-50 block mb-1">Investment</span>
                       <span className="service-price">{service.price} ETB</span>

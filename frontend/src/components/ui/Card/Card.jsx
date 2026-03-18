@@ -11,6 +11,7 @@ const Card = ({
   variant = 'default', 
   className = '', 
   padding = true,
+  fullHeight = true,
   onClick,
   ...props 
 }) => {
@@ -18,6 +19,7 @@ const Card = ({
     'card',
     `card-${variant}`,
     padding ? 'card-padding' : '',
+    fullHeight ? 'card-full-height' : '',
     onClick ? 'card-clickable' : '',
     className
   ].filter(Boolean).join(' ');

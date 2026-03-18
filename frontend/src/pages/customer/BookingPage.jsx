@@ -250,8 +250,8 @@ const BookingPage = () => {
 
         {/* Step 3: Confirm Booking */}
         {step === 3 && selectedService && selectedDate && selectedTime && (
-          <div className="animate-slide-up max-w-2xl mx-auto">
-            <Card variant="gold-border" className="overflow-hidden">
+          <div className="animate-slide-up max-w-2xl mx-auto h-full">
+            <Card variant="gold-border" className="overflow-hidden" fullHeight={true}>
               <div className="bg-primary-black p-6 text-center text-white">
                 <h2 className="text-3xl font-black mb-1">Confirm Booking</h2>
                 <p className="text-gold text-sm font-bold uppercase tracking-widest">Review Your Appointment</p>

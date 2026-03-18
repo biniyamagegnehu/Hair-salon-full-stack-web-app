@@ -105,7 +105,7 @@ const ProfilePage = () => {
         <div className="profile-grid">
           {/* Sidebar / User Info */}
           <div className="user-sidebar">
-            <Card variant="gold-border" className="overflow-visible">
+            <Card variant="gold-border" className="overflow-visible" fullHeight={false}>
               <CardBody className="p-8">
                 <div className="profile-avatar-container">
                   <div className="profile-avatar">
@@ -149,7 +149,7 @@ const ProfilePage = () => {
 
           {/* Appointment History */}
           <div className="appointment-history-section">
-            <Card className="appointment-history-card">
+            <Card className="appointment-history-card" fullHeight={true}>
               <CardHeader className="flex justify-between items-center p-8 bg-black text-white rounded-t-xl">
                 <div>
                   <h3 className="text-xl font-black uppercase tracking-widest">Appointment Archive</h3>
