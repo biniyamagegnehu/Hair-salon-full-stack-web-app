@@ -40,13 +40,13 @@ const ServicesPage = () => {
 
   if (error) {
     return (
-      <div className="container py-20">
-        <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm">
-          <div className="flex items-center gap-4">
-            <span className="text-2xl">⚠️</span>
+      <div className="container py-20 bg-cream min-h-screen">
+        <div className="bg-error/10 border border-error/20 p-8 rounded-3xl shadow-xl max-w-2xl mx-auto">
+          <div className="flex items-center gap-6">
+            <span className="text-4xl">⚠️</span>
             <div>
-              <h3 className="font-bold text-red-800">{t('common.error')}</h3>
-              <p className="text-red-700">{error}</p>
+              <h3 className="text-xl font-black text-black tracking-tight uppercase mb-2">{t('common.error')}</h3>
+              <p className="text-secondary-brown font-bold opacity-60 italic">{error}</p>
             </div>
           </div>
         </div>
@@ -57,31 +57,34 @@ const ServicesPage = () => {
   return (
     <div className="services-page animate-fade-in">
       {/* Services Header */}
-      <div className="text-center mb-16">
+      <div className="text-center mb-20">
         <Badge variant="gold" size="lg" className="mb-4">Elegance Defined</Badge>
-        <h1 className="text-5xl font-black text-black">Our Services</h1>
-        <div className="w-20 h-1 bg-gold mx-auto mt-6" style={{ backgroundColor: 'var(--accent-gold)' }}></div>
+        <h1 className="text-6xl font-black text-black uppercase tracking-tighter italic">
+          Master <span className="text-gold">Grooming</span>
+        </h1>
+        <p className="text-secondary-brown font-bold opacity-40 mt-2">Precision-crafted services for the modern Ethiopian man</p>
       </div>
 
       <div className="container">
         {isLoading ? (
-          <div className="services-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} padding={false}>
-                <Skeleton height="200px" variant="rectangle" />
-                <div className="p-6">
-                  <Skeleton width="60%" height="24px" className="mb-4" />
-                  <Skeleton width="100%" height="60px" className="mb-4" />
+              <Card key={i} padding={false} className="border border-border-primary/20">
+                <Skeleton height="240px" variant="rectangle" />
+                <div className="p-8">
+                  <Skeleton width="40%" height="12px" className="mb-4 opacity-20" />
+                  <Skeleton width="70%" height="32px" className="mb-6" />
+                  <Skeleton width="100%" height="60px" className="mb-8 opacity-40" />
                   <div className="flex justify-between items-center">
-                    <Skeleton width="30%" height="32px" />
-                    <Skeleton width="20%" height="16px" />
+                    <Skeleton width="40%" height="40px" />
+                    <Skeleton width="25%" height="16px" />
                   </div>
                 </div>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="services-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {services.map((service) => (
               <Card key={service._id} variant="interactive" padding={false} className="h-full flex flex-col">
                 <div className="service-card-image">

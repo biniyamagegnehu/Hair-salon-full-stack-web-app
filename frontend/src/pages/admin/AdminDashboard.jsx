@@ -129,7 +129,7 @@ const AdminDashboard = () => {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 bg-cream/30 px-4 py-2 rounded-full border border-border-primary">
-            <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`}></div>
+            <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-error'}`}></div>
             <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-secondary-brown">
               {isConnected ? t('common.live') : t('common.connecting')}
             </span>
@@ -163,7 +163,7 @@ const AdminDashboard = () => {
           <div className="admin-stat-info">
             <p className="admin-stat-label">Daily Revenue</p>
             <p className="admin-stat-value">{formatCurrency(stats?.revenue?.today?.total || 0)}</p>
-            <p className="text-[10px] font-bold text-green-600 uppercase mt-1">↑ 12% vs yesterday</p>
+            <p className="text-[10px] font-bold text-success uppercase mt-1">↑ 12% vs yesterday</p>
           </div>
         </div>
         <div className="admin-stat-card">
@@ -352,7 +352,7 @@ const AdminDashboard = () => {
               {notifications.length > 0 ? (
                 <div className="space-y-3">
                   {notifications.map(n => (
-                    <div key={n.id} className={`p-3 rounded-lg border-l-4 ${n.type === 'success' ? 'border-green-500 bg-green-50/10' : 'border-gold bg-gold/5'}`}>
+                    <div key={n.id} className={`p-3 rounded-lg border-l-4 ${n.type === 'success' ? 'border-success bg-success/10' : 'border-gold bg-gold/5'}`}>
                       <p className="text-[10px] font-black text-black uppercase">{n.title}</p>
                       <p className="text-[10px] font-bold text-secondary-brown">{n.message}</p>
                       <p className="text-[8px] font-black text-secondary-brown opacity-50 mt-1 uppercase">{formatTime(n.timestamp)}</p>

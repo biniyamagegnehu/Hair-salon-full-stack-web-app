@@ -4,6 +4,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { GoogleLogin } from '@react-oauth/google';
 import { login, googleLogin, clearError } from '../../store/slices/authSlice';
+import Card, { CardBody } from '../../components/ui/Card/Card';
+import Badge from '../../components/ui/Badge/Badge';
+import Button from '../../components/ui/Button/Button';
+import Input from '../../components/ui/Input/Input';
 
 const LoginPage = () => {
   const { t } = useTranslation();
@@ -45,89 +49,101 @@ const LoginPage = () => {
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-        {t('auth.welcomeBack')}
-      </h2>
+    <div className="max-w-md mx-auto">
+      <div className="text-center mb-10">
+        <Badge variant="gold" className="mb-4">Welcome Back</Badge>
+        <h2 className="text-4xl font-black text-black uppercase tracking-tight">
+          {t('auth.login')}
+        </h2>
+        <p className="text-secondary-brown font-bold opacity-40 mt-1 italic">Access your premium grooming portal</p>
+      </div>
       
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-          <p className="font-medium">{t('common.error')}</p>
-          <p className="text-sm">{error}</p>
+        <div className="bg-error/10 border border-error/20 text-error px-6 py-4 rounded-2xl font-bold text-xs mb-8">
+          <p className="uppercase tracking-widest opacity-60 mb-1">{t('common.error')}</p>
+          <p>{error}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('auth.email')} / {t('auth.phone')}
-          </label>
-          <input
-            type="text"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            placeholder={t('auth.email')}
-            required
-          />
-        </div>
+      <Card className="mb-8">
+        <CardBody className="p-8 sm:p-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+                {t('auth.email')} / {t('auth.phone')}
+              </label>
+              <Input
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder={t('auth.email')}
+                required
+                fullWidth
+                noMargin
+              />
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('auth.password')}
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pr-10"
-              placeholder={t('auth.password')}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-2.5 text-gray-500"
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+                {t('auth.password')}
+              </label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  fullWidth
+                  noMargin
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-brown opacity-40 hover:opacity-100 transition-opacity"
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              variant="black"
+              isLoading={isLoading}
+              fullWidth
+              className="mt-4"
             >
-              {showPassword ? '👁️' : '👁️‍🗨️'}
-            </button>
+              {t('auth.login')}
+            </Button>
+          </form>
+
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border-primary"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
+              <span className="px-4 bg-white text-secondary-brown opacity-40">{t('common.or')}</span>
+            </div>
           </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        >
-          {isLoading ? t('common.loading') : t('auth.login')}
-        </button>
-      </form>
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => {}}
+              theme="outline"
+              size="large"
+              shape="pill"
+              text="continue_with"
+              width="100%"
+            />
+          </div>
+        </CardBody>
+      </Card>
 
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">{t('common.or')}</span>
-        </div>
-      </div>
-
-      <div className="flex justify-center">
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={() => {}}
-          theme="outline"
-          size="large"
-          shape="rectangular"
-          text="continue_with"
-          width="280"
-        />
-      </div>
-
-      <p className="mt-6 text-center text-sm text-gray-600">
+      <p className="text-center text-sm font-bold text-secondary-brown opacity-60">
         {t('auth.noAccount')}{' '}
-        <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+        <Link to="/register" className="text-gold hover:text-black transition-colors underline decoration-2 underline-offset-4">
           {t('auth.register')}
         </Link>
       </p>

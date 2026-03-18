@@ -3,6 +3,21 @@
 @import "./styles/globals.css";
 @import "tailwindcss";
 
+@theme {
+  /* Brand Colors */
+  --color-gold: var(--accent-gold);
+  --color-black: var(--primary-black);
+  --color-brown: var(--secondary-brown);
+  --color-cream: var(--background-cream);
+  
+  /* Semantic Colors */
+  --color-error: var(--error);
+  --color-success: var(--success);
+  
+  /* Font Family */
+  --font-brand: var(--font-family);
+}
+
 /* Custom styles */
 .font-amharic {
   font-family: 'Noto Sans Ethiopic', sans-serif;

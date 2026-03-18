@@ -121,30 +121,30 @@ const AdminQueue = () => {
       onDragStart={(e) => handleDragStart(e, appointment, status, index)}
       onDragOver={(e) => handleDragOver(e, status, index)}
       onDrop={(e) => handleDrop(e, status, index)}
-      className={`bg-white rounded-xl p-5 border-2 transition-all cursor-grab active:cursor-grabbing mb-4 group ${
+      className={`bg-white rounded-[2rem] p-6 border-2 transition-all cursor-grab active:cursor-grabbing mb-4 group ${
         dragOverItem?.category === status && dragOverItem?.index === index
           ? 'border-gold bg-gold/5 scale-[1.02]'
-          : 'border-border-primary hover:border-black hover:shadow-xl'
+          : 'border-border-primary hover:border-black hover:shadow-2xl'
       } ${draggedItem?.item?._id === appointment._id ? 'opacity-20 grayscale scale-95' : ''}`}
     >
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start mb-6">
         <div>
-          <h4 className="font-black text-black uppercase text-sm tracking-tighter group-hover:text-gold transition-colors">
+          <h4 className="font-black text-black uppercase text-base tracking-tighter group-hover:text-gold transition-colors">
             {appointment.customer?.fullName || 'Anonymous Resident'}
           </h4>
           <p className="text-[10px] font-black text-secondary-brown opacity-40 uppercase tracking-widest mt-0.5">
             {appointment.service?.name?.en || 'Standard Operation'}
           </p>
         </div>
-        <Badge variant="dark" size="xs">#{appointment.queuePosition || index + 1}</Badge>
+        <Badge variant="dark" size="sm">#{appointment.queuePosition || index + 1}</Badge>
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-background-cream flex items-center justify-center border border-border-primary">
-            <span className="text-xs">⌚</span>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-cream flex items-center justify-center border border-border-primary shadow-inner">
+            <span className="text-sm">⌚</span>
           </div>
-          <p className="text-xs font-black text-black">{appointment.scheduledTime || 'ON CALL'}</p>
+          <p className="text-sm font-black text-black">{appointment.scheduledTime || 'ON CALL'}</p>
         </div>
         <div className="flex gap-1">
           {status === 'confirmed' && (
@@ -183,8 +183,8 @@ const AdminQueue = () => {
           <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Live tactical deployment and floor control</p>
         </div>
         <div className="flex gap-3">
-          <div className="px-4 sm:px-6 py-2 sm:py-3 bg-zinc-900 rounded-2xl border border-white/5 flex items-center gap-3 sm:gap-4">
-            <div className="w-2 h-2 bg-success rounded-full animate-pulse shadow-[0_0_10px_rgba(0,255,0,0.5)]" />
+          <div className="px-4 sm:px-6 py-2 sm:py-3 bg-black rounded-2xl border border-gold/20 flex items-center gap-3 sm:gap-4 shadow-xl">
+            <div className="w-2 h-2 bg-success rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
             <span className="text-[10px] font-black text-white uppercase tracking-widest">System Link Active</span>
           </div>
         </div>
@@ -206,11 +206,11 @@ const AdminQueue = () => {
             <p className="text-3xl sm:text-4xl font-black text-success">{stats.inProgress || 0}</p>
           </CardBody>
         </Card>
-        <Card className="relative group overflow-hidden">
-          <div className="absolute right-0 bottom-0 text-6xl opacity-5 translate-x-4 translate-y-4">✅</div>
+        <Card className="relative group overflow-hidden border-2 border-border-primary">
+          <div className="absolute right-0 bottom-0 text-6xl opacity-5 translate-x-4 translate-y-4 font-black">✅</div>
           <CardBody className="p-5 sm:p-6">
             <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40 mb-1">Staging Area</p>
-            <p className="text-3xl sm:text-4xl font-black text-blue-600">{stats.checkedIn || 0}</p>
+            <p className="text-3xl sm:text-4xl font-black text-black">{stats.checkedIn || 0}</p>
           </CardBody>
         </Card>
         <Card className="relative group overflow-hidden">

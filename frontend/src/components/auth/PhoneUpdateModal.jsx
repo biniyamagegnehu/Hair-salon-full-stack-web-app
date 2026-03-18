@@ -40,64 +40,66 @@ const PhoneUpdateModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-      <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="p-6">
-          <div className="text-center mb-6">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
-              <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div className="relative bg-white rounded-[2rem] shadow-2xl max-w-md w-full overflow-hidden border border-border-primary">
+        <div className="p-10">
+          <div className="text-center mb-10">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-gold/10 mb-6 border-2 border-gold/20 shadow-inner">
+              <svg className="h-10 w-10 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Phone Number Required
+            <h3 className="text-3xl font-black text-black mb-3 tracking-tighter uppercase italic">
+              Legacy <span className="text-gold">Connection</span>
             </h3>
-            <p className="text-sm text-gray-500">
-              To complete your registration, please provide your Ethiopian phone number. This is required for appointment notifications and queue updates.
+            <p className="text-secondary-brown font-bold opacity-60 text-sm leading-relaxed">
+              We require your Ethiopian phone number to keep you updated on your master transformation and queue status.
             </p>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+ 
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
+              <label htmlFor="phone" className="block text-[10px] font-black uppercase tracking-widest text-gold mb-2 pl-1">
+                Ethiopian Phone Number
               </label>
-              <input
-                id="phone"
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => {
-                  setPhoneNumber(e.target.value);
-                  setError('');
-                }}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  error ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="+251911223344"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="phone"
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                    setError('');
+                  }}
+                  className={`w-full bg-cream px-6 py-4 rounded-2xl font-bold text-black border-2 transition-all outline-none ${
+                    error ? 'border-error ring-4 ring-error/5' : 'border-transparent focus:border-gold focus:ring-4 focus:ring-gold/5'
+                  }`}
+                  placeholder="+251911223344"
+                  required
+                />
+              </div>
               {error && (
-                <p className="text-sm text-red-600 mt-1">{error}</p>
+                <p className="text-[10px] font-black text-error uppercase tracking-widest mt-2 pl-1">{error}</p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Format: +251 followed by 9 digits (e.g., +251911223344)
+              <p className="text-[10px] font-black text-secondary-brown opacity-30 uppercase tracking-widest mt-2 pl-1">
+                Ex: +251 911 22 33 44
               </p>
             </div>
-
-            <div className="flex space-x-3">
+ 
+            <div className="flex flex-col gap-3 pt-4">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-black text-white font-black uppercase tracking-widest py-5 px-4 rounded-2xl shadow-xl hover:bg-gold hover:text-black transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Saving...' : 'Save Number'}
+                {isLoading ? 'Verifying...' : 'Authenticate Number'}
               </button>
               <button
                 type="button"
                 onClick={handleSkip}
-                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="w-full bg-white text-secondary-brown font-black uppercase tracking-widest py-4 px-4 rounded-2xl border border-border-primary hover:bg-cream transition-colors text-xs"
               >
-                Skip for Now
+                Decide Later
               </button>
             </div>
           </form>

@@ -77,7 +77,7 @@ const HomePage = () => {
             <h2 className="section-title">Masterpiece Grooming</h2>
           </div>
           
-          <div className="services-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((service) => (
               <Card key={service.id} variant="interactive" className="animate-fade-in">
                 <div className="text-4xl mb-4">{service.icon}</div>
@@ -99,18 +99,18 @@ const HomePage = () => {
       <section className="section-padding features-section mt-16">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="feature-item">
-              <span className="feature-icon">✂️</span>
+            <div className="text-center p-8">
+              <span className="text-5xl text-gold mb-4 block">✂️</span>
               <h3 className="text-xl font-bold mb-4">Master Craftsmanship</h3>
               <p className="opacity-70">Our barbers are world-class professionals with years of experience in modern and classic styles.</p>
             </div>
-            <div className="feature-item">
-              <span className="feature-icon">✨</span>
+            <div className="text-center p-8">
+              <span className="text-5xl text-gold mb-4 block">✨</span>
               <h3 className="text-xl font-bold mb-4">Premium Products</h3>
               <p className="opacity-70">We only use high-end, dermatologist-tested grooming products tailored for Ethiopian skin and hair.</p>
             </div>
-            <div className="feature-item">
-              <span className="feature-icon">🛋️</span>
+            <div className="text-center p-8">
+              <span className="text-5xl text-gold mb-4 block">🛋️</span>
               <h3 className="text-xl font-bold mb-4">Luxury Atmosphere</h3>
               <p className="opacity-70">Relax in our sophisticated environment with complimentary beverages and entertainment.</p>
             </div>
@@ -126,7 +126,7 @@ const HomePage = () => {
             <h2 className="section-title">What Our Men Say</h2>
           </div>
           
-          <div className="testimonials-grid">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((t) => (
               <Card key={t.id} variant="gold-border" className="transition-all hover:scale-105">
                 <div className="rating-stars">

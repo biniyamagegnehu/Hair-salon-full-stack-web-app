@@ -61,18 +61,7 @@ a:hover {
   color: var(--primary-black);
 }
 
-/* Utility Classes */
-.text-gold { color: var(--accent-gold); }
-.text-cream { color: var(--background-cream); }
-.text-black { color: var(--primary-black); }
-.text-brown { color: var(--secondary-brown); }
-
-.bg-gold { background-color: var(--accent-gold); }
-.bg-black { background-color: var(--primary-black); }
-.bg-brown { background-color: var(--secondary-brown); }
-.bg-cream { background-color: var(--background-cream); }
-
-.border-gold { border-color: var(--accent-gold); }
+/* Utility Classes handled by Tailwind 4 theme */
 
 /* Animations */
 @keyframes fadeIn {

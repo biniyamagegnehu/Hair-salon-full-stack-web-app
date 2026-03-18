@@ -156,32 +156,32 @@ const QueuePage = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="queue-stats-grid">
-          <div className="stat-card">
-            <span className="stat-icon">👥</span>
-            <span className="stat-num">{stats.totalInQueue || 0}</span>
-            <span className="stat-text">Total in Queue</span>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="bg-white border-2 border-border-primary rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
+            <span className="text-4xl block mb-4">👥</span>
+            <span className="text-4xl font-black text-black block mb-1">{stats.totalInQueue || 0}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">Total in Queue</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-icon">✂️</span>
-            <span className="stat-num">{stats.inProgress || 0}</span>
-            <span className="stat-text">Being Served</span>
+          <div className="bg-white border-2 border-gold rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
+            <span className="text-4xl block mb-4">✂️</span>
+            <span className="text-4xl font-black text-gold block mb-1">{stats.inProgress || 0}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">Being Served</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-icon">📅</span>
-            <span className="stat-num">{stats.checkedIn || 0}</span>
-            <span className="stat-text">Checked In</span>
+          <div className="bg-white border-2 border-border-primary rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
+            <span className="text-4xl block mb-4">📅</span>
+            <span className="text-4xl font-black text-black block mb-1">{stats.checkedIn || 0}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">Checked In</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-icon">⏰</span>
-            <span className="stat-num">{stats.estimatedCurrentWait || 0}</span>
-            <span className="stat-text">Avg. Wait (Min)</span>
+          <div className="bg-white border-2 border-border-primary rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
+            <span className="text-4xl block mb-4">⏰</span>
+            <span className="text-4xl font-black text-black block mb-1">{stats.estimatedCurrentWait || 0}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">Avg. Wait (Min)</span>
           </div>
         </div>
 
         {/* My Current Status (If serving today) */}
         {isAuthenticated && todaysAppointments.length > 0 && (
-          <div className="my-queue-section animate-slide-up">
+          <div className="bg-black text-white rounded-[40px] p-10 lg:p-16 mb-16 relative overflow-hidden shadow-2xl animate-slide-up">
             <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
               <span className="text-gold">Your</span> Status Today
             </h2>
@@ -236,19 +236,19 @@ const QueuePage = () => {
               </Button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-border-primary/50">
               {queue.map((item, index) => (
-                <div key={item._id} className={`queue-row ${item.status === 'IN_PROGRESS' ? 'active' : ''}`}>
-                  <div className="queue-pos">{index + 1}</div>
+                <div key={item._id} className={`flex items-center gap-6 p-8 transition-all duration-300 ${item.status === 'IN_PROGRESS' ? 'bg-gold/5' : 'hover:bg-cream'}`}>
+                  <div className="text-2xl font-black text-secondary-brown opacity-20 w-8">{index + 1}</div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg text-black">
+                    <h3 className="font-black text-xl text-black uppercase tracking-tight">
                       {item.customer?.fullName || 'Valued Customer'}
                     </h3>
-                    <p className="text-sm opacity-50 font-medium">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">
                       {item.service?.name?.en} • {item.scheduledTime}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex flex-col items-end gap-2">
                     <Badge variant={
                       item.status === 'IN_PROGRESS' ? 'success' : 
                       item.status === 'CHECKED_IN' ? 'gold' : 'brown'
@@ -256,9 +256,9 @@ const QueuePage = () => {
                       {item.status.replace('_', ' ')}
                     </Badge>
                     {item.estimatedWaitTime > 0 && item.status !== 'IN_PROGRESS' && (
-                      <p className="text-xs font-black text-gold mt-2 uppercase tracking-tighter">
+                      <span className="text-[10px] font-black text-gold uppercase tracking-widest">
                         ~{item.estimatedWaitTime} MIN WAIT
-                      </p>
+                      </span>
                     )}
                   </div>
                 </div>
