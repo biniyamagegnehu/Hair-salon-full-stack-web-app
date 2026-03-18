@@ -112,11 +112,11 @@ const AdminServices = () => {
   return (
     <div className="admin-page animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
           <Badge variant="gold" className="mb-4">Service Catalog</Badge>
-          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Portfolio Manager</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1">Curate your professional offerings and pricing structure</p>
+          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Portfolio Manager</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Curate your professional offerings and pricing structure</p>
         </div>
         <Button
           variant="black"
@@ -124,7 +124,7 @@ const AdminServices = () => {
             resetForm();
             setShowModal(true);
           }}
-          className="group"
+          className="group w-full md:w-auto"
         >
           <span className="mr-2 group-hover:rotate-90 transition-transform inline-block">+</span>
           {t('admin.addService', 'Register New Service')}
@@ -132,11 +132,11 @@ const AdminServices = () => {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} height="320px" variant="rectangle" />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {services.map((service) => (
             <Card
               key={service._id}

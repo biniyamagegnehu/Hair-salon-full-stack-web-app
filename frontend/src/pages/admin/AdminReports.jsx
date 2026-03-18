@@ -128,23 +128,23 @@ const AdminReports = () => {
 
   return (
     <div className="admin-page animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-8 mb-12">
+      {/* Header Area */}
+      <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6 mb-8 sm:mb-12">
         <div>
           <Badge variant="gold" className="mb-4">Intelligence Portal</Badge>
-          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Business Analytics</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1">Deep-dive into operational performance and growth vectors</p>
+          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Business Analytics</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Deep-dive into operational performance and growth vectors</p>
         </div>
         
         {/* Date Range Controller */}
-        <div className="flex flex-wrap items-center gap-4 bg-black p-4 rounded-2xl shadow-xl">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-black p-4 sm:p-6 rounded-2xl shadow-xl">
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-2">From</span>
             <input
               type="date"
               value={dateRange.start}
               onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-              className="px-4 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white focus:border-gold outline-none transition-colors"
+              className="flex-1 sm:flex-none px-4 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white focus:border-gold outline-none transition-colors"
             />
           </div>
           <div className="flex items-center gap-3">
@@ -153,13 +153,14 @@ const AdminReports = () => {
               type="date"
               value={dateRange.end}
               onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-              className="px-4 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white focus:border-gold outline-none transition-colors"
+              className="flex-1 sm:flex-none px-4 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white focus:border-gold outline-none transition-colors"
             />
           </div>
-          <div className="h-8 w-px bg-white/10 mx-2" />
+          <div className="hidden sm:block h-8 w-px bg-white/10 mx-2" />
           <Button
             variant="gold"
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => {
               setDateRange({
                 start: new Date(new Date().setDate(1)).toISOString().split('T')[0],
@@ -171,41 +172,40 @@ const AdminReports = () => {
           </Button>
         </div>
       </div>
-
-      {/* Primary KPI Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {/* Primary KPI Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
         <Card variant="black" className="relative group overflow-hidden">
           <div className="absolute -right-4 -top-4 text-7xl opacity-5 group-hover:scale-110 transition-transform">💰</div>
-          <CardBody className="p-8">
+          <CardBody className="p-6 sm:p-8">
             <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Aggregate Revenue</p>
-            <h4 className="text-3xl font-black text-white mb-2">{formatCurrency(reports?.revenue?.total || 0)}</h4>
+            <h4 className="text-2xl sm:text-3xl font-black text-white mb-2">{formatCurrency(reports?.revenue?.total || 0)}</h4>
             <Badge variant="gold" size="xs">↑ 12.5% Growth</Badge>
           </CardBody>
         </Card>
         
         <Card className="relative group overflow-hidden">
           <div className="absolute -right-4 -top-4 text-7xl opacity-5 group-hover:scale-110 transition-transform">📅</div>
-          <CardBody className="p-8">
+          <CardBody className="p-6 sm:p-8">
             <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown mb-2">Total Engagements</p>
-            <h4 className="text-3xl font-black text-black mb-2">{formatNumber(reports?.appointments?.total || 0)}</h4>
+            <h4 className="text-2xl sm:text-3xl font-black text-black mb-2">{formatNumber(reports?.appointments?.total || 0)}</h4>
             <Badge variant="success" size="xs">↑ 8.2% vs Last PRD</Badge>
           </CardBody>
         </Card>
-
+ 
         <Card className="relative group overflow-hidden">
           <div className="absolute -right-4 -top-4 text-7xl opacity-5 group-hover:scale-110 transition-transform">👥</div>
-          <CardBody className="p-8">
+          <CardBody className="p-6 sm:p-8">
             <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown mb-2">Unique Clients</p>
-            <h4 className="text-3xl font-black text-black mb-2">{formatNumber(reports?.customers?.total || 0)}</h4>
+            <h4 className="text-2xl sm:text-3xl font-black text-black mb-2">{formatNumber(reports?.customers?.total || 0)}</h4>
             <Badge variant="gold" size="xs">PLATINUM LEVEL REACHED</Badge>
           </CardBody>
         </Card>
-
+ 
         <Card className="relative group overflow-hidden">
           <div className="absolute -right-4 -top-4 text-7xl opacity-5 group-hover:scale-110 transition-transform">📊</div>
-          <CardBody className="p-8">
+          <CardBody className="p-6 sm:p-8">
             <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown mb-2">Session Density</p>
-            <h4 className="text-3xl font-black text-black mb-2">{formatNumber(reports?.appointments?.averagePerDay || 0)}</h4>
+            <h4 className="text-2xl sm:text-3xl font-black text-black mb-2">{formatNumber(reports?.appointments?.averagePerDay || 0)}</h4>
             <p className="text-[10px] font-bold text-secondary-brown opacity-40 uppercase mt-1">Daily Average</p>
           </CardBody>
         </Card>

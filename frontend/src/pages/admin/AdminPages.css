@@ -15,7 +15,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
   .admin-stats-grid {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -73,13 +73,15 @@
   background-color: var(--white);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-primary);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  min-width: 800px; /* Force scroll on small screens */
 }
 
 .admin-table th {

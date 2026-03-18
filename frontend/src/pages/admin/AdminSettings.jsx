@@ -207,12 +207,12 @@ const AdminSettings = () => {
 
   return (
     <div className="admin-page animate-fade-in pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      {/* Header Area */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
           <Badge variant="gold" className="mb-4">System Architecture</Badge>
-          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Global Settings</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1">Configure core salon parameters and security protocols</p>
+          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Global Settings</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Configure core salon parameters and security protocols</p>
         </div>
       </div>
 

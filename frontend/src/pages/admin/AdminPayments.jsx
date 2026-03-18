@@ -148,16 +148,16 @@ const AdminPayments = () => {
   return (
     <div className="admin-page animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
           <Badge variant="gold" className="mb-4">Financial Records</Badge>
-          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Revenue Ledger</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1">Audit transactions and manage payment reversals</p>
+          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Revenue Ledger</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Audit transactions and manage payment reversals</p>
         </div>
         <Button
           variant="black"
           onClick={handleExportCSV}
-          className="flex items-center gap-2 group"
+          className="flex items-center justify-center gap-2 group w-full md:w-auto"
         >
           <span className="group-hover:translate-y-0.5 transition-transform">📥</span>
           Export Audit Log
@@ -166,8 +166,8 @@ const AdminPayments = () => {
 
       {/* Filter Matrix */}
       <Card variant="default" className="mb-8">
-        <CardBody className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <CardBody className="p-4 sm:p-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown mb-2 block">Identifier Scan</label>
               <Input

@@ -10,6 +10,12 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'ADMIN') {
@@ -33,10 +39,22 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="admin-layout">
-      <AdminSidebar />
+    <div className={`admin-layout ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[1040] lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      
       <div className="admin-main">
-        <AdminHeader title={getPageTitle()} />
+        <AdminHeader 
+          title={getPageTitle()} 
+          onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+        />
         <main className="admin-content">
           <AnimatePresence mode="wait">
             <motion.div
@@ -45,7 +63,7 @@ const AdminLayout = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              style={{ width: '100%', height: '100%' }}
+              className="w-full h-full"
             >
               <Outlet />
             </motion.div>

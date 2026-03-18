@@ -176,14 +176,14 @@ const AdminQueue = () => {
   return (
     <div className="admin-page animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
           <Badge variant="gold" className="mb-4">Real-Time Operations</Badge>
-          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Studio Monitor</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1">Live tactical deployment and floor control</p>
+          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Studio Monitor</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Live tactical deployment and floor control</p>
         </div>
         <div className="flex gap-3">
-          <div className="px-6 py-3 bg-zinc-900 rounded-2xl border border-white/5 flex items-center gap-4">
+          <div className="px-4 sm:px-6 py-2 sm:py-3 bg-zinc-900 rounded-2xl border border-white/5 flex items-center gap-3 sm:gap-4">
             <div className="w-2 h-2 bg-success rounded-full animate-pulse shadow-[0_0_10px_rgba(0,255,0,0.5)]" />
             <span className="text-[10px] font-black text-white uppercase tracking-widest">System Link Active</span>
           </div>
@@ -191,46 +191,46 @@ const AdminQueue = () => {
       </div>
 
       {/* Logistics Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
         <Card variant="black" className="relative group overflow-hidden">
           <div className="absolute right-0 bottom-0 text-6xl opacity-10 translate-x-4 translate-y-4">👥</div>
-          <CardBody className="p-6">
+          <CardBody className="p-5 sm:p-6">
             <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Total Manifest</p>
-            <p className="text-4xl font-black text-white">{stats.total || 0}</p>
+            <p className="text-3xl sm:text-4xl font-black text-white">{stats.total || 0}</p>
           </CardBody>
         </Card>
         <Card className="relative group overflow-hidden">
           <div className="absolute right-0 bottom-0 text-6xl opacity-5 translate-x-4 translate-y-4">🔄</div>
-          <CardBody className="p-6">
+          <CardBody className="p-5 sm:p-6">
             <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40 mb-1">Active Now</p>
-            <p className="text-4xl font-black text-success">{stats.inProgress || 0}</p>
+            <p className="text-3xl sm:text-4xl font-black text-success">{stats.inProgress || 0}</p>
           </CardBody>
         </Card>
         <Card className="relative group overflow-hidden">
           <div className="absolute right-0 bottom-0 text-6xl opacity-5 translate-x-4 translate-y-4">✅</div>
-          <CardBody className="p-6">
+          <CardBody className="p-5 sm:p-6">
             <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40 mb-1">Staging Area</p>
-            <p className="text-4xl font-black text-blue-600">{stats.checkedIn || 0}</p>
+            <p className="text-3xl sm:text-4xl font-black text-blue-600">{stats.checkedIn || 0}</p>
           </CardBody>
         </Card>
         <Card className="relative group overflow-hidden">
           <div className="absolute right-0 bottom-0 text-6xl opacity-5 translate-x-4 translate-y-4">⏳</div>
-          <CardBody className="p-6">
+          <CardBody className="p-5 sm:p-6">
             <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40 mb-1">Confirmed</p>
-            <p className="text-4xl font-black text-gold">{stats.confirmed || 0}</p>
+            <p className="text-3xl sm:text-4xl font-black text-gold">{stats.confirmed || 0}</p>
           </CardBody>
         </Card>
       </div>
 
       {/* Performance Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Active Sector */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between px-2">
             <h3 className="font-black text-black uppercase text-sm tracking-widest">Execution Tier</h3>
             <Badge variant="success" size="xs">Live Now</Badge>
           </div>
-          <div className="bg-background-cream/30 p-4 rounded-3xl border-2 border-dashed border-border-primary min-h-[600px] transition-colors hover:bg-background-cream/50">
+          <div className="bg-background-cream/30 p-4 rounded-3xl border-2 border-dashed border-border-primary min-h-[300px] lg:min-h-[600px] transition-colors hover:bg-background-cream/50">
             {isLoading && !appointments.inProgress.length ? (
               <Skeleton height="150px" variant="rectangle" className="mb-4" />
             ) : appointments.inProgress?.length > 0 ? (

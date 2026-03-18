@@ -73,16 +73,16 @@ const AdminWorkingHours = () => {
 
   return (
     <div className="admin-page animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      {/* Header Area */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
           <Badge variant="gold" className="mb-4">Operational Timeline</Badge>
-          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Studio Access</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1">Define the tactical availability and deployment window</p>
+          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Studio Access</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Define the tactical availability and deployment window</p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={handleReset}>Abort Changes</Button>
-          <Button variant="gold" onClick={handleSave}>Sync Operations</Button>
+        <div className="flex gap-3 w-full md:w-auto">
+          <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none">Abort Changes</Button>
+          <Button variant="gold" onClick={handleSave} className="flex-1 md:flex-none">Sync Operations</Button>
         </div>
       </div>
 

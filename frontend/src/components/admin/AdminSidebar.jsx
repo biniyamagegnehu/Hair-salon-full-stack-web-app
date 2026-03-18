@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -62,10 +62,19 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="admin-sidebar">
-      <div className="p-8 border-b border-white/5">
-        <h2 className="text-accent-gold text-xl font-black tracking-tighter uppercase mb-1">X-MEN</h2>
-        <p className="text-xs font-bold uppercase tracking-widest opacity-50">Salon Admin</p>
+    <aside className={`admin-sidebar ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} fixed lg:static h-full transition-transform duration-300 ease-in-out`}>
+      <div className="p-6 sm:p-8 border-b border-white/5 flex justify-between items-center">
+        <div>
+          <h2 className="text-accent-gold text-xl font-black tracking-tighter uppercase mb-1">X-MEN</h2>
+          <p className="text-xs font-bold uppercase tracking-widest opacity-50">Salon Admin</p>
+        </div>
+        <button 
+          onClick={onClose}
+          className="lg:hidden p-2 hover:bg-white/10 rounded-full transition-colors"
+          aria-label="Close menu"
+        >
+          <span className="text-xl">✕</span>
+        </button>
       </div>
 
       <nav className="flex-1 py-6 overflow-y-auto" aria-label="Administrative modules">

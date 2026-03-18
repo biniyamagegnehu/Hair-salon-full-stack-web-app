@@ -104,20 +104,20 @@ const AdminCustomers = () => {
   return (
     <div className="admin-page animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
-          <Badge variant="gold" className="mb-4">Customer Directory</Badge>
-          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Client Hub</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1">Manage relationships and lifetime value</p>
+          <Badge variant="gold" className="mb-4">Client Relations</Badge>
+          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Customer Database</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Comprehensive management of your elite clientele and history</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto">
           <select
             value={filterStatus}
             onChange={(e) => {
               setFilterStatus(e.target.value);
               setPage(1);
             }}
-            className="px-6 py-2 bg-black text-white border-none rounded-xl text-sm font-black uppercase tracking-widest cursor-pointer hover:bg-zinc-800 transition-colors"
+            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-black text-white border-none rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest cursor-pointer hover:bg-zinc-800 transition-colors"
           >
             <option value="all">All Clients</option>
             <option value="active">Active Only</option>
@@ -126,7 +126,7 @@ const AdminCustomers = () => {
           <Button
             variant="gold"
             onClick={() => window.location.href = '/admin/customers/new'}
-            className="flex items-center gap-2"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2"
           >
             <span className="text-xl">+</span> Add Client
           </Button>

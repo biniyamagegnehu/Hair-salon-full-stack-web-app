@@ -124,13 +124,13 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-4xl font-black text-black uppercase tracking-tight">{t('admin.dashboard')}</h1>
-          <p className="text-secondary-brown font-bold opacity-60">{formatDate(currentTime)}</p>
+          <h1 className="text-3xl sm:text-4xl font-black text-black uppercase tracking-tight">{t('admin.dashboard')}</h1>
+          <p className="text-secondary-brown font-bold opacity-60 text-sm sm:text-base">{formatDate(currentTime)}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 bg-cream/30 px-4 py-2 rounded-full border border-border-primary">
             <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500'}`}></div>
-            <span className="text-xs font-black uppercase tracking-widest text-secondary-brown">
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-secondary-brown">
               {isConnected ? t('common.live') : t('common.connecting')}
             </span>
           </div>
@@ -138,7 +138,7 @@ const AdminDashboard = () => {
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="px-4 py-2 bg-white border border-border-primary rounded-xl text-xs font-black uppercase tracking-widest text-secondary-brown focus:outline-none focus:ring-2 focus:ring-accent-gold"
+            className="px-3 sm:px-4 py-2 bg-white border border-border-primary rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest text-secondary-brown focus:outline-none focus:ring-2 focus:ring-accent-gold"
           >
             <option value="week">{t('common.last7Days')}</option>
             <option value="month">{t('common.last30Days')}</option>
@@ -151,7 +151,7 @@ const AdminDashboard = () => {
             onClick={refreshData}
             title={t('common.refresh')}
           >
-            <span className="text-lg">🔄</span>
+            <span className="text-base sm:text-lg">🔄</span>
           </Button>
         </div>
       </div>
@@ -192,20 +192,20 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
         {/* Live Queue */}
-        <div className="lg:col-span-1">
+        <div className="xl:col-span-1">
           <Card variant="gold-border" className="h-full">
-            <CardHeader className="flex justify-between items-center p-6 border-b border-border-primary">
+            <CardHeader className="flex justify-between items-center p-4 sm:p-6 border-b border-border-primary text-black">
               <div>
-                <h3 className="text-lg font-black uppercase tracking-widest">{t('queue.currentlyServing')}</h3>
+                <h3 className="text-base sm:text-lg font-black uppercase tracking-widest">{t('queue.currentlyServing')}</h3>
                 <p className="text-[10px] font-bold text-accent-gold uppercase">Real-time update</p>
               </div>
               <Link to="/admin/queue">
                 <Button variant="text" size="xs">View All</Button>
               </Link>
             </CardHeader>
-            <CardBody className="p-6">
+            <CardBody className="p-4 sm:p-6">
               <div className="space-y-4">
                 {queue?.appointments?.inProgress?.length > 0 ? (
                   queue.appointments.inProgress.map((apt, index) => (
@@ -247,27 +247,27 @@ const AdminDashboard = () => {
         </div>
 
         {/* Appointment Trends Chart Placeholder */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           <Card className="h-full">
-            <CardHeader className="flex justify-between items-center bg-black p-6 rounded-t-xl text-white">
+            <CardHeader className="flex justify-between items-center bg-black p-4 sm:p-6 rounded-t-xl text-white">
               <div>
-                <h3 className="text-lg font-black uppercase tracking-widest">{t('admin.appointmentTrends')}</h3>
+                <h3 className="text-base sm:text-lg font-black uppercase tracking-widest">{t('admin.appointmentTrends')}</h3>
                 <p className="text-[10px] font-bold text-gold uppercase">Performance analytics</p>
               </div>
               <Badge variant="gold">+{analytics?.trends?.increase || 0}% Increase</Badge>
             </CardHeader>
-            <CardBody className="p-8">
+            <CardBody className="p-4 sm:p-8">
               {analytics?.trends?.daily?.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {analytics.trends.daily.slice(0, 7).map((day, index) => {
                     const max = Math.max(...analytics.trends.daily.map(d => d.count));
                     const percentage = (day.count / max) * 100;
                     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
                     
                     return (
-                      <div key={index} className="flex items-center gap-4 group">
+                      <div key={index} className="flex items-center gap-3 sm:gap-4 group">
                         <span className="text-[10px] font-black text-secondary-brown opacity-50 w-8">{days[index]}</span>
-                        <div className="flex-1 h-10 bg-cream rounded-lg overflow-hidden relative border border-border-primary">
+                        <div className="flex-1 h-8 sm:h-10 bg-cream rounded-lg overflow-hidden relative border border-border-primary">
                           <div 
                             className="h-full bg-black group-hover:bg-accent-gold transition-all duration-500"
                             style={{ width: `${Math.max(percentage, 5)}%` }}
@@ -277,14 +277,14 @@ const AdminDashboard = () => {
                             </span>
                           </div>
                         </div>
-                        <span className="text-sm font-black text-black w-8 text-right">{day.count}</span>
+                        <span className="text-xs sm:text-sm font-black text-black w-8 text-right">{day.count}</span>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="h-64 flex items-center justify-center border-2 border-dashed border-border-primary rounded-xl">
-                  <p className="text-sm font-bold text-secondary-brown opacity-30">NO HISTORICAL DATA AVAILABLE</p>
+                <div className="h-48 sm:h-64 flex items-center justify-center border-2 border-dashed border-border-primary rounded-xl">
+                  <p className="text-xs sm:text-sm font-bold text-secondary-brown opacity-30 uppercase tracking-widest">No historical data</p>
                 </div>
               )}
 

@@ -113,16 +113,16 @@ const AdminAppointments = () => {
   return (
     <div className="admin-page animate-fade-in">
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
           <Badge variant="gold" className="mb-4">Appointment Archive</Badge>
-          <h1 className="text-5xl font-black text-black uppercase tracking-tight">Booking Portal</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1">Manage, track, and optimize salon flow</p>
+          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Booking Portal</h1>
+          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Manage, track, and optimize salon flow</p>
         </div>
         <Button
           variant="black"
           onClick={() => window.location.href = '/admin/appointments/new'}
-          className="flex items-center gap-2"
+          className="flex items-center justify-center gap-2 w-full md:w-auto"
         >
           <span className="text-xl">+</span> New Session
         </Button>
@@ -130,8 +130,8 @@ const AdminAppointments = () => {
 
       {/* Filter Matrix */}
       <Card variant="default" className="mb-8">
-        <CardBody className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <CardBody className="p-4 sm:p-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Timeline Start</label>
               <input
