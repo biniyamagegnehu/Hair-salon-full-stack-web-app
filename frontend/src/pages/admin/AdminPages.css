@@ -146,3 +146,34 @@
   border-left: 3px solid var(--accent-gold);
   background-color: var(--background-cream);
 }
+
+/* Hide scrollbars for cleaner mobile horizontal scrolling */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Ensure minimum tap target sizes on screens < 640px */
+@media (max-width: 639px) {
+  button, 
+  a, 
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select, 
+  .admin-btn-icon {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Some custom inputs shouldn't be forced to 44px wide if they form full width */
+  button.w-full {
+    min-width: 100%;
+  }
+}
