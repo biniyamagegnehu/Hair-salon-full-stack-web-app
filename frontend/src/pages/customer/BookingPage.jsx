@@ -211,13 +211,13 @@ const BookingPage = () => {
             </button>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[0.85fr_1.15fr] items-start">
             <div className="rounded-3xl border border-gray-100 bg-[#F8F4EC]/55 p-5">
               <div className="mb-4 flex items-center gap-2 text-sm font-medium text-[#3B2F2F]">
                 <CalendarDaysIcon className="h-5 w-5 text-[#C9A227]" />
                 Select date
               </div>
-              <div className="overflow-hidden rounded-2xl bg-white p-3 shadow-sm [&_.react-datepicker]:border-none [&_.react-datepicker]:font-sans [&_.react-datepicker]:w-full [&_.react-datepicker__current-month]:text-[#0F0F0F] [&_.react-datepicker__day--selected]:bg-[#0F0F0F] [&_.react-datepicker__day--keyboard-selected]:bg-[#C9A227] [&_.react-datepicker__header]:bg-[#F8F4EC] [&_.react-datepicker__header]:border-b [&_.react-datepicker__header]:border-gray-100">
+              <div className="min-h-[320px] overflow-hidden rounded-2xl bg-white p-3 shadow-sm [&_.react-datepicker]:border-none [&_.react-datepicker]:font-sans [&_.react-datepicker]:w-full [&_.react-datepicker__current-month]:text-[#0F0F0F] [&_.react-datepicker__day--selected]:bg-[#0F0F0F] [&_.react-datepicker__day--keyboard-selected]:bg-[#C9A227] [&_.react-datepicker__header]:bg-[#F8F4EC] [&_.react-datepicker__header]:border-b [&_.react-datepicker__header]:border-gray-100">
                 <DatePicker
                   selected={selectedDate}
                   onChange={handleDateChange}
@@ -228,25 +228,25 @@ const BookingPage = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm min-h-[320px] flex flex-col">
               <div className="mb-4 flex items-center gap-2 text-sm font-medium text-[#3B2F2F]">
                 <ClockIcon className="h-5 w-5 text-[#C9A227]" />
                 Available time slots
               </div>
 
               {!selectedDate ? (
-                <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-[#F8F4EC]/45 px-6 text-center">
+                <div className="flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-[#F8F4EC]/45 px-6 text-center">
                   <p className="text-xl font-bold tracking-[-0.03em] text-[#0F0F0F]">Choose a date first</p>
                   <p className="mt-3 max-w-sm text-base leading-7 text-gray-700">Once you pick a day, we will show the best available times for this service.</p>
                 </div>
               ) : loadingSlots ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3">
                   {[1, 2, 3, 4, 5, 6].map((item) => (
                     <Skeleton key={item} height="48px" variant="rectangle" className="rounded-xl" />
                   ))}
                 </div>
               ) : availableSlots.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3">
                   {availableSlots.map((slot) => (
                     <button
                       key={slot.time}
@@ -263,7 +263,7 @@ const BookingPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-red-200 bg-red-50 px-6 text-center">
+                <div className="flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-red-200 bg-red-50 px-6 text-center">
                   <p className="text-xl font-bold tracking-[-0.03em] text-[#0F0F0F]">No slots available</p>
                   <p className="mt-3 max-w-sm text-base leading-7 text-gray-700">Please try another date to find an open appointment window.</p>
                 </div>
