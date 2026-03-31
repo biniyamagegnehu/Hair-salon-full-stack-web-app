@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
@@ -7,58 +7,84 @@ import {
   updateAppointment,
   deleteAppointment
 } from '../../store/slices/adminSlice';
-import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
-import Badge from '../../components/ui/Badge/Badge';
 import Button from '../../components/ui/Button/Button';
-import Input from '../../components/ui/Input/Input';
-import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
+import Badge from '../../components/ui/Badge/Badge';
+import BottomSheet from '../../components/ui/BottomSheet/BottomSheet';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
+import {
+  CalendarDaysIcon,
+  ClockIcon,
+  PhoneIcon,
+  UserIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  EllipsisVerticalIcon,
+  ScissorsIcon,
+  CurrencyDollarIcon,
+  PencilSquareIcon,
+  TrashIcon
+} from '@heroicons/react/24/outline';
 import './AdminPages.css';
 
 const AdminAppointments = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { appointments, isLoading, filters } = useSelector((state) => state.admin.appointments || {
+  const { appointments, isLoading } = useSelector((state) => state.admin.appointments || {
     appointments: [],
-    isLoading: false,
-    filters: {}
+    isLoading: false
   });
   
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [dateRange, setDateRange] = useState({
-    start: new Date().toISOString().split('T')[0],
-    end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-  });
+  const [showDetailsSheet, setShowDetailsSheet] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Date selection state
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // Status options
+  // Generate an array of dates around today for the horizontal selector
+  const dateOptions = useMemo(() => {
+    const dates = [];
+    const today = new Date();
+    // 3 days ago to 14 days ahead
+    for (let i = -3; i <= 14; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      dates.push({
+        dateStr: d.toISOString().split('T')[0],
+        dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        dayNum: d.getDate(),
+        isToday: i === 0
+      });
+    }
+    return dates;
+  }, []);
+
+  // Status options with style mapping
   const statusOptions = [
-    { value: 'all', label: 'All Status', variant: 'brown' },
-    { value: 'PENDING_PAYMENT', label: 'Pending Payment', variant: 'gold' },
-    { value: 'CONFIRMED', label: 'Confirmed', variant: 'success' },
-    { value: 'CHECKED_IN', label: 'Checked In', variant: 'black' },
-    { value: 'IN_PROGRESS', label: 'In Progress', variant: 'gold' },
-    { value: 'COMPLETED', label: 'Completed', variant: 'cream' },
-    { value: 'CANCELLED', label: 'Cancelled', variant: 'error' },
-    { value: 'NO_SHOW', label: 'No Show', variant: 'error' }
+    { value: 'all', label: 'All', color: 'bg-black text-white border-black' },
+    { value: 'PENDING_PAYMENT', label: 'Pending', color: 'bg-white text-secondary-brown border-accent-gold/20' },
+    { value: 'CONFIRMED', label: 'Confirmed', color: 'bg-white text-success border-success/30' },
+    { value: 'CHECKED_IN', label: 'Checked In', color: 'bg-accent-gold md:text-black border-accent-gold' },
+    { value: 'IN_PROGRESS', label: 'In Progress', color: 'bg-black text-accent-gold border-black' },
+    { value: 'COMPLETED', label: 'Completed', color: 'bg-gray-100 text-gray-400 border-gray-200' },
+    { value: 'CANCELLED', label: 'Cancelled', color: 'bg-error/10 text-error border-error/20' }
   ];
+
+  const loadAppointments = React.useCallback(() => {
+    // We only fetch for the selected date on mobile for simplicity, 
+    // or we could construct a dateRange for desktop
+    const activeFilters = {
+      startDate: selectedDate,
+      endDate: selectedDate,
+      status: statusFilter !== 'all' ? statusFilter : undefined
+    };
+    dispatch(fetchAllAppointments(activeFilters));
+  }, [selectedDate, statusFilter, dispatch]);
 
   useEffect(() => {
     loadAppointments();
-  }, [dateRange, statusFilter, searchTerm, dispatch]);
-
-  const loadAppointments = () => {
-    const activeFilters = {
-      startDate: dateRange.start,
-      endDate: dateRange.end,
-      status: statusFilter !== 'all' ? statusFilter : undefined,
-      search: searchTerm || undefined
-    };
-    dispatch(fetchAllAppointments(activeFilters));
-  };
+  }, [loadAppointments]);
 
   const handleUpdateStatus = async (appointmentId, newStatus) => {
     try {
@@ -66,10 +92,32 @@ const AdminAppointments = () => {
         appointmentId, 
         data: { status: newStatus } 
       })).unwrap();
-      toast.success(t('common.success'));
+      toast.success(t('common.success') || 'Status updated');
       loadAppointments();
+      if (selectedAppointment && selectedAppointment._id === appointmentId) {
+        setSelectedAppointment({...selectedAppointment, status: newStatus});
+      }
     } catch (error) {
       toast.error(error?.message || t('common.error'));
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await dispatch(updateAppointment({
+        appointmentId: selectedAppointment._id,
+        data: {
+          status: selectedAppointment.status,
+          scheduledDate: selectedAppointment.scheduledDate,
+          scheduledTime: selectedAppointment.scheduledTime,
+          notes: selectedAppointment.notes
+        }
+      })).unwrap();
+      toast.success('Successfully synchronized');
+      setIsEditMode(false);
+      loadAppointments();
+    } catch (error) {
+      toast.error(error?.message || 'Update failed');
     }
   };
 
@@ -78,6 +126,7 @@ const AdminAppointments = () => {
       try {
         await dispatch(deleteAppointment(appointmentId)).unwrap();
         toast.success('Successfully deleted');
+        setShowDetailsSheet(false);
         loadAppointments();
       } catch (error) {
         toast.error(error?.message || 'Error deleting');
@@ -85,18 +134,30 @@ const AdminAppointments = () => {
     }
   };
 
-  const getStatusVariant = (status) => {
-    const option = statusOptions.find(opt => opt.value === status);
-    return option?.variant || 'brown';
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+  const getStatusBadge = (status) => {
+    const map = {
+      'PENDING_PAYMENT': { label: 'Pending', variant: 'gold' },
+      'CONFIRMED': { label: 'Confirmed', variant: 'success' },
+      'CHECKED_IN': { label: 'Checked In', variant: 'black' },
+      'IN_PROGRESS': { label: 'In Progress', variant: 'gold', pulse: true },
+      'COMPLETED': { label: 'Completed', variant: 'default' },
+      'CANCELLED': { label: 'Cancelled', variant: 'error' },
+      'NO_SHOW': { label: 'No Show', variant: 'error' }
+    };
+    const mapped = map[status] || { label: status, variant: 'brown' };
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border
+        ${mapped.variant === 'gold' ? 'bg-accent-gold/10 text-accent-gold border-accent-gold/20' : ''}
+        ${mapped.variant === 'success' ? 'bg-success/10 text-success border-success/20' : ''}
+        ${mapped.variant === 'black' ? 'bg-black text-white border-black' : ''}
+        ${mapped.variant === 'error' ? 'bg-error/10 text-error border-error/20' : ''}
+        ${mapped.variant === 'default' ? 'bg-gray-100 text-gray-500 border-gray-200' : ''}
+        ${mapped.variant === 'brown' ? 'bg-secondary-brown/10 text-secondary-brown border-secondary-brown/20' : ''}
+      `}>
+        {mapped.pulse && <span className="w-1.5 h-1.5 rounded-full bg-accent-gold animate-pulse" />}
+        {mapped.label}
+      </span>
+    );
   };
 
   const formatCurrency = (amount) => {
@@ -108,308 +169,340 @@ const AdminAppointments = () => {
   };
 
   const appointmentsList = appointments?.list || [];
-  const appointmentsPagination = appointments?.pagination || { page: 1, limit: 20, total: 0, pages: 1 };
+  
+  // Sort appointments by time
+  const sortedAppointments = [...appointmentsList].sort((a, b) => {
+    return a.scheduledTime.localeCompare(b.scheduledTime);
+  });
 
   return (
-    <div className="admin-page animate-fade-in">
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
+    <div className="admin-page animate-fade-in px-4 lg:px-0">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4 lg:mb-8">
         <div>
-          <Badge variant="gold" className="mb-4">Appointment Archive</Badge>
-          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Booking Portal</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Manage, track, and optimize salon flow</p>
+          <h1 className="text-2xl lg:text-3xl font-black text-black uppercase tracking-tight">Appointments</h1>
+          <p className="text-xs font-bold opacity-50 uppercase tracking-widest mt-1">Manage Schedule</p>
         </div>
         <Button
           variant="black"
           onClick={() => window.location.href = '/admin/appointments/new'}
-          className="flex items-center justify-center gap-2 w-full md:w-auto"
+          className="w-full md:w-auto flex items-center justify-center gap-2 h-[44px]"
         >
-          <span className="text-xl">+</span> New Session
+          <span className="text-xl">+</span> Add Booking
         </Button>
       </div>
 
-      {/* Filter Matrix */}
-      <Card variant="default" className="mb-8">
-        <CardBody className="p-4 sm:p-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Timeline Start</label>
-              <input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                className="w-full px-4 py-2 bg-cream/30 border border-border-primary rounded-xl text-sm font-bold focus:ring-accent-gold"
-              />
+      {/* Sticky Horizontal Calendar */}
+      <div className="sticky top-0 z-40 bg-background-cream pb-4 pt-2 -mx-4 px-4 lg:mx-0 lg:px-0 lg:static lg:bg-transparent lg:pb-0 lg:pt-0 mb-4">
+        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
+          {dateOptions.map((dateObj) => (
+            <button
+              key={dateObj.dateStr}
+              onClick={() => setSelectedDate(dateObj.dateStr)}
+              className={`flex flex-col items-center justify-center w-14 h-16 rounded-2xl shrink-0 transition-all border ${
+                selectedDate === dateObj.dateStr
+                  ? 'bg-black border-black text-accent-gold shadow-md'
+                  : dateObj.isToday
+                    ? 'bg-white border-accent-gold text-black'
+                    : 'bg-white border-transparent text-secondary-brown/60 hover:border-accent-gold/20'
+              }`}
+            >
+              <span className={`text-[10px] font-black uppercase ${selectedDate === dateObj.dateStr ? 'text-white' : ''}`}>
+                {dateObj.dayName}
+              </span>
+              <span className={`text-xl font-black mt-0.5 ${selectedDate === dateObj.dateStr ? 'text-accent-gold' : 'text-black'}`}>
+                {dateObj.dayNum}
+              </span>
+              {dateObj.isToday && selectedDate !== dateObj.dateStr && (
+                <div className="w-1 h-1 rounded-full bg-accent-gold mt-1" />
+              )}
+            </button>
+          ))}
+        </div>
+        
+        {/* Status Filters */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar mt-2 pb-1">
+          {statusOptions.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setStatusFilter(opt.value)}
+              className={`whitespace-nowrap px-4 h-8 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
+                statusFilter === opt.value
+                  ? opt.color
+                  : 'bg-white border-gray-200 text-secondary-brown/60 hover:border-accent-gold/20'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} height="120px" variant="rectangle" className="rounded-2xl" />)}
+        </div>
+      ) : sortedAppointments.length === 0 ? (
+        <div className="py-24 text-center bg-white rounded-3xl border border-dashed border-accent-gold/20">
+          <CalendarDaysIcon className="w-12 h-12 text-secondary-brown/20 mx-auto mb-3" />
+          <p className="text-sm font-black text-secondary-brown opacity-40 uppercase tracking-widest mb-1">No appointments</p>
+          <p className="text-xs font-bold text-secondary-brown/40">Try selecting a different date</p>
+        </div>
+      ) : (
+        <div className="space-y-4 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:space-y-0 lg:gap-4">
+          {sortedAppointments.map((apt) => (
+            <div 
+              key={apt._id}
+              onClick={() => {
+                setSelectedAppointment(apt);
+                setIsEditMode(false);
+                setShowDetailsSheet(true);
+              }}
+              className="bg-white p-4 rounded-2xl border border-accent-gold/10 shadow-sm hover:border-accent-gold/50 cursor-pointer transition-all active:scale-[0.98]"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-2">
+                  <ClockIcon className="w-4 h-4 text-accent-gold" />
+                  <span className="text-lg font-black text-black">{apt.scheduledTime}</span>
+                </div>
+                {getStatusBadge(apt.status)}
+              </div>
+              
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-background-cream flex items-center justify-center font-black text-black">
+                  {apt.customer?.fullName?.charAt(0).toUpperCase() || 'W'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-black text-black uppercase text-sm truncate pr-2">
+                    {apt.customer?.fullName || 'Walk-in Client'}
+                  </h3>
+                  <p className="text-xs font-bold text-secondary-brown/60 truncate flex items-center gap-1 mt-0.5">
+                    <ScissorsIcon className="w-3 h-3" />
+                    {apt.service?.name?.en}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-secondary-brown/50">
+                  <CurrencyDollarIcon className="w-4 h-4" />
+                  {formatCurrency(apt.payment?.totalAmount)} 
+                  {apt.payment?.paymentStatus === 'COMPLETED' ? (
+                    <span className="text-success ml-1">Paid</span>
+                  ) : (
+                    <span className="text-error ml-1">Unpaid</span>
+                  )}
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if(apt.customer?.phoneNumber) window.location.href = `tel:${apt.customer.phoneNumber}`;
+                  }}
+                  className="w-8 h-8 rounded-full bg-accent-gold/10 text-accent-gold flex items-center justify-center hover:bg-accent-gold hover:text-white transition-colors"
+                >
+                  <PhoneIcon className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Timeline End</label>
-              <input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                className="w-full px-4 py-2 bg-cream/30 border border-border-primary rounded-xl text-sm font-bold"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Presence Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 bg-cream/30 border border-border-primary rounded-xl text-sm font-bold"
+          ))}
+        </div>
+      )}
+
+      {/* Details / Edit BottomSheet */}
+      <BottomSheet 
+        isOpen={showDetailsSheet} 
+        onClose={() => {
+          setShowDetailsSheet(false);
+          // Wait for animation to finish before resetting mode
+          setTimeout(() => setIsEditMode(false), 300);
+        }}
+        title={isEditMode ? "Edit Setup" : "Session Details"}
+        actionButton={
+          !isEditMode && selectedAppointment && (
+            <button 
+              onClick={() => setIsEditMode(true)}
+              className="p-2 text-secondary-brown hover:text-black"
+            >
+              <PencilSquareIcon className="w-6 h-6" />
+            </button>
+          )
+        }
+      >
+        {selectedAppointment && !isEditMode && (
+          <div className="space-y-6 pb-6">
+            <div className="flex items-center gap-4 bg-background-cream p-4 rounded-2xl border border-accent-gold/10">
+              <div className="w-16 h-16 bg-black text-accent-gold flex items-center justify-center rounded-2xl font-black text-3xl">
+                {selectedAppointment.customer?.fullName?.charAt(0).toUpperCase() || 'W'}
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-black text-black uppercase">{selectedAppointment.customer?.fullName || 'Walk-in Client'}</h4>
+                <p className="text-xs font-bold text-secondary-brown/60 mt-1">{selectedAppointment.customer?.phoneNumber || 'No phone provided'}</p>
+              </div>
+              <button 
+                onClick={() => { if(selectedAppointment.customer?.phoneNumber) window.location.href = `tel:${selectedAppointment.customer.phoneNumber}`; }}
+                className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black border border-gray-100 shadow-sm hover:text-accent-gold"
               >
-                {statusOptions.map(opt => (
+                <PhoneIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50 mb-1">Time</p>
+                <div className="flex items-center gap-1.5 font-black text-black">
+                  <ClockIcon className="w-4 h-4 text-accent-gold" />
+                  {selectedAppointment.scheduledTime}
+                </div>
+                <p className="text-[10px] font-bold text-secondary-brown/60 mt-1">{selectedAppointment.scheduledDate.split('T')[0]}</p>
+              </div>
+              <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50 mb-1">Service</p>
+                <p className="text-xs font-black text-black line-clamp-2 leading-tight">{selectedAppointment.service?.name?.en}</p>
+                <p className="text-[10px] font-bold text-accent-gold mt-1">{selectedAppointment.service?.duration} mins</p>
+              </div>
+            </div>
+
+            <div className="bg-black text-white p-5 rounded-2xl">
+              <div className="flex justify-between items-center mb-3 pb-3 border-b border-white/10">
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Status</span>
+                <span className="text-xs font-black uppercase text-accent-gold">{selectedAppointment.status.replace('_', ' ')}</span>
+              </div>
+              <div className="flex justify-between items-center mb-3 pb-3 border-b border-white/10">
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Payment</span>
+                <span className={`text-xs font-black uppercase ${selectedAppointment.payment?.paymentStatus === 'COMPLETED' ? 'text-success' : 'text-error'}`}>
+                  {selectedAppointment.payment?.paymentStatus}
+                </span>
+              </div>
+              <div className="flex justify-between items-end pt-1">
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Total Bill</span>
+                <span className="text-2xl font-black text-white">{formatCurrency(selectedAppointment.payment?.totalAmount)}</span>
+              </div>
+            </div>
+
+            {selectedAppointment.notes && (
+              <div className="p-4 bg-accent-gold/10 rounded-2xl border border-accent-gold/20">
+                <div className="flex items-center gap-1.5 text-accent-gold mb-2">
+                  <EllipsisVerticalIcon className="w-4 h-4" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Notes</span>
+                </div>
+                <p className="text-xs font-bold text-secondary-brown">{selectedAppointment.notes}</p>
+              </div>
+            )}
+
+            {/* Quick Actions Footer */}
+            <div className="pt-2 grid grid-cols-2 gap-3">
+              {selectedAppointment.status === 'PENDING_PAYMENT' || selectedAppointment.status === 'CONFIRMED' ? (
+                <>
+                  <Button 
+                    variant="black" 
+                    className="w-full text-xs"
+                    onClick={() => handleUpdateStatus(selectedAppointment._id, 'CHECKED_IN')}
+                  >Check In
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-xs text-error border-error hover:bg-error/10"
+                    onClick={() => handleUpdateStatus(selectedAppointment._id, 'CANCELLED')}
+                  >Cancel
+                  </Button>
+                </>
+              ) : selectedAppointment.status === 'CHECKED_IN' ? (
+                <Button 
+                  variant="gold" 
+                  className="w-full col-span-2 text-xs"
+                  onClick={() => handleUpdateStatus(selectedAppointment._id, 'IN_PROGRESS')}
+                >Start Service
+                </Button>
+              ) : selectedAppointment.status === 'IN_PROGRESS' ? (
+                <Button 
+                  variant="success" 
+                  className="w-full col-span-2 text-xs"
+                  onClick={() => handleUpdateStatus(selectedAppointment._id, 'COMPLETED')}
+                >Complete Service
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="w-full col-span-2 text-xs"
+                  onClick={() => setShowDetailsSheet(false)}
+                >Close
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {selectedAppointment && isEditMode && (
+          <div className="space-y-5 pb-6">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/70 ml-1">Current Status</label>
+              <select
+                value={selectedAppointment.status}
+                onChange={(e) => setSelectedAppointment({ ...selectedAppointment, status: e.target.value })}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-accent-gold focus:ring-0"
+              >
+                {statusOptions.filter(o => o.value !== 'all').map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Trace Customer</label>
-              <Input
-                placeholder="Name or Phone..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                noMargin
-              />
-            </div>
-          </div>
-        </CardBody>
-      </Card>
 
-      {/* Operations Table */}
-      <Card className="overflow-visible">
-        <CardHeader className="bg-black p-6 rounded-t-xl flex justify-between items-center text-white">
-          <h3 className="text-sm font-black uppercase tracking-widest">Active Records</h3>
-          <Badge variant="gold">{appointmentsPagination.total} Found</Badge>
-        </CardHeader>
-        <CardBody className="p-0">
-          {isLoading ? (
-            <div className="p-8 space-y-4">
-              {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} height="60px" variant="rectangle" />)}
-            </div>
-          ) : appointmentsList.length === 0 ? (
-            <div className="py-24 text-center">
-              <p className="text-xl font-black text-secondary-brown opacity-20 uppercase tracking-widest">No matching sessions found</p>
-            </div>
-          ) : (
-            <div className="admin-table-container">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Customer Detail</th>
-                    <th>Selected Service</th>
-                    <th>Schedule</th>
-                    <th>Status</th>
-                    <th>Financials</th>
-                    <th className="text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointmentsList.map((apt) => (
-                    <tr key={apt._id}>
-                      <td>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-black text-gold flex items-center justify-center rounded-lg font-black text-lg">
-                            {apt.customer?.fullName?.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-black text-black uppercase text-sm">{apt.customer?.fullName || 'Walk-in'}</p>
-                            <p className="text-[10px] font-bold text-secondary-brown opacity-60">+{apt.customer?.phoneNumber}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p className="font-bold text-black">{apt.service?.name?.en}</p>
-                        <p className="text-[10px] font-black text-accent-gold uppercase">{apt.service?.duration} Min Session</p>
-                      </td>
-                      <td>
-                        <p className="font-bold text-black">{formatDate(apt.scheduledDate)}</p>
-                        <Badge variant="black" size="xs">{apt.scheduledTime}</Badge>
-                      </td>
-                      <td>
-                        <Badge variant={getStatusVariant(apt.status)} size="sm">
-                          {apt.status.replace('_', ' ')}
-                        </Badge>
-                      </td>
-                      <td>
-                        <p className="font-black text-black">{formatCurrency(apt.payment?.totalAmount)}</p>
-                        <p className={`text-[10px] font-black uppercase ${apt.payment?.paymentStatus === 'COMPLETED' ? 'text-green-600' : 'text-gold'}`}>
-                          {apt.payment?.paymentStatus}
-                        </p>
-                      </td>
-                      <td className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <button 
-                            className="admin-btn-icon" 
-                            title="Quick View"
-                            onClick={() => {
-                              setSelectedAppointment(apt);
-                              setShowDetailsModal(true);
-                            }}
-                          >👁️</button>
-                          <button 
-                            className="admin-btn-icon" 
-                            title="Edit"
-                            onClick={() => {
-                              setSelectedAppointment(apt);
-                              setShowEditModal(true);
-                            }}
-                          >✏️</button>
-                          <button 
-                            className="admin-btn-icon text-error hover:bg-error/10" 
-                            title="Delete"
-                            onClick={() => handleDelete(apt._id)}
-                          >🗑️</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardBody>
-      </Card>
-
-      {/* Details Modal */}
-      <Modal isOpen={showDetailsModal} onClose={() => setShowDetailsModal(false)}>
-        <ModalHeader>Session Insight</ModalHeader>
-        <ModalContent>
-          {selectedAppointment && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 bg-cream p-4 rounded-xl border border-border-primary">
-                <div className="w-16 h-16 bg-black text-gold flex items-center justify-center rounded-xl font-black text-3xl">
-                  {selectedAppointment.customer?.fullName?.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h4 className="text-xl font-black text-black uppercase">{selectedAppointment.customer?.fullName}</h4>
-                  <p className="text-secondary-brown font-bold">{selectedAppointment.customer?.phoneNumber}</p>
-                  <p className="text-xs text-secondary-brown opacity-50">{selectedAppointment.customer?.email}</p>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/70 ml-1">Date</label>
+                <input
+                  type="date"
+                  value={selectedAppointment.scheduledDate?.split('T')[0] || ''}
+                  onChange={(e) => setSelectedAppointment({ ...selectedAppointment, scheduledDate: e.target.value })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-accent-gold"
+                />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-background-cream p-4 rounded-xl">
-                  <p className="text-[10px] font-black uppercase text-secondary-brown opacity-50 mb-1">Service Type</p>
-                  <p className="font-black text-black">{selectedAppointment.service?.name?.en}</p>
-                  <p className="text-[10px] font-bold text-accent-gold uppercase">{selectedAppointment.service?.duration} Minutes</p>
-                </div>
-                <div className="bg-background-cream p-4 rounded-xl">
-                  <p className="text-[10px] font-black uppercase text-secondary-brown opacity-50 mb-1">Scheduled Date</p>
-                  <p className="font-black text-black">{formatDate(selectedAppointment.scheduledDate)}</p>
-                  <p className="text-[10px] font-bold text-black uppercase">Clock: {selectedAppointment.scheduledTime}</p>
-                </div>
-              </div>
-
-              <div className="bg-black text-white p-6 rounded-xl">
-                <div className="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
-                  <span className="text-xs font-black uppercase opacity-60">Total Billable</span>
-                  <span className="text-2xl font-black text-gold">{formatCurrency(selectedAppointment.payment?.totalAmount)}</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="opacity-60">Advance Deposited:</span>
-                    <span className="font-bold text-green-400">{formatCurrency(selectedAppointment.payment?.advanceAmount)}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="opacity-60">Payment Status:</span>
-                    <span className="font-bold uppercase text-gold">{selectedAppointment.payment?.paymentStatus}</span>
-                  </div>
-                </div>
-              </div>
-
-              {selectedAppointment.notes && (
-                <div className="p-4 bg-gold/5 rounded-xl border-l-4 border-gold">
-                  <p className="text-[10px] font-black uppercase text-accent-gold mb-1">Manager Notes</p>
-                  <p className="text-sm font-bold text-secondary-brown italic">"{selectedAppointment.notes}"</p>
-                </div>
-              )}
-            </div>
-          )}
-        </ModalContent>
-        <ModalFooter>
-          <Button variant="outline" onClick={() => setShowDetailsModal(false)}>Close Archive</Button>
-          <Button variant="gold" onClick={() => { setShowDetailsModal(false); setShowEditModal(true); }}>Enter Edit Mode</Button>
-        </ModalFooter>
-      </Modal>
-
-      {/* Edit Modal */}
-      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)}>
-        <ModalHeader>Modify Records</ModalHeader>
-        <ModalContent>
-          {selectedAppointment && (
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Flow Status</label>
-                <select
-                  value={selectedAppointment.status}
-                  onChange={(e) => setSelectedAppointment({ ...selectedAppointment, status: e.target.value })}
-                  className="w-full px-4 py-3 bg-cream/30 border border-border-primary rounded-xl text-sm font-bold focus:ring-accent-gold"
-                >
-                  {statusOptions.filter(o => o.value !== 'all').map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Adjust Date</label>
-                  <input
-                    type="date"
-                    value={selectedAppointment.scheduledDate?.split('T')[0] || ''}
-                    onChange={(e) => setSelectedAppointment({ ...selectedAppointment, scheduledDate: e.target.value })}
-                    className="w-full px-4 py-3 bg-cream/30 border border-border-primary rounded-xl text-sm font-bold"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Adjust Time</label>
-                  <input
-                    type="time"
-                    value={selectedAppointment.scheduledTime || ''}
-                    onChange={(e) => setSelectedAppointment({ ...selectedAppointment, scheduledTime: e.target.value })}
-                    className="w-full px-4 py-3 bg-cream/30 border border-border-primary rounded-xl text-sm font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Administrative Notes</label>
-                <textarea
-                  value={selectedAppointment.notes || ''}
-                  onChange={(e) => setSelectedAppointment({ ...selectedAppointment, notes: e.target.value })}
-                  rows="4"
-                  className="w-full px-4 py-3 bg-cream/30 border border-border-primary rounded-xl text-sm font-bold"
-                  placeholder="Internal notes about this session..."
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/70 ml-1">Time</label>
+                <input
+                  type="time"
+                  value={selectedAppointment.scheduledTime || ''}
+                  onChange={(e) => setSelectedAppointment({ ...selectedAppointment, scheduledTime: e.target.value })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-accent-gold"
                 />
               </div>
             </div>
-          )}
-        </ModalContent>
-        <ModalFooter>
-          <Button variant="outline" onClick={() => setShowEditModal(false)}>Discard Changes</Button>
-          <Button 
-            variant="gold" 
-            onClick={async () => {
-              try {
-                await dispatch(updateAppointment({
-                  appointmentId: selectedAppointment._id,
-                  data: {
-                    status: selectedAppointment.status,
-                    scheduledDate: selectedAppointment.scheduledDate,
-                    scheduledTime: selectedAppointment.scheduledTime,
-                    notes: selectedAppointment.notes
-                  }
-                })).unwrap();
-                toast.success('Successfully synchronized');
-                setShowEditModal(false);
-                loadAppointments();
-              } catch (error) {
-                toast.error(error?.message || 'Update failed');
-              }
-            }}
-          >Sync Changes</Button>
-        </ModalFooter>
-      </Modal>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/70 ml-1">Notes</label>
+              <textarea
+                value={selectedAppointment.notes || ''}
+                onChange={(e) => setSelectedAppointment({ ...selectedAppointment, notes: e.target.value })}
+                rows="3"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-accent-gold"
+                placeholder="Optional notes..."
+              />
+            </div>
+
+            <div className="pt-4 border-t border-gray-100 space-y-3">
+              <Button 
+                variant="black" 
+                className="w-full"
+                onClick={handleSaveEdit}
+              >Save Changes</Button>
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setIsEditMode(false)}
+                >Cancel</Button>
+                <button 
+                  onClick={() => handleDelete(selectedAppointment._id)}
+                  className="w-12 h-[38px] rounded-xl border border-error text-error flex items-center justify-center hover:bg-error/10 active:scale-95 transition-all"
+                  aria-label="Delete Appointment"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </BottomSheet>
     </div>
   );
 };
