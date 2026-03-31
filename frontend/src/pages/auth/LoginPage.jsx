@@ -49,27 +49,48 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="text-center mb-10">
-        <Badge variant="gold" className="mb-4">Welcome Back</Badge>
-        <h2 className="text-4xl font-black text-black uppercase tracking-tight">
+    <div className="mx-auto flex max-w-4xl flex-col gap-10 lg:flex-row lg:items-stretch">
+      <div className="hidden w-full max-w-sm flex-col justify-between rounded-[28px] border border-black/5 bg-primary-black px-8 py-10 text-white lg:flex">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.32em] text-accent-gold/80">X Men&apos;s Hair Salon</p>
+          <h2 className="mt-4 text-3xl font-bold tracking-[-0.04em]">Premium grooming access.</h2>
+          <p className="mt-4 text-sm leading-relaxed text-white/70">
+            Sign in to manage bookings, queue status, and your profile in a calm, focused interface.
+          </p>
+        </div>
+        <div className="mt-10 space-y-4">
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <span className="text-xs font-medium text-white/70">Saved appointments</span>
+            <span className="text-sm font-semibold text-accent-gold">Always synced</span>
+          </div>
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <span className="text-xs font-medium text-white/70">Queue visibility</span>
+            <span className="text-sm font-semibold text-accent-gold">Real-time</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full lg:max-w-md">
+      <div className="text-center mb-8">
+        <Badge variant="gold" className="mb-3">Welcome Back</Badge>
+        <h2 className="text-3xl font-black text-black tracking-tight sm:text-4xl">
           {t('auth.login')}
         </h2>
         <p className="text-secondary-brown font-bold opacity-40 mt-1 italic">Access your premium grooming portal</p>
       </div>
       
       {error && (
-        <div className="bg-error/10 border border-error/20 text-error px-6 py-4 rounded-2xl font-bold text-xs mb-8">
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
           <p className="uppercase tracking-widest opacity-60 mb-1">{t('common.error')}</p>
           <p>{error}</p>
         </div>
       )}
 
-      <Card className="mb-8">
-        <CardBody className="p-8 sm:p-10">
+      <Card className="mb-6">
+        <CardBody className="p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-brown">
                 {t('auth.email')} / {t('auth.phone')}
               </label>
               <Input
@@ -84,7 +105,7 @@ const LoginPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-brown">
                 {t('auth.password')}
               </label>
               <div className="relative">
@@ -118,9 +139,9 @@ const LoginPage = () => {
             </Button>
           </form>
 
-          <div className="relative my-8">
+          <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border-primary"></div>
+              <div className="w-full border-t border-black/5"></div>
             </div>
             <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
               <span className="px-4 bg-white text-secondary-brown opacity-40">{t('common.or')}</span>
@@ -141,12 +162,13 @@ const LoginPage = () => {
         </CardBody>
       </Card>
 
-      <p className="text-center text-sm font-bold text-secondary-brown opacity-60">
+      <p className="text-center text-sm font-medium text-secondary-brown/70">
         {t('auth.noAccount')}{' '}
         <Link to="/register" className="text-gold hover:text-black transition-colors underline decoration-2 underline-offset-4">
           {t('auth.register')}
         </Link>
       </p>
+      </div>
     </div>
   );
 };

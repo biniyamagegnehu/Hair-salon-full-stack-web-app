@@ -104,34 +104,55 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="text-center mb-10">
-        <Badge variant="gold" className="mb-4">New Engagement</Badge>
-        <h2 className="text-4xl font-black text-black uppercase tracking-tight">
+    <div className="mx-auto flex max-w-4xl flex-col gap-10 lg:flex-row lg:items-stretch">
+      <div className="hidden w-full max-w-sm flex-col justify-between rounded-[28px] border border-black/5 bg-primary-black px-8 py-10 text-white lg:flex">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.32em] text-accent-gold/80">Join X Men&apos;s</p>
+          <h2 className="mt-4 text-3xl font-bold tracking-[-0.04em]">Designed for returning clients.</h2>
+          <p className="mt-4 text-sm leading-relaxed text-white/70">
+            Create an account to keep your appointments, queue status, and preferences perfectly in sync.
+          </p>
+        </div>
+        <div className="mt-10 space-y-4">
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <span className="text-xs font-medium text-white/70">Faster booking</span>
+            <span className="text-sm font-semibold text-accent-gold">One tap</span>
+          </div>
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <span className="text-xs font-medium text-white/70">Profile-aware service</span>
+            <span className="text-sm font-semibold text-accent-gold">Personalized</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full lg:max-w-md">
+      <div className="text-center mb-8">
+        <Badge variant="gold" className="mb-3">New Engagement</Badge>
+        <h2 className="text-3xl font-black text-black tracking-tight sm:text-4xl">
           {t('auth.register')}
         </h2>
         <p className="text-secondary-brown font-bold opacity-40 mt-1 italic">Join the exclusive X Men's circle</p>
       </div>
       
       {error && (
-        <div className="bg-error/10 border border-error/20 text-error px-6 py-4 rounded-2xl font-bold text-xs mb-8">
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
           <p className="uppercase tracking-widest opacity-60 mb-1">Registration Error</p>
           <p>{error}</p>
         </div>
       )}
 
       {passwordError && (
-        <div className="bg-gold/10 border border-gold/20 text-gold px-6 py-4 rounded-2xl font-bold text-xs mb-8">
+        <div className="mb-6 rounded-2xl border border-accent-gold/30 bg-accent-gold/10 px-4 py-3 text-xs font-semibold text-secondary-brown">
           <p className="uppercase tracking-widest opacity-60 mb-1">Validation Alert</p>
           <p>{passwordError}</p>
         </div>
       )}
 
-      <Card className="mb-8">
-        <CardBody className="p-8 sm:p-10">
+      <Card className="mb-6">
+        <CardBody className="p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-brown">
                 {t('auth.fullName')} <span className="text-error">*</span>
               </label>
               <Input
@@ -146,7 +167,7 @@ const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-brown">
                 {t('auth.phone')} <span className="text-error">*</span>
               </label>
               <Input
@@ -162,7 +183,7 @@ const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-brown">
                 {t('auth.email')} (Optional)
               </label>
               <Input
@@ -177,7 +198,7 @@ const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-brown">
                 Password <span className="text-error">*</span>
               </label>
               <div className="relative">
@@ -202,7 +223,7 @@ const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-brown">
                 Confirm Password <span className="text-error">*</span>
               </label>
               <div className="relative">
@@ -237,9 +258,9 @@ const RegisterPage = () => {
             </Button>
           </form>
 
-          <div className="relative my-8">
+          <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border-primary"></div>
+              <div className="w-full border-t border-black/5"></div>
             </div>
             <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
               <span className="px-4 bg-white text-secondary-brown opacity-40">Quick Access</span>
@@ -260,12 +281,13 @@ const RegisterPage = () => {
         </CardBody>
       </Card>
 
-      <p className="text-center text-sm font-bold text-secondary-brown opacity-60">
+      <p className="text-center text-sm font-medium text-secondary-brown/70">
         Already have an account?{' '}
         <Link to="/login" className="text-gold hover:text-black transition-colors underline decoration-2 underline-offset-4">
           Sign In
         </Link>
       </p>
+      </div>
     </div>
   );
 };
