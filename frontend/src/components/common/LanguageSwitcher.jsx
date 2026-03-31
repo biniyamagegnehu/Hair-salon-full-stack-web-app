@@ -1,16 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { authService } from '../../services/api/auth';
 
+const buttonClass = (active) =>
+  `rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${
+    active
+      ? 'bg-[#C9A227] text-[#0F0F0F] shadow-sm'
+      : 'bg-white text-[#3B2F2F] hover:bg-[#F8F4EC]'
+  }`;
+
 const LanguageSwitcher = () => {
-  const { i18n, t } = useTranslation();
-  const dispatch = useDispatch();
+  const { i18n } = useTranslation();
 
   const changeLanguage = async (lng) => {
     i18n.changeLanguage(lng);
-    
-    // Save to backend if user is logged in
+
     try {
       await authService.updateLanguage(lng);
     } catch (error) {
@@ -19,39 +23,15 @@ const LanguageSwitcher = () => {
   };
 
   return (
-    <div className="flex items-center space-x-2 ml-4">
-      <button
-        onClick={() => changeLanguage('am')}
-        className={`px-3 py-1 rounded-md text-sm font-semibold transition-all duration-300 border-2 ${
-          i18n.language === 'am'
-            ? 'border-accent-gold bg-accent-gold text-black'
-            : 'border-accent-gold text-accent-gold hover:bg-gold-transparent'
-        }`}
-        style={{
-          borderColor: 'var(--accent-gold)',
-          color: i18n.language === 'am' ? 'var(--primary-black)' : 'var(--accent-gold)',
-          backgroundColor: i18n.language === 'am' ? 'var(--accent-gold)' : 'transparent'
-        }}
-      >
+    <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/80 p-1 shadow-sm">
+      <button type="button" onClick={() => changeLanguage('am')} className={buttonClass(i18n.language === 'am')}>
         አማ
       </button>
-      <button
-        onClick={() => changeLanguage('en')}
-        className={`px-3 py-1 rounded-md text-sm font-semibold transition-all duration-300 border-2 ${
-          i18n.language === 'en'
-            ? 'border-accent-gold bg-accent-gold text-black'
-            : 'border-accent-gold text-accent-gold hover:bg-gold-transparent'
-        }`}
-        style={{
-          borderColor: 'var(--accent-gold)',
-          color: i18n.language === 'en' ? 'var(--primary-black)' : 'var(--accent-gold)',
-          backgroundColor: i18n.language === 'en' ? 'var(--accent-gold)' : 'transparent'
-        }}
-      >
+      <button type="button" onClick={() => changeLanguage('en')} className={buttonClass(i18n.language === 'en')}>
         EN
       </button>
     </div>
   );
 };
 
-export default LanguageSwitcher;
+export default LanguageSwitcher;
