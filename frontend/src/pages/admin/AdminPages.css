@@ -1,12 +1,32 @@
 .admin-page {
-  padding-bottom: var(--spacing-12);
+  padding-bottom: var(--space-12);
+  color: var(--color-text);
+}
+
+.admin-page h1,
+.admin-page h2,
+.admin-page h3,
+.admin-page h4 {
+  letter-spacing: -0.03em;
+  line-height: var(--line-height-tight);
+}
+
+.admin-page p,
+.admin-page label,
+.admin-page td,
+.admin-page th,
+.admin-page input,
+.admin-page select,
+.admin-page textarea,
+.admin-page button {
+  font-family: var(--font-sans);
 }
 
 .admin-stats-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: var(--spacing-6);
-  margin-bottom: var(--spacing-8);
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 @media (min-width: 640px) {
@@ -22,32 +42,31 @@
 }
 
 .admin-stat-card {
-  background-color: var(--white);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-6);
   display: flex;
   align-items: center;
-  gap: var(--spacing-4);
-  transition: all var(--transition-base);
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--border-radius-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.92));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .admin-stat-card:hover {
-  border-color: var(--accent-gold);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .admin-stat-icon {
   width: 48px;
   height: 48px;
-  border-radius: var(--radius-md);
-  background-color: var(--background-cream);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: var(--accent-gold);
+  color: var(--color-accent);
+  border-radius: var(--border-radius-lg);
+  background-color: rgba(248, 244, 236, 0.95);
 }
 
 .admin-stat-info {
@@ -56,123 +75,142 @@
 
 .admin-stat-label {
   font-size: var(--font-size-xs);
-  font-weight: 800;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--secondary-brown);
-  opacity: 0.6;
+  color: rgba(59, 47, 47, 0.55);
 }
 
 .admin-stat-value {
   font-size: var(--font-size-2xl);
-  font-weight: 900;
-  color: var(--primary-black);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
 }
 
-/* Data Table Styles */
 .admin-table-container {
-  background-color: var(--white);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-primary);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-radius: var(--border-radius-lg);
+  background-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .admin-table {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
   text-align: left;
-  min-width: 800px; /* Force scroll on small screens */
 }
 
 .admin-table th {
-  background-color: var(--background-cream);
-  padding: var(--spacing-4) var(--spacing-6);
+  padding: var(--space-4) var(--space-6);
   font-size: var(--font-size-xs);
-  font-weight: 800;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--secondary-brown);
-  border-bottom: 2px solid var(--accent-gold);
+  color: rgba(59, 47, 47, 0.68);
+  background-color: rgba(248, 244, 236, 0.88);
+  border-bottom: 1px solid rgba(201, 162, 39, 0.22);
 }
 
 .admin-table td {
-  padding: var(--spacing-4) var(--spacing-6);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: var(--space-4) var(--space-6);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  border-bottom: 1px solid rgba(15, 15, 15, 0.06);
 }
 
 .admin-table tr:hover {
-  background-color: rgba(201, 162, 39, 0.02);
+  background-color: rgba(248, 244, 236, 0.8);
 }
 
 .admin-table tr:last-child td {
   border-bottom: none;
 }
 
-/* Action Buttons */
 .admin-actions {
   display: flex;
-  gap: var(--spacing-2);
+  gap: var(--space-2);
 }
 
 .admin-btn-icon {
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
-  background-color: var(--background-cream);
+  border-radius: var(--border-radius-md);
+  background-color: rgba(248, 244, 236, 0.95);
   color: var(--secondary-brown);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .admin-btn-icon:hover {
-  background-color: var(--accent-gold);
   color: var(--primary-black);
+  background-color: var(--accent-gold);
+  transform: translateY(-1px);
 }
 
-/* Dashboard Specifics */
 .activity-feed {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
+  gap: var(--space-4);
 }
 
 .activity-item {
   display: flex;
-  gap: var(--spacing-4);
-  padding: var(--spacing-4);
-  border-radius: var(--radius-md);
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--border-radius-md);
   border-left: 3px solid var(--accent-gold);
   background-color: var(--background-cream);
 }
 
-/* Hide scrollbars for cleaner mobile horizontal scrolling */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Ensure minimum tap target sizes on screens < 640px */
+.admin-page .bg-white,
+.admin-page [class*="bg-white"] {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.admin-page input,
+.admin-page select,
+.admin-page textarea {
+  border-radius: var(--border-radius-lg);
+}
+
+.admin-page input:focus,
+.admin-page select:focus,
+.admin-page textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.12);
+}
+
 @media (max-width: 639px) {
-  button, 
-  a, 
+  button,
+  a,
   input[type="text"],
   input[type="email"],
   input[type="password"],
   input[type="number"],
   input[type="date"],
   input[type="time"],
-  select, 
+  select,
   .admin-btn-icon {
-    min-height: 44px;
     min-width: 44px;
+    min-height: 44px;
   }
 
-  /* Some custom inputs shouldn't be forced to 44px wide if they form full width */
   button.w-full {
     min-width: 100%;
   }

@@ -45,30 +45,28 @@ const AdminLayout = () => {
 
   return (
     <div className={`admin-layout ${isSidebarOpen ? 'sidebar-open' : ''} ${isDesktopSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-      {/* Mobile Overlay */}
       {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-[1040] lg:hidden backdrop-blur-sm transition-opacity duration-300"
+        <div
+          className="admin-overlay lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Desktop Sidebar / Mobile Drawer Sidebar */}
-      <AdminSidebar 
-        isOpen={isSidebarOpen} 
+      <AdminSidebar
+        isOpen={isSidebarOpen}
         isCollapsed={isDesktopSidebarCollapsed}
         onToggleCollapse={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
-        onClose={() => setIsSidebarOpen(false)} 
+        onClose={() => setIsSidebarOpen(false)}
       />
-      
+
       <div className="admin-main">
-        <AdminHeader 
-          title={getPageTitle()} 
-          onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+        <AdminHeader
+          title={getPageTitle()}
+          onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
         />
-        
-        <main className="admin-content pb-24 lg:pb-8">
-          <div className="max-w-7xl mx-auto">
+
+        <main className="admin-content">
+          <div className="admin-content-shell">
             <AdminBreadcrumbs />
             <AnimatePresence mode="wait">
               <motion.div
@@ -76,8 +74,8 @@ const AdminLayout = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="w-full h-full"
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="admin-outlet"
               >
                 <Outlet />
               </motion.div>
@@ -85,11 +83,10 @@ const AdminLayout = () => {
           </div>
         </main>
 
-        {/* Mobile Bottom Navigation */}
         <AdminBottomNav onMoreClick={() => setIsSidebarOpen(true)} />
       </div>
     </div>
   );
 };
 
-export default AdminLayout;
+export default AdminLayout;

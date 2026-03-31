@@ -6,16 +6,15 @@ const AdminBreadcrumbs = () => {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
-  // Don't show on dashboard
   if (pathnames.length <= 1) return null;
 
   return (
-    <nav className="flex mb-6 overflow-x-auto no-scrollbar" aria-label="Breadcrumb">
-      <ol className="flex items-center space-x-2 whitespace-nowrap">
+    <nav className="mb-6 overflow-x-auto no-scrollbar" aria-label="Breadcrumb">
+      <ol className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/65 bg-white/78 px-4 py-3 shadow-sm">
         <li>
-          <div>
-            <Link to="/admin" className="text-secondary-brown/40 hover:text-accent-gold transition-colors">
-              <HomeIcon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+          <div className="flex items-center">
+            <Link to="/admin" className="text-secondary-brown/45 hover:text-accent-gold transition-colors">
+              <HomeIcon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
               <span className="sr-only">Home</span>
             </Link>
           </div>
@@ -27,13 +26,13 @@ const AdminBreadcrumbs = () => {
           return (
             <li key={name}>
               <div className="flex items-center">
-                <ChevronRightIcon className="h-5 w-5 flex-shrink-0 text-secondary-brown/20" aria-hidden="true" />
+                <ChevronRightIcon className="h-4 w-4 flex-shrink-0 text-secondary-brown/25" aria-hidden="true" />
                 <Link
                   to={routeTo}
-                  className={`ml-2 text-[10px] font-black uppercase tracking-widest transition-colors ${
-                    isLast 
-                      ? 'text-accent-gold cursor-default' 
-                      : 'text-secondary-brown/40 hover:text-secondary-brown'
+                  className={`ml-2 text-[11px] font-medium capitalize tracking-[0.02em] transition-colors ${
+                    isLast
+                      ? 'text-black cursor-default'
+                      : 'text-secondary-brown/55 hover:text-secondary-brown'
                   }`}
                   aria-current={isLast ? 'page' : undefined}
                 >

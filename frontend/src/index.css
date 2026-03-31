@@ -1,4 +1,5 @@
 @import "./fonts.css";
+@import "./styles/admin-tokens.css";
 @import "./styles/variables.css";
 @import "./styles/globals.css";
 @import "tailwindcss";
