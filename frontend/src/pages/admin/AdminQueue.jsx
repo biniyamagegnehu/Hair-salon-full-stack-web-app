@@ -4,13 +4,19 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import {
   fetchTodayQueue,
-  updateAppointmentStatus,
-  reorderQueue
+  updateAppointmentStatus
 } from '../../store/slices/adminSlice';
-import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
-import Badge from '../../components/ui/Badge/Badge';
 import Button from '../../components/ui/Button/Button';
+import Badge from '../../components/ui/Badge/Badge';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
+import BottomSheet from '../../components/ui/BottomSheet/BottomSheet';
+import {
+  ClockIcon,
+  PlayCircleIcon,
+  CheckCircleIcon,
+  UserIcon,
+  EllipsisHorizontalIcon
+} from '@heroicons/react/24/outline';
 import './AdminPages.css';
 
 const AdminQueue = () => {
@@ -28,13 +34,12 @@ const AdminQueue = () => {
     total: 0, 
     inProgress: 0, 
     checkedIn: 0, 
-    confirmed: 0, 
-    estimatedRevenue: 0 
+    confirmed: 0 
   };
   const isLoading = adminState.isLoading || false;
 
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [dragOverItem, setDragOverItem] = useState(null);
+  const [selectedApt, setSelectedApt] = useState(null);
+  const [showActionSheet, setShowActionSheet] = useState(false);
 
   useEffect(() => {
     dispatch(fetchTodayQueue());
@@ -44,63 +49,6 @@ const AdminQueue = () => {
     return () => clearInterval(interval);
   }, [dispatch]);
 
-  const handleDragStart = (e, item, category, index) => {
-    setDraggedItem({ item, category, index });
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e, category, index) => {
-    e.preventDefault();
-    setDragOverItem({ category, index });
-  };
-
-  const handleDrop = async (e, targetCategory, targetIndex) => {
-    e.preventDefault();
-    if (!draggedItem) return;
-
-    const { item, category: sourceCategory, index: sourceIndex } = draggedItem;
-    if (sourceCategory === targetCategory && sourceIndex === targetIndex) {
-      setDraggedItem(null);
-      setDragOverItem(null);
-      return;
-    }
-
-    const newInProgress = [...(appointments.inProgress || [])];
-    const newCheckedIn = [...(appointments.checkedIn || [])];
-    const newConfirmed = [...(appointments.confirmed || [])];
-    
-    let movedItem;
-    if (sourceCategory === 'inProgress') movedItem = newInProgress.splice(sourceIndex, 1)[0];
-    else if (sourceCategory === 'checkedIn') movedItem = newCheckedIn.splice(sourceIndex, 1)[0];
-    else if (sourceCategory === 'confirmed') movedItem = newConfirmed.splice(sourceIndex, 1)[0];
-    
-    if (!movedItem) return;
-    
-    if (targetCategory === 'inProgress') newInProgress.splice(targetIndex, 0, movedItem);
-    else if (targetCategory === 'checkedIn') newCheckedIn.splice(targetIndex, 0, movedItem);
-    else if (targetCategory === 'confirmed') newConfirmed.splice(targetIndex, 0, movedItem);
-
-    const reorderedAppointments = [];
-    let position = 1;
-    [...newInProgress, ...newCheckedIn, ...newConfirmed].forEach(apt => {
-      reorderedAppointments.push({
-        appointmentId: apt._id,
-        newPosition: position++
-      });
-    });
-
-    try {
-      await dispatch(reorderQueue(reorderedAppointments)).unwrap();
-      toast.success(t('queue.reordered', 'Operations sequence updated'));
-      dispatch(fetchTodayQueue());
-    } catch (error) {
-      toast.error(error || t('common.error'));
-    }
-
-    setDraggedItem(null);
-    setDragOverItem(null);
-  };
-
   const handleStatusUpdate = async (id, status) => {
     try {
       await dispatch(updateAppointmentStatus({
@@ -109,190 +57,211 @@ const AdminQueue = () => {
         notes: 'Protocol automation update'
       })).unwrap();
       toast.success('Status synchronized');
+      setShowActionSheet(false);
       dispatch(fetchTodayQueue());
     } catch (error) {
       toast.error(error || t('common.error'));
     }
   };
 
-  const QueueItem = ({ appointment, status, index }) => (
-    <div
-      draggable
-      onDragStart={(e) => handleDragStart(e, appointment, status, index)}
-      onDragOver={(e) => handleDragOver(e, status, index)}
-      onDrop={(e) => handleDrop(e, status, index)}
-      className={`bg-white rounded-2xl p-6 border-2 transition-all cursor-grab active:cursor-grabbing mb-4 group ${
-        dragOverItem?.category === status && dragOverItem?.index === index
-          ? 'border-gold bg-gold/5 scale-[1.02] shadow-gold'
-          : 'border-border-primary hover:border-black hover:shadow-xl'
-      } ${draggedItem?.item?._id === appointment._id ? 'opacity-20 grayscale scale-95' : ''}`}
+  const MobileCard = ({ appointment, status, index }) => (
+    <div 
+      className="bg-white rounded-2xl p-4 border border-accent-gold/10 shadow-sm mb-3 flex items-center justify-between"
+      onClick={() => {
+        setSelectedApt({ ...appointment, currentStatus: status });
+        setShowActionSheet(true);
+      }}
     >
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex items-center gap-3">
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${
+          status === 'inProgress' ? 'bg-black text-accent-gold animate-pulse' :
+          status === 'checkedIn' ? 'bg-accent-gold/20 text-black' :
+          'bg-background-cream text-secondary-brown/50'
+        }`}>
+          {appointment.customer?.fullName?.charAt(0) || <UserIcon className="w-6 h-6" />}
+        </div>
         <div>
-          <h4 className="font-black text-black uppercase text-base tracking-tighter group-hover:text-gold transition-colors">
-            {appointment.customer?.fullName || 'Anonymous Resident'}
-          </h4>
-          <p className="text-[10px] font-black text-secondary-brown opacity-40 uppercase tracking-widest mt-0.5">
-            {appointment.service?.name?.en || 'Standard Operation'}
-          </p>
+          <h4 className="font-black text-black uppercase text-sm">{appointment.customer?.fullName || 'Walk-in'}</h4>
+          <p className="text-[10px] font-bold text-secondary-brown/60 truncate max-w-[150px]">{appointment.service?.name?.en}</p>
         </div>
-        <Badge variant="gold" size="sm" className="font-mono">#{appointment.queuePosition || index + 1}</Badge>
       </div>
+      
+      <div className="flex items-center gap-2">
+        <div className="text-right mr-2">
+          <p className="text-xs font-black text-black">{appointment.scheduledTime}</p>
+          <p className="text-[8px] font-black uppercase tracking-widest text-secondary-brown/40">#{appointment.queuePosition || index + 1}</p>
+        </div>
+        <button className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-secondary-brown/50 hover:bg-black hover:text-white transition-colors">
+          <EllipsisHorizontalIcon className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  );
 
-      <div className="flex items-center justify-between mt-auto">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cream flex items-center justify-center border border-border-primary shadow-sm group-hover:border-gold/50 transition-colors">
-            <span className="text-sm">⌚</span>
+  const DesktopCol = ({ title, items, status, color }) => (
+    <div className="bg-gray-50 rounded-3xl p-4 min-h-[500px] border border-gray-100">
+      <div className="flex items-center justify-between mb-4 px-2">
+        <h3 className="font-black text-black uppercase text-xs tracking-widest">{title}</h3>
+        <Badge variant={color} size="xs">{items.length}</Badge>
+      </div>
+      <div className="space-y-3">
+        {isLoading && !items.length ? (
+           <Skeleton height="80px" variant="rectangle" className="rounded-2xl" />
+        ) : items.length > 0 ? (
+          items.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status={status} index={i} />)
+        ) : (
+          <div className="py-12 text-center">
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 text-secondary-brown">Empty Data</p>
           </div>
-          <p className="text-sm font-black text-black">{appointment.scheduledTime || 'ON CALL'}</p>
-        </div>
-        <div className="flex gap-2">
-          {status === 'confirmed' && (
-            <Button 
-              variant="black" 
-              size="xs"
-              onClick={() => handleStatusUpdate(appointment._id, 'CHECKED_IN')}
-              className="w-10 h-10 p-0 flex items-center justify-center"
-              title="Check In"
-            >✓</Button>
-          )}
-          {status === 'checkedIn' && (
-            <Button 
-              variant="black" 
-              size="xs"
-              onClick={() => handleStatusUpdate(appointment._id, 'IN_PROGRESS')}
-              className="w-10 h-10 p-0 flex items-center justify-center"
-              title="Start Session"
-            >▶</Button>
-          )}
-          {status === 'inProgress' && (
-            <Button 
-              variant="success" 
-              size="xs"
-              onClick={() => handleStatusUpdate(appointment._id, 'COMPLETED')}
-              className="w-10 h-10 p-0 flex items-center justify-center"
-              title="Finalize"
-            >🏁</Button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
 
   return (
-    <div className="admin-page animate-fade-in">
+    <div className="admin-page animate-fade-in px-4 lg:px-0">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 lg:mb-8">
         <div>
-          <Badge variant="gold" className="mb-4">Real-Time Operations</Badge>
-          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Studio Monitor</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Live tactical deployment and floor control</p>
+          <h1 className="text-2xl lg:text-3xl font-black text-black uppercase tracking-tight">Today's Queue</h1>
+          <p className="text-xs font-bold opacity-50 uppercase tracking-widest mt-1">Live Floor Monitor</p>
         </div>
-        <div className="flex gap-3">
-          <div className="px-4 sm:px-6 py-2 sm:py-3 bg-black rounded-2xl border border-gold/20 flex items-center gap-3 sm:gap-4 shadow-xl">
-            <div className="w-2 h-2 bg-success rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">System Link Active</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Logistics Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
-        <Card variant="black" className="relative group overflow-hidden">
-          <div className="absolute right-0 bottom-0 text-6xl opacity-10 translate-x-4 translate-y-4">👥</div>
-          <CardBody className="p-5 sm:p-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Total Manifest</p>
-            <p className="text-3xl sm:text-4xl font-black text-white">{stats.total || 0}</p>
-          </CardBody>
-        </Card>
-        <Card className="relative group overflow-hidden">
-          <div className="absolute right-0 bottom-0 text-6xl opacity-5 translate-x-4 translate-y-4">🔄</div>
-          <CardBody className="p-5 sm:p-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40 mb-1">Active Now</p>
-            <p className="text-3xl sm:text-4xl font-black text-success">{stats.inProgress || 0}</p>
-          </CardBody>
-        </Card>
-        <Card className="relative group overflow-hidden border-2 border-border-primary">
-          <div className="absolute right-0 bottom-0 text-6xl opacity-5 translate-x-4 translate-y-4 font-black">✅</div>
-          <CardBody className="p-5 sm:p-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40 mb-1">Staging Area</p>
-            <p className="text-3xl sm:text-4xl font-black text-black">{stats.checkedIn || 0}</p>
-          </CardBody>
-        </Card>
-        <Card className="relative group overflow-hidden">
-          <div className="absolute right-0 bottom-0 text-6xl opacity-5 translate-x-4 translate-y-4">⏳</div>
-          <CardBody className="p-5 sm:p-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40 mb-1">Confirmed</p>
-            <p className="text-3xl sm:text-4xl font-black text-gold">{stats.confirmed || 0}</p>
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Performance Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        {/* Active Sector */}
-        <div className="space-y-4 sm:space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="font-black text-black uppercase text-sm tracking-widest">Execution Tier</h3>
-            <Badge variant="success" size="xs">Live Now</Badge>
-          </div>
-          <div className="bg-background-cream/30 p-4 rounded-3xl border-2 border-dashed border-border-primary min-h-[300px] lg:min-h-[600px] transition-colors hover:bg-background-cream/50">
-            {isLoading && !appointments.inProgress.length ? (
-              <Skeleton height="150px" variant="rectangle" className="mb-4" />
-            ) : appointments.inProgress?.length > 0 ? (
-              appointments.inProgress.map((apt, i) => (
-                <QueueItem key={apt._id} appointment={apt} status="inProgress" index={i} />
-              ))
-            ) : (
-              <div className="py-24 text-center">
-                <p className="text-[10px] font-black text-secondary-brown opacity-30 uppercase tracking-widest">Tier Vacant</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Staging Sector */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="font-black text-black uppercase text-sm tracking-widest">Staging Area</h3>
-            <Badge variant="dark" size="xs">Checked In</Badge>
-          </div>
-          <div className="bg-background-cream/30 p-4 rounded-3xl border-2 border-dashed border-border-primary min-h-[600px] transition-colors hover:bg-background-cream/50">
-            {isLoading && !appointments.checkedIn.length ? (
-              <Skeleton height="150px" variant="rectangle" className="mb-4" />
-            ) : appointments.checkedIn?.length > 0 ? (
-              appointments.checkedIn.map((apt, i) => (
-                <QueueItem key={apt._id} appointment={apt} status="checkedIn" index={i} />
-              ))
-            ) : (
-              <div className="py-24 text-center">
-                <p className="text-[10px] font-black text-secondary-brown opacity-30 uppercase tracking-widest">Staging Empty</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Confirmed Sector */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="font-black text-black uppercase text-sm tracking-widest">Confirmed Manifest</h3>
-            <Badge variant="gold" size="xs">Awaiting Entry</Badge>
-          </div>
-          <div className="bg-background-cream/30 p-4 rounded-3xl border-2 border-dashed border-border-primary min-h-[600px] transition-colors hover:bg-background-cream/50">
-            {isLoading && !appointments.confirmed.length ? (
-              <Skeleton height="150px" variant="rectangle" className="mb-4" />
-            ) : appointments.confirmed?.length > 0 ? (
-              appointments.confirmed.map((apt, i) => (
-                <QueueItem key={apt._id} appointment={apt} status="confirmed" index={i} />
-              ))
-            ) : (
-              <div className="py-24 text-center">
-                <p className="text-[10px] font-black text-secondary-brown opacity-30 uppercase tracking-widest">Manifest Clear</p>
-              </div>
-            )}
+        <div className="flex gap-2 w-full md:w-auto">
+          <div className="px-4 h-[44px] bg-black rounded-2xl flex flex-1 lg:flex-none items-center justify-center gap-2 shadow-md">
+            <div className="w-2 h-2 bg-success rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+            <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Sync</span>
           </div>
         </div>
       </div>
+
+      {/* Stats Summary Mobile Scrollable */}
+      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-4 lg:pb-8">
+        <div className="flex-none w-36 lg:w-auto bg-black rounded-2xl p-4 flex flex-col justify-between">
+          <p className="text-[10px] font-black uppercase tracking-widest text-white/50">Total</p>
+          <p className="text-2xl font-black text-white mt-2">{stats.total || 0}</p>
+        </div>
+        <div className="flex-none w-36 lg:w-auto bg-white border border-accent-gold/20 rounded-2xl p-4 flex flex-col justify-between">
+          <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50">In Progress</p>
+          <p className="text-2xl font-black text-success mt-2">{stats.inProgress || 0}</p>
+        </div>
+        <div className="flex-none w-36 lg:w-auto bg-white border border-accent-gold/20 rounded-2xl p-4 flex flex-col justify-between">
+          <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50">Checked In</p>
+          <p className="text-2xl font-black text-black mt-2">{stats.checkedIn || 0}</p>
+        </div>
+        <div className="flex-none w-36 lg:w-auto bg-white border border-accent-gold/20 rounded-2xl p-4 flex flex-col justify-between">
+          <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50">Scheduled</p>
+          <p className="text-2xl font-black text-accent-gold mt-2">{stats.confirmed || 0}</p>
+        </div>
+      </div>
+
+      {/* Mobile Accordion View vs Desktop Kanban */}
+      <div className="lg:hidden space-y-6">
+        {/* In Progress */}
+        <div className="space-y-3">
+          <h3 className="font-black text-black uppercase text-xs tracking-widest flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+            <span>In Progress</span>
+            <Badge variant="success" size="xs">{appointments.inProgress.length}</Badge>
+          </h3>
+          {isLoading ? <Skeleton height="80px" /> : appointments.inProgress.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="inProgress" index={i} />)}
+          {!isLoading && !appointments.inProgress.length && <p className="text-center text-xs opacity-40 font-bold uppercase py-4">None active</p>}
+        </div>
+
+        {/* Checked In */}
+        <div className="space-y-3">
+          <h3 className="font-black text-black uppercase text-xs tracking-widest flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+            <span>Checked In & Waiting</span>
+            <Badge variant="black" size="xs">{appointments.checkedIn.length}</Badge>
+          </h3>
+          {isLoading ? <Skeleton height="80px" /> : appointments.checkedIn.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="checkedIn" index={i} />)}
+          {!isLoading && !appointments.checkedIn.length && <p className="text-center text-xs opacity-40 font-bold uppercase py-4">Queue empty</p>}
+        </div>
+
+        {/* Confirmed */}
+        <div className="space-y-3 pb-8">
+          <h3 className="font-black text-black uppercase text-xs tracking-widest flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+            <span>Upcoming Manifest</span>
+            <Badge variant="gold" size="xs">{appointments.confirmed.length}</Badge>
+          </h3>
+          {isLoading ? <Skeleton height="80px" /> : appointments.confirmed.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="confirmed" index={i} />)}
+          {!isLoading && !appointments.confirmed.length && <p className="text-center text-xs opacity-40 font-bold uppercase py-4">No upcoming bookings</p>}
+        </div>
+      </div>
+
+      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
+        <DesktopCol title="Active Operations" items={appointments.inProgress} status="inProgress" color="success" />
+        <DesktopCol title="Staging Area" items={appointments.checkedIn} status="checkedIn" color="black" />
+        <DesktopCol title="Confirmed Manifest" items={appointments.confirmed} status="confirmed" color="gold" />
+      </div>
+
+      {/* Status Action BottomSheet */}
+      <BottomSheet
+        isOpen={showActionSheet}
+        onClose={() => setShowActionSheet(false)}
+        title="Manage Entry"
+      >
+        {selectedApt && (
+          <div className="space-y-5 pb-6">
+            <div className="bg-background-cream p-4 rounded-2xl flex items-center justify-between">
+              <div>
+                <h4 className="font-black text-black uppercase">{selectedApt.customer?.fullName || 'Walk-in'}</h4>
+                <p className="text-xs font-bold text-secondary-brown/60">{selectedApt.service?.name?.en}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-black text-black">{selectedApt.scheduledTime}</p>
+                <Badge variant={
+                  selectedApt.currentStatus === 'inProgress' ? 'success' :
+                  selectedApt.currentStatus === 'checkedIn' ? 'black' : 'gold'
+                }>{selectedApt.currentStatus}</Badge>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h5 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50 pl-1">Actions</h5>
+              
+              {selectedApt.currentStatus === 'confirmed' && (
+                <Button 
+                  variant="black" 
+                  className="w-full h-14 flex items-center justify-center gap-2"
+                  onClick={() => handleStatusUpdate(selectedApt._id, 'CHECKED_IN')}
+                >
+                  <UserIcon className="w-5 h-5" /> Mark Checked In
+                </Button>
+              )}
+              
+              {selectedApt.currentStatus === 'checkedIn' && (
+                <Button 
+                  variant="gold" 
+                  className="w-full h-14 flex items-center justify-center gap-2"
+                  onClick={() => handleStatusUpdate(selectedApt._id, 'IN_PROGRESS')}
+                >
+                  <PlayCircleIcon className="w-5 h-5" /> Start Service
+                </Button>
+              )}
+              
+              {selectedApt.currentStatus === 'inProgress' && (
+                <Button 
+                  variant="success" 
+                  className="w-full h-14 flex items-center justify-center gap-2"
+                  onClick={() => handleStatusUpdate(selectedApt._id, 'COMPLETED')}
+                >
+                  <CheckCircleIcon className="w-5 h-5" /> Complete Service
+                </Button>
+              )}
+              
+              <Button 
+                variant="outline" 
+                className="w-full h-14 flex flex-col justify-center"
+                onClick={() => {
+                  setShowActionSheet(false);
+                  window.location.href = `/admin/appointments/${selectedApt._id}`; // Simple navigation hack or could redirect
+                }}
+              >
+                <span>Full Details</span>
+              </Button>
+            </div>
+          </div>
+        )}
+      </BottomSheet>
     </div>
   );
 };
