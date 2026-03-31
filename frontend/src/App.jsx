@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Toaster } from 'react-hot-toast'
+import { getCurrentUser } from './store/slices/authSlice'
 
 // Layouts
 import MainLayout from './layouts/MainLayout'
@@ -35,7 +36,7 @@ import AdminPayments from './pages/admin/AdminPayments';
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.auth)
-  return isAuthenticated ? children : <Navigate to="/login" />
+  return isAuthenticated ? children : <Navigate to="/login" replace />
 }
 
 // Admin Route Component
@@ -54,6 +55,23 @@ const AdminRoute = ({ children }) => {
 }
 
 function App() {
+  const dispatch = useDispatch();
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    dispatch(getCurrentUser()).finally(() => {
+      setIsInitializing(false);
+    });
+  }, [dispatch]);
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-accent-gold border-t-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Toaster 

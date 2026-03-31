@@ -16,6 +16,29 @@ import Tabs from '../../components/ui/Tabs/Tabs';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
 import './AdminPages.css';
 
+const AccordionItem = ({ id, label, icon, children, activeTab, expandedSection, setExpandedSection }) => {
+  return (
+    <div className={`mb-4 lg:mb-0 lg:block ${activeTab === id ? '' : 'lg:hidden'}`}>
+      <button 
+        className={`w-full p-5 flex justify-between items-center font-black uppercase text-sm lg:hidden bg-white border border-gray-100 shadow-sm ${expandedSection === id ? 'rounded-t-2xl' : 'rounded-2xl'}`}
+        onClick={() => setExpandedSection(expandedSection === id ? '' : id)}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-xl">{icon}</span> 
+          <span>{label}</span>
+        </div>
+        <span className="text-accent-gold text-lg">{expandedSection === id ? '−' : '+'}</span>
+      </button>
+      <div className={`
+        ${expandedSection === id ? 'block' : 'hidden lg:block'} 
+        p-5 lg:p-0 border-x border-b lg:border-none border-gray-100 rounded-b-2xl lg:rounded-none bg-white lg:bg-transparent
+      `}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const AdminSettings = () => {
   const { i18n, t } = useTranslation();
   const dispatch = useDispatch();
@@ -68,6 +91,7 @@ const AdminSettings = () => {
 
   useEffect(() => {
     if (salonConfig) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(prev => ({
         ...prev,
         ...salonConfig
@@ -197,7 +221,7 @@ const AdminSettings = () => {
     return new Date(dateString).toLocaleString();
   };
 
-  const settingTabs = [
+const settingTabs = [
     { id: 'general', label: t('settings.general', 'General'), icon: '⚙️' },
     { id: 'working-hours', label: t('settings.workingHours', 'Working Hours'), icon: '⏰' },
     { id: 'notifications', label: t('settings.notifications', 'Notifications'), icon: '🔔' },
@@ -205,29 +229,6 @@ const AdminSettings = () => {
     { id: 'security', label: t('settings.security', 'Security'), icon: '🔒' },
     { id: 'audit', label: t('settings.auditLogs', 'Audit Logs'), icon: '📋' }
   ];
-
-  const AccordionItem = ({ id, label, icon, children }) => {
-    return (
-      <div className={`mb-4 lg:mb-0 lg:block ${activeTab === id ? '' : 'lg:hidden'}`}>
-        <button 
-          className={`w-full p-5 flex justify-between items-center font-black uppercase text-sm lg:hidden bg-white border border-gray-100 shadow-sm ${expandedSection === id ? 'rounded-t-2xl' : 'rounded-2xl'}`}
-          onClick={() => setExpandedSection(expandedSection === id ? '' : id)}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xl">{icon}</span> 
-            <span>{label}</span>
-          </div>
-          <span className="text-accent-gold text-lg">{expandedSection === id ? '−' : '+'}</span>
-        </button>
-        <div className={`
-          ${expandedSection === id ? 'block' : 'hidden lg:block'} 
-          p-5 lg:p-0 border-x border-b lg:border-none border-gray-100 rounded-b-2xl lg:rounded-none bg-white lg:bg-transparent
-        `}>
-          {children}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="admin-page animate-fade-in pb-20 px-4 md:px-0">
@@ -273,7 +274,7 @@ const AdminSettings = () => {
               ) : (
                 <>
                   {/* General Settings */}
-                  <AccordionItem id="general" label={t('settings.general', 'General')} icon="⚙️">
+                  <AccordionItem id="general" label={t('settings.general', 'General')} icon="⚙️" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
                     <div className="space-y-10 animate-fade-in">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
@@ -369,7 +370,7 @@ const AdminSettings = () => {
                   </AccordionItem>
 
                   {/* Working Hours */}
-                  <AccordionItem id="working-hours" label={t('settings.workingHours', 'Working Hours')} icon="⏰">
+                  <AccordionItem id="working-hours" label={t('settings.workingHours', 'Working Hours')} icon="⏰" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
                     <div className="space-y-6 animate-fade-in">
                       <div className="grid grid-cols-1 gap-4">
                         {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
@@ -451,7 +452,7 @@ const AdminSettings = () => {
                   </AccordionItem>
 
                   {/* Notifications */}
-                  <AccordionItem id="notifications" label={t('settings.notifications', 'Notifications')} icon="🔔">
+                  <AccordionItem id="notifications" label={t('settings.notifications', 'Notifications')} icon="🔔" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
                     <div className="space-y-6 animate-fade-in">
                       <div className="grid grid-cols-1 gap-4 sm:gap-6">
                         {[
@@ -488,7 +489,7 @@ const AdminSettings = () => {
                   </AccordionItem>
 
                   {/* Business Tab */}
-                  <AccordionItem id="business" label={t('settings.business', 'Business')} icon="📅">
+                  <AccordionItem id="business" label={t('settings.business', 'Business')} icon="📅" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
                     <div className="space-y-10 animate-fade-in">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
                         <div className="space-y-4">
@@ -549,7 +550,7 @@ const AdminSettings = () => {
                   </AccordionItem>
 
                   {/* Security Tab */}
-                  <AccordionItem id="security" label={t('settings.security', 'Security')} icon="🔒">
+                  <AccordionItem id="security" label={t('settings.security', 'Security')} icon="🔒" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
                     <div className="animate-fade-in md:max-w-lg mx-auto md:mx-0">
                       <div className="mb-8 md:mb-10 text-center md:text-left">
                         <Badge variant="gold" className="mb-4">Identity Verification</Badge>
@@ -607,7 +608,7 @@ const AdminSettings = () => {
                   </AccordionItem>
 
                   {/* Audit Logs Tab */}
-                  <AccordionItem id="audit" label={t('settings.auditLogs', 'Audit Logs')} icon="📋">
+                  <AccordionItem id="audit" label={t('settings.auditLogs', 'Audit Logs')} icon="📋" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
                     <div className="space-y-6 md:space-y-8 animate-fade-in pt-2">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
                         <div>

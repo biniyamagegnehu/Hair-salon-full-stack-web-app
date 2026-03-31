@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +31,15 @@ const AdminCustomers = () => {
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState('all');
 
+  const loadCustomers = () => {
+    dispatch(fetchCustomers({ 
+      page, 
+      limit: 20, 
+      search: searchTerm,
+      status: filterStatus !== 'all' ? filterStatus : undefined
+    }));
+  };
+
   useEffect(() => {
     loadCustomers();
   }, [page, searchTerm, filterStatus, dispatch]);
@@ -39,15 +49,6 @@ const AdminCustomers = () => {
       toast.error(error);
     }
   }, [error]);
-
-  const loadCustomers = () => {
-    dispatch(fetchCustomers({ 
-      page, 
-      limit: 20, 
-      search: searchTerm,
-      status: filterStatus !== 'all' ? filterStatus : undefined
-    }));
-  };
 
   const handleSearch = (e) => {
     e.preventDefault();

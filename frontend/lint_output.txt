@@ -1,0 +1,44 @@
+﻿
+C:\Users\biniy\Devs\x-mens-hair-salon\frontend\src\pages\admin\AdminAppointments.jsx
+  32:36  error    'filters' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           no-unused-vars
+  76:5   error    Error: Cannot access variable before it is declared
+
+`loadAppointments` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  74 |
+  75 |   useEffect(() => {
+> 76 |     loadAppointments();
+     |     ^^^^^^^^^^^^^^^^ `loadAppointments` accessed before it is declared
+  77 |   }, [selectedDate, statusFilter, dispatch]);
+  78 |
+  79 |   const loadAppointments = () => {
+
+  77 |   }, [selectedDate, statusFilter, dispatch]);
+  78 |
+> 79 |   const loadAppointments = () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 80 |     // We only fetch for the selected date on mobile for simplicity, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 81 |     // or we could construct a dateRange for desktop
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 82 |     const activeFilters = {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 83 |       startDate: selectedDate,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 84 |       endDate: selectedDate,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 85 |       status: statusFilter !== 'all' ? statusFilter : undefined
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 86 |     };
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 87 |     dispatch(fetchAllAppointments(activeFilters));
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 88 |   };
+     | ^^^^^ `loadAppointments` is declared here
+  89 |
+  90 |   const handleUpdateStatus = async (appointmentId, newStatus) => {
+  91 |     try {  react-hooks/immutability
+  77:6   warning  React Hook useEffect has a missing dependency: 'loadAppointments'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/exhaustive-deps
+
+Γ£û 3 problems (2 errors, 1 warning)
+

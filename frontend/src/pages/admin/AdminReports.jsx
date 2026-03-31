@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +18,86 @@ import Skeleton from '../../components/ui/Skeleton/Skeleton';
 import { ShareIcon } from '@heroicons/react/24/outline';
 import './AdminPages.css';
 
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('en-ET', {
+    style: 'currency',
+    currency: 'ETB',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount || 0);
+};
+
+const formatNumber = (num) => {
+  return new Intl.NumberFormat('en-US').format(num || 0);
+};
+
+const formatPercentage = (value, total) => {
+  if (!total) return '0%';
+  return `${((value / total) * 100).toFixed(1)}%`;
+};
+
+const VisualChart = ({ data, type = 'revenue' }) => {
+  if (!data || !data.daily) return (
+    <div className="py-20 text-center">
+      <p className="text-[10px] font-black uppercase text-secondary-brown opacity-40">No historical data in buffer</p>
+    </div>
+  );
+  
+  const maxVal = Math.max(...data.daily.map(d => type === 'revenue' ? d.revenue : d.count), 1);
+  const colorClass = type === 'revenue' ? 'bg-gold' : 'bg-black';
+  
+  return (
+    <div className="space-y-4">
+      {data.daily.slice(0, 10).map((day, index) => (
+        <div key={index} className="space-y-1 group">
+          <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-1">
+            <span className="text-secondary-brown opacity-60 group-hover:opacity-100 transition-opacity">{day.date}</span>
+            <span className="text-black">{type === 'revenue' ? formatCurrency(day.revenue) : `${day.count} SESSIONS`}</span>
+          </div>
+          <div className="h-4 bg-background-cream rounded-full border border-border-primary overflow-hidden relative">
+            <div 
+              className={`h-full ${colorClass} transition-all duration-1000 ease-out relative`}
+              style={{ width: `${((type === 'revenue' ? day.revenue : day.count) / maxVal) * 100}%` }}
+            >
+              <div className="absolute inset-0 bg-white/20 animate-pulse" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ServiceVisual = ({ data }) => {
+  if (!data || !data.services) return null;
+  const maxCount = Math.max(...data.services.map(s => s.count), 1);
+  
+  return (
+    <div className="space-y-6">
+      {data.services.map((service, index) => (
+        <div key={index} className="space-y-2">
+          <div className="flex justify-between items-end">
+            <div>
+              <p className="font-black text-black uppercase text-sm tracking-tighter">{service.name}</p>
+              <p className="text-[10px] font-bold text-secondary-brown opacity-40">MARKET DOMINANCE: {formatPercentage(service.count, data.total)}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-black text-black text-sm">{service.count}</p>
+              <p className="text-[10px] font-black text-gold uppercase">Engagements</p>
+            </div>
+          </div>
+          <div className="h-2 bg-background-cream rounded-full overflow-hidden border border-border-primary">
+            <div 
+              className="h-full bg-black transition-all duration-700"
+              style={{ width: `${(service.count / maxCount) * 100}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const AdminReports = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -30,16 +111,16 @@ const AdminReports = () => {
   
   const [activeTab, setActiveTab] = useState('revenue');
 
-  useEffect(() => {
-    loadReports();
-  }, [dateRange, dispatch]);
-
   const loadReports = () => {
     dispatch(fetchRevenueReport({ startDate: dateRange.start, endDate: dateRange.end }));
     dispatch(fetchAppointmentReport({ startDate: dateRange.start, endDate: dateRange.end }));
     dispatch(fetchCustomerReport());
     dispatch(fetchServicePopularityReport());
   };
+
+  useEffect(() => {
+    loadReports();
+  }, [dateRange, dispatch]);
 
   const handleShare = async () => {
     const shareData = {
@@ -59,85 +140,7 @@ const AdminReports = () => {
     }
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-ET', {
-      style: 'currency',
-      currency: 'ETB',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount || 0);
-  };
-
-  const formatNumber = (num) => {
-    return new Intl.NumberFormat('en-US').format(num || 0);
-  };
-
-  const formatPercentage = (value, total) => {
-    if (!total) return '0%';
-    return `${((value / total) * 100).toFixed(1)}%`;
-  };
-
-  const VisualChart = ({ data, type = 'revenue' }) => {
-    if (!data || !data.daily) return (
-      <div className="py-20 text-center">
-        <p className="text-[10px] font-black uppercase text-secondary-brown opacity-40">No historical data in buffer</p>
-      </div>
-    );
-    
-    const maxVal = Math.max(...data.daily.map(d => type === 'revenue' ? d.revenue : d.count), 1);
-    const colorClass = type === 'revenue' ? 'bg-gold' : 'bg-black';
-    
-    return (
-      <div className="space-y-4">
-        {data.daily.slice(0, 10).map((day, index) => (
-          <div key={index} className="space-y-1 group">
-            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-1">
-              <span className="text-secondary-brown opacity-60 group-hover:opacity-100 transition-opacity">{day.date}</span>
-              <span className="text-black">{type === 'revenue' ? formatCurrency(day.revenue) : `${day.count} SESSIONS`}</span>
-            </div>
-            <div className="h-4 bg-background-cream rounded-full border border-border-primary overflow-hidden relative">
-              <div 
-                className={`h-full ${colorClass} transition-all duration-1000 ease-out relative`}
-                style={{ width: `${((type === 'revenue' ? day.revenue : day.count) / maxVal) * 100}%` }}
-              >
-                <div className="absolute inset-0 bg-white/20 animate-pulse" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const ServiceVisual = ({ data }) => {
-    if (!data || !data.services) return null;
-    const maxCount = Math.max(...data.services.map(s => s.count), 1);
-    
-    return (
-      <div className="space-y-6">
-        {data.services.map((service, index) => (
-          <div key={index} className="space-y-2">
-            <div className="flex justify-between items-end">
-              <div>
-                <p className="font-black text-black uppercase text-sm tracking-tighter">{service.name}</p>
-                <p className="text-[10px] font-bold text-secondary-brown opacity-40">MARKET DOMINANCE: {formatPercentage(service.count, data.total)}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-black text-black text-sm">{service.count}</p>
-                <p className="text-[10px] font-black text-gold uppercase">Engagements</p>
-              </div>
-            </div>
-            <div className="h-2 bg-background-cream rounded-full overflow-hidden border border-border-primary">
-              <div 
-                className="h-full bg-black transition-all duration-700"
-                style={{ width: `${(service.count / maxCount) * 100}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  // Extracted to module scope
 
   const tabOptions = [
     { id: 'revenue', label: 'Fiscal Revenue', icon: '💰' },

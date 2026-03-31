@@ -1,0 +1,11 @@
+.bottom-sheet {
+  /* Default styles for animation and layout are inline with Tailwind */
+  transform-origin: bottom center;
+}
+
+@media (max-width: 1024px) {
+  .bottom-sheet {
+    /* Safe area padding for newer iPhones */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

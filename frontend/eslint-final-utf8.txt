@@ -1,0 +1,31 @@
+﻿
+C:\Users\biniy\Devs\x-mens-hair-salon\frontend\src\layouts\AdminLayout.jsx
+  4:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\biniy\Devs\x-mens-hair-salon\frontend\src\pages\admin\AdminCustomers.jsx
+  44:6   warning  React Hook useEffect has a missing dependency: 'loadCustomers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  66:14  error    'error' is defined but never used                                                                                 no-unused-vars
+
+C:\Users\biniy\Devs\x-mens-hair-salon\frontend\src\pages\admin\AdminDashboard.jsx
+   38:10  error    'notifications' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                    no-unused-vars
+   39:10  error    'showQuickActionsSheet' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                            no-unused-vars
+   39:33  error    'setShowQuickActionsSheet' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                         no-unused-vars
+   67:6   warning  React Hook useEffect has a missing dependency: 'refreshData'. Either include it or remove the dependency array                   react-hooks/exhaustive-deps
+   71:45  error    'data' is defined but never used                                                                                                 no-unused-vars
+   89:6   warning  React Hook useEffect has missing dependencies: 'dispatch' and 'refreshData'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  117:9   error    'formatTime' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                       no-unused-vars
+
+C:\Users\biniy\Devs\x-mens-hair-salon\frontend\src\pages\admin\AdminPayments.jsx
+  68:6  warning  React Hook useEffect has a missing dependency: 'fetchPayments'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\biniy\Devs\x-mens-hair-salon\frontend\src\pages\admin\AdminReports.jsx
+  101:11  error    't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                               no-unused-vars
+  122:6   warning  React Hook useEffect has a missing dependency: 'loadReports'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\biniy\Devs\x-mens-hair-salon\frontend\src\pages\admin\AdminWorkingHours.jsx
+  37:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  47:6  warning  React Hook useEffect has a missing dependency: 'days'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Γ£û 15 problems (8 errors, 7 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

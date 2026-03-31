@@ -19,6 +19,60 @@ import {
 } from '@heroicons/react/24/outline';
 import './AdminPages.css';
 
+const MobileCard = ({ appointment, status, index, setSelectedApt, setShowActionSheet }) => (
+  <div 
+    className="bg-white rounded-2xl p-4 border border-accent-gold/10 shadow-sm mb-3 flex items-center justify-between"
+    onClick={() => {
+      setSelectedApt({ ...appointment, currentStatus: status });
+      setShowActionSheet(true);
+    }}
+  >
+    <div className="flex items-center gap-3">
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${
+        status === 'inProgress' ? 'bg-black text-accent-gold animate-pulse' :
+        status === 'checkedIn' ? 'bg-accent-gold/20 text-black' :
+        'bg-background-cream text-secondary-brown/50'
+      }`}>
+        {appointment.customer?.fullName?.charAt(0) || <UserIcon className="w-6 h-6" />}
+      </div>
+      <div>
+        <h4 className="font-black text-black uppercase text-sm">{appointment.customer?.fullName || 'Walk-in'}</h4>
+        <p className="text-[10px] font-bold text-secondary-brown/60 truncate max-w-[150px]">{appointment.service?.name?.en}</p>
+      </div>
+    </div>
+    
+    <div className="flex items-center gap-2">
+      <div className="text-right mr-2">
+        <p className="text-xs font-black text-black">{appointment.scheduledTime}</p>
+        <p className="text-[8px] font-black uppercase tracking-widest text-secondary-brown/40">#{appointment.queuePosition || index + 1}</p>
+      </div>
+      <button className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-secondary-brown/50 hover:bg-black hover:text-white transition-colors">
+        <EllipsisHorizontalIcon className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
+);
+
+const DesktopCol = ({ title, items, status, color, isLoading, setSelectedApt, setShowActionSheet }) => (
+  <div className="bg-gray-50 rounded-3xl p-4 min-h-[500px] border border-gray-100">
+    <div className="flex items-center justify-between mb-4 px-2">
+      <h3 className="font-black text-black uppercase text-xs tracking-widest">{title}</h3>
+      <Badge variant={color} size="xs">{items.length}</Badge>
+    </div>
+    <div className="space-y-3">
+      {isLoading && !items.length ? (
+         <Skeleton height="80px" variant="rectangle" className="rounded-2xl" />
+      ) : items.length > 0 ? (
+        items.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status={status} index={i} setSelectedApt={setSelectedApt} setShowActionSheet={setShowActionSheet} />)
+      ) : (
+        <div className="py-12 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest opacity-30 text-secondary-brown">Empty Data</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 const AdminQueue = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -64,59 +118,7 @@ const AdminQueue = () => {
     }
   };
 
-  const MobileCard = ({ appointment, status, index }) => (
-    <div 
-      className="bg-white rounded-2xl p-4 border border-accent-gold/10 shadow-sm mb-3 flex items-center justify-between"
-      onClick={() => {
-        setSelectedApt({ ...appointment, currentStatus: status });
-        setShowActionSheet(true);
-      }}
-    >
-      <div className="flex items-center gap-3">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${
-          status === 'inProgress' ? 'bg-black text-accent-gold animate-pulse' :
-          status === 'checkedIn' ? 'bg-accent-gold/20 text-black' :
-          'bg-background-cream text-secondary-brown/50'
-        }`}>
-          {appointment.customer?.fullName?.charAt(0) || <UserIcon className="w-6 h-6" />}
-        </div>
-        <div>
-          <h4 className="font-black text-black uppercase text-sm">{appointment.customer?.fullName || 'Walk-in'}</h4>
-          <p className="text-[10px] font-bold text-secondary-brown/60 truncate max-w-[150px]">{appointment.service?.name?.en}</p>
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <div className="text-right mr-2">
-          <p className="text-xs font-black text-black">{appointment.scheduledTime}</p>
-          <p className="text-[8px] font-black uppercase tracking-widest text-secondary-brown/40">#{appointment.queuePosition || index + 1}</p>
-        </div>
-        <button className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-secondary-brown/50 hover:bg-black hover:text-white transition-colors">
-          <EllipsisHorizontalIcon className="w-5 h-5" />
-        </button>
-      </div>
-    </div>
-  );
-
-  const DesktopCol = ({ title, items, status, color }) => (
-    <div className="bg-gray-50 rounded-3xl p-4 min-h-[500px] border border-gray-100">
-      <div className="flex items-center justify-between mb-4 px-2">
-        <h3 className="font-black text-black uppercase text-xs tracking-widest">{title}</h3>
-        <Badge variant={color} size="xs">{items.length}</Badge>
-      </div>
-      <div className="space-y-3">
-        {isLoading && !items.length ? (
-           <Skeleton height="80px" variant="rectangle" className="rounded-2xl" />
-        ) : items.length > 0 ? (
-          items.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status={status} index={i} />)
-        ) : (
-          <div className="py-12 text-center">
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 text-secondary-brown">Empty Data</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  // Extracted to module scope
 
   return (
     <div className="admin-page animate-fade-in px-4 lg:px-0">
@@ -162,7 +164,7 @@ const AdminQueue = () => {
             <span>In Progress</span>
             <Badge variant="success" size="xs">{appointments.inProgress.length}</Badge>
           </h3>
-          {isLoading ? <Skeleton height="80px" /> : appointments.inProgress.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="inProgress" index={i} />)}
+          {isLoading ? <Skeleton height="80px" /> : appointments.inProgress.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="inProgress" index={i} setSelectedApt={setSelectedApt} setShowActionSheet={setShowActionSheet} />)}
           {!isLoading && !appointments.inProgress.length && <p className="text-center text-xs opacity-40 font-bold uppercase py-4">None active</p>}
         </div>
 
@@ -172,7 +174,7 @@ const AdminQueue = () => {
             <span>Checked In & Waiting</span>
             <Badge variant="black" size="xs">{appointments.checkedIn.length}</Badge>
           </h3>
-          {isLoading ? <Skeleton height="80px" /> : appointments.checkedIn.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="checkedIn" index={i} />)}
+          {isLoading ? <Skeleton height="80px" /> : appointments.checkedIn.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="checkedIn" index={i} setSelectedApt={setSelectedApt} setShowActionSheet={setShowActionSheet} />)}
           {!isLoading && !appointments.checkedIn.length && <p className="text-center text-xs opacity-40 font-bold uppercase py-4">Queue empty</p>}
         </div>
 
@@ -182,15 +184,15 @@ const AdminQueue = () => {
             <span>Upcoming Manifest</span>
             <Badge variant="gold" size="xs">{appointments.confirmed.length}</Badge>
           </h3>
-          {isLoading ? <Skeleton height="80px" /> : appointments.confirmed.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="confirmed" index={i} />)}
+          {isLoading ? <Skeleton height="80px" /> : appointments.confirmed.map((apt, i) => <MobileCard key={apt._id} appointment={apt} status="confirmed" index={i} setSelectedApt={setSelectedApt} setShowActionSheet={setShowActionSheet} />)}
           {!isLoading && !appointments.confirmed.length && <p className="text-center text-xs opacity-40 font-bold uppercase py-4">No upcoming bookings</p>}
         </div>
       </div>
 
       <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
-        <DesktopCol title="Active Operations" items={appointments.inProgress} status="inProgress" color="success" />
-        <DesktopCol title="Staging Area" items={appointments.checkedIn} status="checkedIn" color="black" />
-        <DesktopCol title="Confirmed Manifest" items={appointments.confirmed} status="confirmed" color="gold" />
+        <DesktopCol title="Active Operations" items={appointments.inProgress} status="inProgress" color="success" isLoading={isLoading} setSelectedApt={setSelectedApt} setShowActionSheet={setShowActionSheet} />
+        <DesktopCol title="Staging Area" items={appointments.checkedIn} status="checkedIn" color="black" isLoading={isLoading} setSelectedApt={setSelectedApt} setShowActionSheet={setShowActionSheet} />
+        <DesktopCol title="Confirmed Manifest" items={appointments.confirmed} status="confirmed" color="gold" isLoading={isLoading} setSelectedApt={setSelectedApt} setShowActionSheet={setShowActionSheet} />
       </div>
 
       {/* Status Action BottomSheet */}

@@ -1,0 +1,10 @@
+/* 
+  FloatingActionButton.css
+  Most styles are kept inline as Tailwind classes for better tree-shaking and consistency.
+  This file is reserved for overriding and deep custom complex animations if necessary.
+*/
+
+.fab-container {
+  /* Ensure the FAB is clickable through translucent overlays if needed */
+  pointer-events: auto;
+}

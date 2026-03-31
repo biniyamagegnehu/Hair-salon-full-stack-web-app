@@ -31,8 +31,10 @@ const AdminWorkingHours = () => {
 
   useEffect(() => {
     if (workingHours.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHours(workingHours);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHours(
         days.map((_, index) => ({
           dayOfWeek: index,
