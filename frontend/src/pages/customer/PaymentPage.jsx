@@ -2,19 +2,39 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import {
+  ArrowPathIcon,
+  CheckCircleIcon,
+  CreditCardIcon,
+  ShieldCheckIcon,
+  XCircleIcon
+} from '@heroicons/react/24/outline';
 import { initializePayment, verifyPayment, clearPaymentState } from '../../store/slices/paymentSlice';
-import Button from '../../components/ui/Button/Button';
-import Badge from '../../components/ui/Badge/Badge';
+
+const blackButton = 'bg-[#0F0F0F] text-white px-6 py-3 rounded-lg hover:bg-[#2A2A2A] transition-all duration-300 font-medium shadow-md hover:shadow-lg';
+const goldButton = 'bg-[#C9A227] text-[#0F0F0F] px-6 py-3 rounded-lg hover:bg-[#DAA520] transition-all duration-300 font-medium shadow-md';
+const outlineButton = 'border-2 border-[#C9A227] text-[#C9A227] px-6 py-3 rounded-lg hover:bg-[#C9A227] hover:text-[#0F0F0F] transition-all duration-300';
+
+const StateCard = ({ icon: Icon, title, message, children, accent }) => (
+  <div className="mx-auto max-w-xl rounded-[32px] border border-black/5 bg-white p-8 text-center shadow-sm sm:p-10">
+    <div className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full ${accent}`}>
+      <Icon className="h-10 w-10" />
+    </div>
+    <h2 className="mt-6 text-4xl font-bold tracking-[-0.04em] text-[#0F0F0F]">{title}</h2>
+    <p className="mt-4 text-base leading-8 text-gray-700">{message}</p>
+    <div className="mt-8 space-y-3">{children}</div>
+  </div>
+);
 
 const PaymentPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { appointmentId } = useParams();
-  
+
   const { paymentUrl, transactionId, isLoading, error } = useSelector((state) => state.payment);
   const { currentAppointment } = useSelector((state) => state.appointments);
-  
+
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const [countdown, setCountdown] = useState(10);
 
@@ -78,244 +98,202 @@ const PaymentPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-gold border-r-gold border-b-border-primary border-l-border-primary mx-auto mb-6"></div>
-          <p className="text-secondary-brown font-black uppercase tracking-widest text-[10px] opacity-40">{t('payment.processing')}</p>
-        </div>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <StateCard
+          icon={ArrowPathIcon}
+          title={t('payment.processing')}
+          message="We are preparing your secure payment session."
+          accent="bg-[#F8F4EC] text-[#C9A227]"
+        >
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-[#C9A227] border-t-[#F8F4EC]" />
+        </StateCard>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-cream">
-        <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-10 text-center border border-border-primary">
-          <div className="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white shadow-xl">
-            <svg className="h-10 w-10 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-black text-black mb-2 uppercase tracking-tighter">{t('payment.paymentFailed')}</h2>
-          <p className="text-secondary-brown font-bold opacity-60 italic mb-8">{error}</p>
-          <div className="space-y-4">
-            <button
-              onClick={handleRetry}
-              className="w-full bg-black text-white font-black uppercase tracking-widest py-4 px-4 rounded-xl shadow-xl hover:bg-gold hover:text-black transition-all duration-300 transform hover:-translate-y-1"
-            >
-              {t('common.tryAgain', 'Try Again')}
-            </button>
-            <button
-              onClick={() => navigate('/booking')}
-              className="w-full bg-white text-secondary-brown font-black uppercase tracking-widest py-4 px-4 rounded-xl border border-border-primary hover:bg-cream transition-colors"
-            >
-              {t('common.back')}
-            </button>
-          </div>
-        </div>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <StateCard
+          icon={XCircleIcon}
+          title={t('payment.paymentFailed')}
+          message={error}
+          accent="bg-red-100 text-red-600"
+        >
+          <button type="button" onClick={handleRetry} className={`${blackButton} w-full`}>
+            {t('common.tryAgain', 'Try Again')}
+          </button>
+          <button type="button" onClick={() => navigate('/booking')} className={`${outlineButton} w-full`}>
+            {t('common.back')}
+          </button>
+        </StateCard>
       </div>
     );
   }
 
   if (paymentStatus === 'success') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-cream">
-        <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-10 text-center border border-border-primary">
-          <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white shadow-xl">
-            <svg className="h-10 w-10 text-success animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-black text-black mb-2 uppercase tracking-tighter">{t('payment.paymentSuccess')}</h2>
-          <p className="text-secondary-brown font-bold opacity-60 italic mb-8">
-            {t('payment.redirecting')} {countdown} {t('common.seconds')}
-          </p>
-          <div className="space-y-4">
-            <button
-              onClick={() => navigate('/queue')}
-              className="w-full bg-black text-white font-black uppercase tracking-widest py-4 px-4 rounded-xl shadow-xl hover:bg-gold hover:text-black transition-all duration-300 transform hover:-translate-y-1"
-            >
-              {t('queue.title')}
-            </button>
-            <button
-              onClick={() => navigate('/profile')}
-              className="w-full bg-white text-secondary-brown font-black uppercase tracking-widest py-4 px-4 rounded-xl border border-border-primary hover:bg-cream transition-colors"
-            >
-              {t('profile.title')}
-            </button>
-          </div>
-        </div>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <StateCard
+          icon={CheckCircleIcon}
+          title={t('payment.paymentSuccess')}
+          message={`${t('payment.redirecting')} ${countdown} ${t('common.seconds')}`}
+          accent="bg-green-100 text-green-600"
+        >
+          <button type="button" onClick={() => navigate('/queue')} className={`${blackButton} w-full`}>
+            {t('queue.title')}
+          </button>
+          <button type="button" onClick={() => navigate('/profile')} className={`${outlineButton} w-full`}>
+            {t('profile.title')}
+          </button>
+        </StateCard>
       </div>
     );
   }
 
   if (paymentStatus === 'failed') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-cream">
-        <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-10 text-center border border-border-primary">
-          <div className="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white shadow-xl">
-            <svg className="h-10 w-10 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-black text-black mb-2 uppercase tracking-tighter">{t('payment.paymentFailed')}</h2>
-          <p className="text-secondary-brown font-bold opacity-60 italic mb-8">
-            {t('payment.paymentFailedMessage', 'Your payment could not be processed. Please try again.')}
-          </p>
-          <div className="space-y-4">
-            <button
-              onClick={handleRetry}
-              className="w-full bg-black text-white font-black uppercase tracking-widest py-4 px-4 rounded-xl shadow-xl hover:bg-gold hover:text-black transition-all duration-300 transform hover:-translate-y-1"
-            >
-              {t('common.tryAgain')}
-            </button>
-            <button
-              onClick={() => navigate('/booking')}
-              className="w-full bg-white text-secondary-brown font-black uppercase tracking-widest py-4 px-4 rounded-xl border border-border-primary hover:bg-cream transition-colors"
-            >
-              {t('common.back')}
-            </button>
-          </div>
-        </div>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <StateCard
+          icon={XCircleIcon}
+          title={t('payment.paymentFailed')}
+          message={t('payment.paymentFailedMessage', 'Your payment could not be processed. Please try again.')}
+          accent="bg-red-100 text-red-600"
+        >
+          <button type="button" onClick={handleRetry} className={`${blackButton} w-full`}>
+            {t('common.tryAgain')}
+          </button>
+          <button type="button" onClick={() => navigate('/booking')} className={`${outlineButton} w-full`}>
+            {t('common.back')}
+          </button>
+        </StateCard>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-border-primary">
-          <div className="bg-black px-8 py-10 text-white relative">
-            <div className="absolute top-0 right-0 p-8 opacity-10 text-6xl">💳</div>
-            <h1 className="text-4xl font-black mb-2 uppercase tracking-tighter italic">
-              <span className="text-gold">Premium</span> {t('payment.title')}
-            </h1>
-            <p className="text-secondary-brown font-bold">{t('payment.advancePayment')}</p>
+    <div className="space-y-8 lg:space-y-10">
+      <section className="rounded-[32px] border border-black/5 bg-white px-6 py-10 shadow-sm sm:px-8 lg:px-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <span className="inline-flex rounded-full bg-[#C9A227] px-3 py-1 text-sm font-medium text-[#0F0F0F]">Secure payment</span>
+            <h1 className="mt-4 text-4xl font-bold tracking-[-0.05em] text-[#0F0F0F] sm:text-5xl">Complete the advance payment to secure your appointment.</h1>
+            <p className="mt-4 text-base leading-8 text-gray-700">
+              Review your booking details, pay the required advance, and return to the live queue with confirmation in place.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_0.85fr]">
+        <section className="rounded-[32px] border border-black/5 bg-white shadow-sm">
+          <div className="border-b border-gray-100 px-6 py-6 sm:px-8">
+            <h2 className="text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Booking summary</h2>
+            <p className="mt-2 text-base text-gray-700">A quick review of the appointment you are confirming.</p>
           </div>
 
           {currentAppointment && (
-            <div className="p-8 border-b border-border-primary bg-white">
-              <h2 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic mb-6">
-                {t('booking.yourBooking')}
-              </h2>
-              <div className="bg-cream rounded-2xl p-8 space-y-4 border border-border-primary/50 shadow-inner">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">{t('booking.service')}</span>
-                  <span className="font-black text-black">
-                    {currentAppointment.service?.name?.en || t('common.service')}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">{t('booking.date')}</span>
-                  <span className="font-black text-black">
-                    {new Date(currentAppointment.scheduledDate).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">{t('booking.time')}</span>
-                  <span className="font-black text-black">
-                    {currentAppointment.scheduledTime}
-                  </span>
-                </div>
-                <div className="pt-6 border-t border-border-primary/50 mt-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">{t('payment.totalAmount')}</span>
-                    <span className="text-xl font-black text-black">
-                      {currentAppointment.payment?.totalAmount} <span className="text-[10px] opacity-40">ETB</span>
-                    </span>
+            <div className="px-6 py-6 sm:px-8">
+              <div className="rounded-[28px] bg-[#F8F4EC] p-6">
+                <div className="space-y-4">
+                  {[
+                    [t('booking.service'), currentAppointment.service?.name?.en || t('common.service')],
+                    [t('booking.date'), new Date(currentAppointment.scheduledDate).toLocaleDateString()],
+                    [t('booking.time'), currentAppointment.scheduledTime]
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex items-center justify-between gap-4 border-b border-black/5 pb-4">
+                      <span className="text-sm font-medium text-[#3B2F2F]/60">{label}</span>
+                      <span className="text-base font-medium text-[#0F0F0F]">{value}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between gap-4 border-b border-black/5 pb-4">
+                    <span className="text-sm font-medium text-[#3B2F2F]/60">{t('payment.totalAmount')}</span>
+                    <span className="text-xl font-bold tracking-[-0.03em] text-[#0F0F0F]">{currentAppointment.payment?.totalAmount} ETB</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gold italic">{t('payment.advancePayment')} Due</span>
-                    <span className="text-2xl font-black text-gold">
-                      {currentAppointment.payment?.advanceAmount} <span className="text-[10px] opacity-40">ETB</span>
-                    </span>
+                  <div className="flex items-center justify-between gap-4 pt-2">
+                    <span className="text-xl font-bold tracking-[-0.03em] text-[#0F0F0F]">{t('payment.advancePayment')} due</span>
+                    <span className="text-2xl font-bold tracking-[-0.03em] text-[#C9A227]">{currentAppointment.payment?.advanceAmount} ETB</span>
                   </div>
                 </div>
               </div>
             </div>
           )}
+        </section>
 
-          <div className="p-8 pb-10">
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic mb-6">
-              {t('payment.paymentMethod')}
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="group border-2 border-border-primary rounded-2xl p-6 hover:border-gold transition-all duration-300 bg-white shadow-sm hover:shadow-xl cursor-pointer" onClick={handlePaymentRedirect}>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center">
-                    <img 
-                      src="https://chapa.co/logo.png" 
-                      alt="Chapa" 
-                      className="h-6 mr-3 grayscale group-hover:grayscale-0 transition-all"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/100x30?text=Chapa';
-                      }}
-                    />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-black">Chapa Secure</span>
-                  </div>
-                  <Badge variant="gold" size="sm" className="scale-75 origin-right">
-                    {t('common.recommended')}
-                  </Badge>
-                </div>
-                <p className="text-xs font-bold text-secondary-brown opacity-60 mb-8 h-10">
-                  {t('payment.chapaDescription', 'Telebirr, CBE Birr, or any local bank card.')}
-                </p>
-                <Button
-                  variant="black"
-                  fullWidth
-                  className="group-hover:bg-gold group-hover:text-black transition-colors"
-                >
-                  Pay {currentAppointment?.payment?.advanceAmount || '0'} ETB
-                </Button>
-              </div>
-
-              <div className="group border-2 border-dashed border-border-primary rounded-2xl p-6 hover:border-secondary-brown hover:bg-cream transition-all duration-300 shadow-sm cursor-pointer" onClick={() => navigate('/queue')}>
-                <div className="flex items-center mb-6">
-                  <div className="p-3 bg-white rounded-xl shadow-sm mr-4 text-2xl">⏳</div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown">{t('payment.payLater')}</span>
-                </div>
-                <p className="text-xs font-bold text-secondary-brown opacity-60 mb-8 h-10">
-                  {t('payment.payLaterDescription', 'Proceed to queue and pay the advance on arrival.')}
-                </p>
-                <Button
-                  variant="outline"
-                  fullWidth
-                  className="group-hover:border-black group-hover:text-black"
-                >
-                  Skip for Now
-                </Button>
-              </div>
+        <section className="rounded-[32px] border border-black/5 bg-white px-6 py-6 shadow-sm sm:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0F0F0F] text-[#C9A227]">
+              <CreditCardIcon className="h-6 w-6" />
             </div>
-
-            <div className="mt-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-30">
-              <svg className="h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <span>{t('payment.securePayment', 'Powered by chapa technology')}</span>
+            <div>
+              <h2 className="text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Payment method</h2>
+              <p className="mt-1 text-base text-gray-700">Choose how you want to continue.</p>
             </div>
           </div>
 
-          {paymentStatus === 'processing' && (
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-white rounded-3xl p-10 max-w-sm mx-4 text-center border border-gold/20 shadow-2xl">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-gold border-r-gold border-b-border-primary border-l-border-primary mx-auto mb-8"></div>
-                <h3 className="text-xl font-black text-black mb-2 uppercase tracking-tight">{t('payment.processing')}</h3>
-                <p className="text-secondary-brown font-bold opacity-60 italic mb-8">
-                  {t('payment.waitingConfirmation', 'Please complete the payment in the system tab.')}
-                </p>
-                <button
-                  onClick={() => setPaymentStatus('pending')}
-                  className="text-[10px] font-black uppercase tracking-widest text-error hover:scale-110 transition-transform"
-                >
-                  {t('common.cancel')}
-                </button>
+          <div className="mt-6 space-y-4">
+            <button
+              type="button"
+              onClick={handlePaymentRedirect}
+              className="w-full rounded-3xl border border-gray-100 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:border-[#C9A227]/40 hover:shadow-md"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-lg font-bold text-[#0F0F0F]">Chapa secure payment</p>
+                  <p className="mt-2 text-base leading-7 text-gray-700">
+                    Telebirr, CBE Birr, or local bank card in one secure redirect flow.
+                  </p>
+                </div>
+                <span className="rounded-full bg-[#C9A227] px-3 py-1 text-sm font-medium text-[#0F0F0F]">
+                  {t('common.recommended')}
+                </span>
               </div>
+              <div className="mt-5">
+                <span className={blackButton}>Pay {currentAppointment?.payment?.advanceAmount || '0'} ETB</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/queue')}
+              className="w-full rounded-3xl border border-dashed border-gray-200 bg-[#F8F4EC]/50 p-5 text-left transition-colors duration-300 hover:border-[#C9A227]/40"
+            >
+              <p className="text-lg font-bold text-[#0F0F0F]">{t('payment.payLater')}</p>
+              <p className="mt-2 text-base leading-7 text-gray-700">
+                {t('payment.payLaterDescription', 'Proceed to queue and pay the advance on arrival.')}
+              </p>
+              <div className="mt-5">
+                <span className={outlineButton}>Skip for now</span>
+              </div>
+            </button>
+          </div>
+
+          <div className="mt-8 rounded-3xl border border-[#C9A227]/20 bg-[linear-gradient(135deg,#fff_0%,#f7f2e7_100%)] p-5">
+            <div className="flex items-start gap-3">
+              <ShieldCheckIcon className="mt-0.5 h-5 w-5 text-[#C9A227]" />
+              <p className="text-sm leading-7 text-gray-700">
+                Powered by secure payment processing. Confirmation is checked automatically after you complete payment in the provider tab.
+              </p>
             </div>
-          )}
-        </div>
+          </div>
+        </section>
       </div>
+
+      {paymentStatus === 'processing' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#0F0F0F]/55 backdrop-blur-sm" />
+          <div className="relative z-10 w-full max-w-md rounded-[32px] border border-black/5 bg-white p-8 text-center shadow-2xl">
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-[#C9A227] border-t-[#F8F4EC]" />
+            <h3 className="mt-6 text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">{t('payment.processing')}</h3>
+            <p className="mt-4 text-base leading-7 text-gray-700">
+              {t('payment.waitingConfirmation', 'Please complete the payment in the provider tab while we wait for confirmation here.')}
+            </p>
+            <button type="button" onClick={() => setPaymentStatus('pending')} className={`${outlineButton} mt-8 w-full`}>
+              {t('common.cancel')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

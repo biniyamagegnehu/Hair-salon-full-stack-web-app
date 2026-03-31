@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchMyAppointments } from '../../store/slices/appointmentSlice';
 import { updatePhoneNumber } from '../../store/slices/authSlice';
-import Button from '../../components/ui/Button/Button';
-import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
-import Badge from '../../components/ui/Badge/Badge';
-import Input from '../../components/ui/Input/Input';
-import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-import './ProfilePage.css';
+
+const primaryButton = 'bg-[#0F0F0F] text-white px-6 py-3 rounded-lg hover:bg-[#2A2A2A] transition-all duration-300 font-medium shadow-md hover:shadow-lg';
+const goldButton = 'bg-[#C9A227] text-[#0F0F0F] px-6 py-3 rounded-lg hover:bg-[#DAA520] transition-all duration-300 font-medium shadow-md';
+const outlineButton = 'border-2 border-[#C9A227] text-[#C9A227] px-6 py-3 rounded-lg hover:bg-[#C9A227] hover:text-[#0F0F0F] transition-all duration-300';
+const inputClass = 'w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:border-transparent transition-all duration-300';
 
 const ProfilePage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, isLoading: authLoading } = useSelector((state) => state.auth);
   const { appointments, isLoading: appointmentsLoading } = useSelector((state) => state.appointments);
-  
+
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [phoneError, setPhoneError] = useState('');
@@ -26,7 +26,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     dispatch(fetchMyAppointments());
-    
+
     const params = new URLSearchParams(location.search);
     if (params.get('phoneRequired') === 'true') {
       setShowPhoneModal(true);
@@ -54,15 +54,22 @@ const ProfilePage = () => {
     setUpdatingPhone(false);
   };
 
-  const getStatusVariant = (status) => {
+  const getStatusClasses = (status) => {
     switch (status) {
-      case 'CONFIRMED': return 'success';
-      case 'PENDING_PAYMENT': return 'gold';
-      case 'CHECKED_IN': return 'black';
-      case 'IN_PROGRESS': return 'gold';
-      case 'COMPLETED': return 'cream';
-      case 'CANCELLED': return 'error';
-      default: return 'brown';
+      case 'CONFIRMED':
+        return 'bg-[#C9A227] text-[#0F0F0F]';
+      case 'PENDING_PAYMENT':
+        return 'bg-[#3B2F2F] text-white';
+      case 'CHECKED_IN':
+        return 'bg-[#0F0F0F] text-white';
+      case 'IN_PROGRESS':
+        return 'bg-[#F8F4EC] text-[#0F0F0F] border border-[#C9A227]/30';
+      case 'COMPLETED':
+        return 'bg-green-100 text-green-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-[#F8F4EC] text-[#3B2F2F]';
     }
   };
 
@@ -76,181 +83,165 @@ const ProfilePage = () => {
   };
 
   const getDateParts = (dateString) => {
-    const d = new Date(dateString);
+    const date = new Date(dateString);
     return {
-      day: d.getDate(),
-      month: d.toLocaleString('en-US', { month: 'short' }).toUpperCase()
+      day: date.getDate(),
+      month: date.toLocaleString('en-US', { month: 'short' }).toUpperCase()
     };
   };
 
   if (authLoading) {
     return (
-      <div className="container py-20">
-        <div className="profile-grid">
-          <Skeleton height="400px" variant="rectangle" />
-          <Skeleton height="600px" variant="rectangle" />
-        </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+        <Skeleton height="420px" variant="rectangle" className="rounded-[32px]" />
+        <Skeleton height="620px" variant="rectangle" className="rounded-[32px]" />
       </div>
     );
   }
 
   return (
-    <div className="profile-page animate-fade-in">
-      <div className="container">
-        <div className="mb-12">
-          <Badge variant="gold" className="mb-4">Member Profile</Badge>
-          <h1 className="text-5xl font-black text-black">Member Dashboard</h1>
-        </div>
+    <div className="space-y-8 lg:space-y-10">
+      <section className="rounded-[32px] border border-black/5 bg-white px-6 py-10 shadow-sm sm:px-8 lg:px-10">
+        <span className="inline-flex rounded-full bg-[#C9A227] px-3 py-1 text-sm font-medium text-[#0F0F0F]">Member profile</span>
+        <h1 className="mt-4 text-4xl font-bold tracking-[-0.05em] text-[#0F0F0F] sm:text-5xl">Your appointment history and profile details in one place.</h1>
+        <p className="mt-4 max-w-3xl text-base leading-8 text-gray-700">
+          Review past and upcoming appointments, keep your contact details current, and stay ready for booking and queue updates.
+        </p>
+      </section>
 
-        <div className="profile-grid">
-          {/* Sidebar / User Info */}
-          <div className="user-sidebar">
-            <Card variant="gold-border" className="overflow-visible" fullHeight={false}>
-              <CardBody className="p-8">
-                <div className="profile-avatar-container">
-                  <div className="profile-avatar">
-                    {user?.fullName?.charAt(0).toUpperCase()}
-                  </div>
-                </div>
-                
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-black text-black mb-1">{user?.fullName}</h2>
-                  <Badge variant="brown" size="sm" className="uppercase tracking-widest">{user?.role}</Badge>
-                </div>
-
-                <div className="space-y-2 mb-8">
-                  <div className="profile-info-item">
-                    <span className="profile-info-label">Phone</span>
-                    <span className="profile-info-value">{user?.phoneNumber}</span>
-                  </div>
-                  {user?.email && (
-                    <div className="profile-info-item">
-                      <span className="profile-info-label">Email</span>
-                      <span className="profile-info-value">{user.email}</span>
-                    </div>
-                  )}
-                  <div className="profile-info-item">
-                    <span className="profile-info-label">Joined</span>
-                    <span className="profile-info-value">{formatDate(user?.createdAt)}</span>
-                  </div>
-                </div>
-
-                <Button 
-                  variant="outline" 
-                  fullWidth 
-                  size="sm"
-                  onClick={() => setShowPhoneModal(true)}
-                >
-                  Edit Information
-                </Button>
-              </CardBody>
-            </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+        <section className="rounded-[32px] border border-black/5 bg-white p-6 shadow-sm sm:p-8">
+          <div className="rounded-[28px] bg-[#0F0F0F] p-8 text-center text-white">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-[#C9A227]/30 bg-[#C9A227]/10 text-4xl font-bold text-[#C9A227]">
+              {user?.fullName?.charAt(0).toUpperCase()}
+            </div>
+            <h2 className="mt-6 text-3xl font-bold tracking-[-0.04em]">{user?.fullName}</h2>
+            <span className="mt-3 inline-flex rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white">{user?.role}</span>
           </div>
 
-          {/* Appointment History */}
-          <div className="appointment-history-section">
-            <Card className="appointment-history-card" fullHeight={true}>
-              <CardHeader className="flex justify-between items-center p-8 bg-black text-white rounded-t-xl">
-                <div>
-                  <h3 className="text-xl font-black uppercase tracking-widest">Appointment Archive</h3>
-                  <p className="text-xs text-gold font-bold">Your journey with us</p>
-                </div>
-                <Badge variant="gold">{appointments.length} Total</Badge>
-              </CardHeader>
-              
-              <CardBody className="p-8">
-                {appointmentsLoading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map(i => <Skeleton key={i} height="100px" variant="rectangle" />)}
-                  </div>
-                ) : appointments.length === 0 ? (
-                  <div className="empty-history">
-                    <span className="empty-icon">✂️</span>
-                    <p className="text-xl font-bold opacity-30 mb-6">No appointments found.</p>
-                    <Button variant="gold" onClick={() => window.location.href = '/booking'}>
-                      Book Your First Session
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="appointment-list">
-                    {appointments.map((appointment) => {
-                      const { day, month } = getDateParts(appointment.scheduledDate);
-                      return (
-                        <div key={appointment.id} className="appointment-item">
-                          <div className="apt-date-box">
-                            <span className="apt-month">{month}</span>
-                            <span className="apt-day">{day}</span>
+          <div className="mt-6 space-y-4">
+            {[
+              ['Phone', user?.phoneNumber || 'Not set'],
+              ['Email', user?.email || 'Not provided'],
+              ['Joined', formatDate(user?.createdAt)]
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-2xl bg-[#F8F4EC] px-4 py-4">
+                <p className="text-sm font-medium text-[#3B2F2F]/60">{label}</p>
+                <p className="mt-2 text-base font-medium text-[#0F0F0F]">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          <button type="button" onClick={() => setShowPhoneModal(true)} className={`${outlineButton} mt-6 w-full`}>
+            Edit information
+          </button>
+        </section>
+
+        <section className="rounded-[32px] border border-black/5 bg-white shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-gray-100 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <div>
+              <h2 className="text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Appointment history</h2>
+              <p className="mt-2 text-base text-gray-700">A clean timeline of your sessions with current service status.</p>
+            </div>
+            <span className="inline-flex rounded-full bg-[#C9A227] px-3 py-1 text-sm font-medium text-[#0F0F0F]">
+              {appointments.length} total
+            </span>
+          </div>
+
+          <div className="px-6 py-6 sm:px-8">
+            {appointmentsLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((item) => (
+                  <Skeleton key={item} height="112px" variant="rectangle" className="rounded-3xl" />
+                ))}
+              </div>
+            ) : appointments.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-gray-200 bg-[#F8F4EC]/50 px-6 py-16 text-center">
+                <p className="text-2xl font-bold tracking-[-0.03em] text-[#0F0F0F]">No appointments yet.</p>
+                <p className="mt-3 text-base leading-7 text-gray-700">Once you book your first session, it will appear here for easy tracking.</p>
+                <button type="button" onClick={() => navigate('/booking')} className={`${goldButton} mt-6`}>
+                  Book your first session
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {appointments.map((appointment) => {
+                  const { day, month } = getDateParts(appointment.scheduledDate);
+                  return (
+                    <article key={appointment.id || appointment._id} className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-md">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex items-start gap-4">
+                          <div className="flex min-h-[72px] min-w-[72px] flex-col items-center justify-center rounded-2xl bg-[#0F0F0F] text-white">
+                            <span className="text-xs font-medium tracking-[0.18em] text-[#C9A227]">{month}</span>
+                            <span className="mt-1 text-2xl font-bold tracking-[-0.03em]">{day}</span>
                           </div>
-                          
-                          <div className="apt-content">
-                            <h4 className="apt-title">
-                              {appointment.service?.name?.en || 'Premium Service'}
-                            </h4>
-                            <p className="apt-meta">
-                              {appointment.scheduledTime} • {appointment.service?.duration || 30} Minutes
-                            </p>
-                          </div>
-                          
-                          <div className="apt-status text-right">
-                            <Badge 
-                              variant={getStatusVariant(appointment.status)}
-                              size="sm"
-                              className="mb-2"
-                            >
-                              {appointment.status.replace('_', ' ')}
-                            </Badge>
-                            {appointment.queuePosition && (
-                              <p className="text-xs font-black text-gold uppercase tracking-tighter">
-                                POS #{appointment.queuePosition}
-                              </p>
-                            )}
+                          <div>
+                            <h3 className="text-2xl font-bold tracking-[-0.03em] text-[#0F0F0F]">{appointment.service?.name?.en || 'Premium Service'}</h3>
+                            <p className="mt-2 text-base text-gray-700">{appointment.scheduledTime} • {appointment.service?.duration || 30} minutes</p>
+                            <p className="mt-2 text-sm text-[#3B2F2F]/60">{formatDate(appointment.scheduledDate)}</p>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardBody>
-            </Card>
+
+                        <div className="flex flex-col gap-3 lg:items-end">
+                          <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${getStatusClasses(appointment.status)}`}>
+                            {appointment.status.replace('_', ' ')}
+                          </span>
+                          {appointment.queuePosition && (
+                            <p className="text-sm font-medium text-[#C9A227]">Queue position #{appointment.queuePosition}</p>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </div>
+        </section>
       </div>
 
-      {/* Phone Modal */}
-      <Modal isOpen={showPhoneModal} onClose={() => setShowPhoneModal(false)}>
-        <ModalHeader>Update Phone Number</ModalHeader>
-        <ModalContent>
-          <div className="py-4">
-            <p className="text-secondary-brown opacity-60 mb-6 font-medium">
-              We use your phone number to coordinate appointments and send vital updates about your session.
+      {showPhoneModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button type="button" className="absolute inset-0 bg-[#0F0F0F]/55 backdrop-blur-sm" onClick={() => setShowPhoneModal(false)} aria-label="Close phone update dialog" />
+          <div className="relative z-10 w-full max-w-lg rounded-[32px] border border-black/5 bg-white p-8 shadow-2xl">
+            <h3 className="text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Update phone number</h3>
+            <p className="mt-4 text-base leading-7 text-gray-700">
+              We use your phone number for appointment coordination and important updates related to your visit.
             </p>
-            <Input
-              label="Phone Number"
-              type="tel"
-              value={phoneNumber}
-              onChange={(e) => {
-                setPhoneNumber(e.target.value);
-                setPhoneError('');
-              }}
-              placeholder="+251911223344"
-              error={phoneError}
-              helperText="Format: +251 9/7 [8 digits]"
-            />
+
+            <div className="mt-6">
+              <label htmlFor="profile-phone" className="block text-sm font-medium text-gray-600">Phone Number</label>
+              <input
+                id="profile-phone"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => {
+                  setPhoneNumber(e.target.value);
+                  setPhoneError('');
+                }}
+                placeholder="+251911223344"
+                className={`${inputClass} mt-2`}
+              />
+              {phoneError ? (
+                <p className="mt-2 text-sm text-red-600">{phoneError}</p>
+              ) : (
+                <p className="mt-2 text-sm text-gray-500">Format: +251 9/7 [8 digits]</p>
+              )}
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button type="button" onClick={() => setShowPhoneModal(false)} className={`${outlineButton} sm:flex-1`}>
+                Discard
+              </button>
+              <button type="button" onClick={handleUpdatePhone} disabled={updatingPhone} className={`${goldButton} sm:flex-1 ${updatingPhone ? 'cursor-not-allowed opacity-70' : ''}`}>
+                {updatingPhone ? 'Saving...' : 'Save changes'}
+              </button>
+            </div>
           </div>
-        </ModalContent>
-        <ModalFooter>
-          <Button variant="outline" onClick={() => setShowPhoneModal(false)}>Discard</Button>
-          <Button 
-            variant="gold" 
-            isLoading={updatingPhone} 
-            onClick={handleUpdatePhone}
-          >
-            Save Changes
-          </Button>
-        </ModalFooter>
-      </Modal>
+        </div>
+      )}
     </div>
   );
 };
 
-export default ProfilePage;
+export default ProfilePage;

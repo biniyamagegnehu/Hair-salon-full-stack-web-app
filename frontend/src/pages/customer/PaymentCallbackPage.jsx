@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { verifyPayment } from '../../store/slices/paymentSlice';
-
 import PaymentSuccessPage from './PaymentSuccessPage';
 import PaymentFailurePage from './PaymentFailurePage';
 
@@ -10,7 +10,7 @@ const PaymentCallbackPage = () => {
   const dispatch = useDispatch();
   const { appointmentId } = useParams();
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState('verifying'); // 'verifying', 'success', 'failed'
+  const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
 
   const transactionId = searchParams.get('transaction_id');
@@ -52,36 +52,29 @@ const PaymentCallbackPage = () => {
 
   if (status === 'verifying') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-cream">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-2xl border border-border-primary max-w-sm w-full">
-          <div className="relative mx-auto mb-6 w-20 h-20">
-            <div className="absolute inset-0 animate-ping rounded-full bg-gold/20 opacity-75"></div>
-            <div className="relative animate-spin rounded-full h-20 w-20 border-4 border-t-gold border-r-gold border-b-border-primary border-l-border-primary"></div>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="w-full max-w-md rounded-[32px] border border-black/5 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#F8F4EC] text-[#C9A227]">
+            <ArrowPathIcon className="h-10 w-10 animate-spin" />
           </div>
-          <h3 className="text-xl font-black text-black mb-2 tracking-tight uppercase">Verifying Payment...</h3>
-          <p className="text-secondary-brown font-bold opacity-40">Please do not close this page.</p>
+          <h3 className="mt-6 text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Verifying payment</h3>
+          <p className="mt-4 text-base leading-8 text-gray-700">Please keep this page open while we confirm the provider response.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-cream flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 sm:p-10 text-center relative overflow-hidden border border-border-primary">
-        {/* Subtle decorative background blob */}
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-gold/10 opacity-50 blur-2xl"></div>
-        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-32 h-32 rounded-full bg-gold/10 opacity-50 blur-2xl"></div>
-
-        <div className="relative z-10">
-          {status === 'success' ? (
-            <PaymentSuccessPage message={message} appointmentId={appointmentId} />
-          ) : (
-            <PaymentFailurePage message={message} appointmentId={appointmentId} />
-          )}
-        </div>
+    <div className="min-h-[70vh] flex items-center justify-center">
+      <div className="w-full max-w-xl rounded-[32px] border border-black/5 bg-white p-8 text-center shadow-sm sm:p-10">
+        {status === 'success' ? (
+          <PaymentSuccessPage message={message} appointmentId={appointmentId} />
+        ) : (
+          <PaymentFailurePage message={message} appointmentId={appointmentId} />
+        )}
       </div>
     </div>
   );
 };
 
-export default PaymentCallbackPage;
+export default PaymentCallbackPage;

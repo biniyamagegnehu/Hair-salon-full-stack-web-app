@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 
-const PaymentSuccessPage = ({ message, appointmentId }) => {
+const blackButton = 'bg-[#0F0F0F] text-white px-6 py-3 rounded-lg hover:bg-[#2A2A2A] transition-all duration-300 font-medium shadow-md hover:shadow-lg';
+const outlineButton = 'border-2 border-[#C9A227] text-[#C9A227] px-6 py-3 rounded-lg hover:bg-[#C9A227] hover:text-[#0F0F0F] transition-all duration-300';
+
+const PaymentSuccessPage = ({ message }) => {
   const navigate = useNavigate();
   const { width, height } = useWindowSize();
   const [countdown, setCountdown] = useState(5);
 
-  // Auto redirect countdown
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -26,41 +29,23 @@ const PaymentSuccessPage = ({ message, appointmentId }) => {
 
   return (
     <>
-      <Confetti
-        width={width}
-        height={height}
-        recycle={false}
-        numberOfPieces={400}
-        gravity={0.15}
-      />
-      <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-white">
-        <svg className="h-10 w-10 text-success animate-[bounce_1s_ease-in-out_infinite]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-        </svg>
+      <Confetti width={width} height={height} recycle={false} numberOfPieces={320} gravity={0.15} />
+      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-600">
+        <CheckCircleIcon className="h-10 w-10" />
       </div>
-      <h2 className="text-4xl font-black text-black mb-3 tracking-tighter uppercase">Payment Successful!</h2>
-      <p className="text-secondary-brown font-bold opacity-60 text-lg mb-8 leading-relaxed max-w-sm mx-auto italic">
+      <h2 className="mt-6 text-4xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Payment successful</h2>
+      <p className="mt-4 text-base leading-8 text-gray-700">
         {message || 'Your appointment is now confirmed.'}
       </p>
-      
-      <div className="bg-cream rounded-2xl p-6 mb-8 border border-border-primary">
-        <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown mb-2 opacity-40">
-          Redirecting to your queue position in <span className="text-gold">{countdown}</span> seconds...
-        </p>
+      <div className="mt-6 rounded-2xl bg-[#F8F4EC] px-5 py-4">
+        <p className="text-sm font-medium text-[#3B2F2F]/65">Redirecting to your queue position in <span className="text-[#C9A227]">{countdown}</span> seconds.</p>
       </div>
-
-      <div className="space-y-4">
-        <button
-          onClick={() => navigate('/queue')}
-          className="w-full bg-black text-white font-black uppercase tracking-widest py-4 px-4 rounded-xl shadow-xl hover:bg-gold hover:text-black transition-all duration-300 transform hover:-translate-y-1"
-        >
-          View Live Queue
+      <div className="mt-8 space-y-3">
+        <button type="button" onClick={() => navigate('/queue')} className={`${blackButton} w-full`}>
+          View live queue
         </button>
-        <button
-          onClick={() => navigate('/profile')}
-          className="w-full bg-white text-secondary-brown font-black uppercase tracking-widest py-4 px-4 rounded-xl border border-border-primary hover:bg-cream transition-colors mt-4"
-        >
-          My Appointments
+        <button type="button" onClick={() => navigate('/profile')} className={`${outlineButton} w-full`}>
+          My appointments
         </button>
       </div>
     </>

@@ -1,33 +1,28 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { XCircleIcon } from '@heroicons/react/24/outline';
+
+const blackButton = 'bg-[#0F0F0F] text-white px-6 py-3 rounded-lg hover:bg-[#2A2A2A] transition-all duration-300 font-medium shadow-md hover:shadow-lg';
+const outlineButton = 'border-2 border-[#C9A227] text-[#C9A227] px-6 py-3 rounded-lg hover:bg-[#C9A227] hover:text-[#0F0F0F] transition-all duration-300';
 
 const PaymentFailurePage = ({ message, appointmentId }) => {
   const navigate = useNavigate();
 
   return (
     <>
-      <div className="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-white">
-        <svg className="h-10 w-10 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100 text-red-600">
+        <XCircleIcon className="h-10 w-10" />
       </div>
-      <h2 className="text-4xl font-black text-black mb-3 tracking-tighter uppercase">Payment Failed</h2>
-      <p className="text-secondary-brown font-bold opacity-60 text-lg mb-8 leading-relaxed max-w-sm mx-auto italic">
+      <h2 className="mt-6 text-4xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Payment failed</h2>
+      <p className="mt-4 text-base leading-8 text-gray-700">
         {message || 'Your payment could not be completed.'}
       </p>
-
-      <div className="space-y-4">
-        <button
-          onClick={() => navigate(`/payment/${appointmentId}`)}
-          className="w-full bg-black text-white font-black uppercase tracking-widest py-4 px-4 rounded-xl shadow-xl hover:bg-gold hover:text-black transition-all duration-300 transform hover:-translate-y-1"
-        >
-          Try Payment Again
+      <div className="mt-8 space-y-3">
+        <button type="button" onClick={() => navigate(`/payment/${appointmentId}`)} className={`${blackButton} w-full`}>
+          Try payment again
         </button>
-        <button
-          onClick={() => navigate('/booking')}
-          className="w-full bg-white text-secondary-brown font-black uppercase tracking-widest py-4 px-4 rounded-xl border border-border-primary hover:bg-cream transition-colors mt-4"
-        >
-          Book New Appointment
+        <button type="button" onClick={() => navigate('/booking')} className={`${outlineButton} w-full`}>
+          Book new appointment
         </button>
       </div>
     </>
