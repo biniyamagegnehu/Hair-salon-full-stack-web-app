@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-hot-toast';
 import {
   fetchRevenueReport,
   fetchAppointmentReport,
@@ -13,6 +14,7 @@ import Button from '../../components/ui/Button/Button';
 import Input from '../../components/ui/Input/Input';
 import Tabs from '../../components/ui/Tabs/Tabs';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
+import { ShareIcon } from '@heroicons/react/24/outline';
 import './AdminPages.css';
 
 const AdminReports = () => {
@@ -37,6 +39,24 @@ const AdminReports = () => {
     dispatch(fetchAppointmentReport({ startDate: dateRange.start, endDate: dateRange.end }));
     dispatch(fetchCustomerReport());
     dispatch(fetchServicePopularityReport());
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Salon Analytics Report',
+      text: `Performance Report (${dateRange.start} to ${dateRange.end})`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        toast.success('Report link copied to clipboard!');
+        navigator.clipboard.writeText(window.location.href);
+      }
+    } catch (err) {
+      console.log('Error sharing:', err);
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -137,9 +157,10 @@ const AdminReports = () => {
         </div>
         
         {/* Date Range Controller */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-black p-4 sm:p-6 rounded-2xl shadow-xl">
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-2">From</span>
+        {/* Date Range & Actions Controller */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-black p-4 sm:p-5 rounded-2xl shadow-xl w-full xl:w-auto">
+          <div className="flex items-center gap-3 flex-1 sm:flex-none">
+            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest sm:ml-2">From</span>
             <input
               type="date"
               value={dateRange.start}
@@ -147,7 +168,7 @@ const AdminReports = () => {
               className="flex-1 sm:flex-none px-4 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white focus:border-gold outline-none transition-colors"
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-1 sm:flex-none">
             <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">To</span>
             <input
               type="date"
@@ -156,20 +177,30 @@ const AdminReports = () => {
               className="flex-1 sm:flex-none px-4 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs font-bold text-white focus:border-gold outline-none transition-colors"
             />
           </div>
-          <div className="hidden sm:block h-8 w-px bg-white/10 mx-2" />
-          <Button
-            variant="gold"
-            size="sm"
-            className="w-full sm:w-auto"
-            onClick={() => {
-              setDateRange({
-                start: new Date(new Date().setDate(1)).toISOString().split('T')[0],
-                end: new Date().toISOString().split('T')[0]
-              });
-            }}
-          >
-            Current Month
-          </Button>
+          <div className="hidden sm:block h-8 w-px bg-white/10 mx-1" />
+          <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+            <Button
+              variant="gold"
+              size="sm"
+              className="flex-1 sm:flex-none"
+              onClick={() => {
+                setDateRange({
+                  start: new Date(new Date().setDate(1)).toISOString().split('T')[0],
+                  end: new Date().toISOString().split('T')[0]
+                });
+              }}
+            >
+              This Month
+            </Button>
+            <button
+              onClick={handleShare}
+              className="h-[38px] px-4 rounded-xl border border-white/20 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition-colors"
+              title="Share Report"
+            >
+              <ShareIcon className="w-4 h-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest sm:hidden lg:inline-block">Share</span>
+            </button>
+          </div>
         </div>
       </div>
           {/* Primary KPI Stats */}
