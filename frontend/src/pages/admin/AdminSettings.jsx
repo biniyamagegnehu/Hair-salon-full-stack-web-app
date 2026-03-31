@@ -17,12 +17,13 @@ import Skeleton from '../../components/ui/Skeleton/Skeleton';
 import './AdminPages.css';
 
 const AdminSettings = () => {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const dispatch = useDispatch();
   
   const { salonConfig, auditLogs, isLoading } = useSelector((state) => state.admin || {});
   
   const [activeTab, setActiveTab] = useState('general');
+  const [expandedSection, setExpandedSection] = useState('general'); // For mobile accordion
   const [formData, setFormData] = useState({
     salonName: { am: '', en: '' },
     location: { am: '', en: '' },
@@ -205,8 +206,31 @@ const AdminSettings = () => {
     { id: 'audit', label: t('settings.auditLogs', 'Audit Logs'), icon: '📋' }
   ];
 
+  const AccordionItem = ({ id, label, icon, children }) => {
+    return (
+      <div className={`mb-4 lg:mb-0 lg:block ${activeTab === id ? '' : 'lg:hidden'}`}>
+        <button 
+          className={`w-full p-5 flex justify-between items-center font-black uppercase text-sm lg:hidden bg-white border border-gray-100 shadow-sm ${expandedSection === id ? 'rounded-t-2xl' : 'rounded-2xl'}`}
+          onClick={() => setExpandedSection(expandedSection === id ? '' : id)}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-xl">{icon}</span> 
+            <span>{label}</span>
+          </div>
+          <span className="text-accent-gold text-lg">{expandedSection === id ? '−' : '+'}</span>
+        </button>
+        <div className={`
+          ${expandedSection === id ? 'block' : 'hidden lg:block'} 
+          p-5 lg:p-0 border-x border-b lg:border-none border-gray-100 rounded-b-2xl lg:rounded-none bg-white lg:bg-transparent
+        `}>
+          {children}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="admin-page animate-fade-in pb-20">
+    <div className="admin-page animate-fade-in pb-20 px-4 md:px-0">
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
@@ -214,16 +238,29 @@ const AdminSettings = () => {
           <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Global Settings</h1>
           <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Configure core salon parameters and security protocols</p>
         </div>
+        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+          <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50">Language</span>
+          <select 
+            className="bg-transparent font-black text-xs outline-none focus:text-accent-gold"
+            value={i18n.language}
+            onChange={(e) => i18n.changeLanguage(e.target.value)}
+          >
+            <option value="en">ENGLISH</option>
+            <option value="am">AMHARIC</option>
+          </select>
+        </div>
       </div>
 
-      <Tabs 
-        tabs={settingTabs} 
-        activeTab={activeTab} 
-        onChange={setActiveTab} 
-        className="mb-12" 
-      />
+      <div className="hidden lg:block">
+        <Tabs 
+          tabs={settingTabs} 
+          activeTab={activeTab} 
+          onChange={setActiveTab} 
+          className="mb-12" 
+        />
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
         <div className="lg:col-span-8">
           <Card className="min-h-[600px]">
             <CardBody className="p-8 md:p-12">
@@ -236,7 +273,7 @@ const AdminSettings = () => {
               ) : (
                 <>
                   {/* General Settings */}
-                  {activeTab === 'general' && (
+                  <AccordionItem id="general" label={t('settings.general', 'General')} icon="⚙️">
                     <div className="space-y-10 animate-fade-in">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
@@ -324,36 +361,50 @@ const AdminSettings = () => {
                       </div>
 
                       <div className="flex justify-end pt-4">
-                        <Button variant="gold" onClick={handleSaveGeneral}>
+                        <Button variant="gold" onClick={handleSaveGeneral} className="w-full md:w-auto">
                           Commit Core Settings
                         </Button>
                       </div>
                     </div>
-                  )}
+                  </AccordionItem>
 
                   {/* Working Hours */}
-                  {activeTab === 'working-hours' && (
+                  <AccordionItem id="working-hours" label={t('settings.workingHours', 'Working Hours')} icon="⏰">
                     <div className="space-y-6 animate-fade-in">
                       <div className="grid grid-cols-1 gap-4">
                         {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
-                          <div key={day} className={`flex items-center justify-between p-6 rounded-2xl border transition-all ${
+                          <div key={day} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 rounded-2xl border transition-all gap-4 ${
                             formData.workingHours?.[day]?.closed 
                               ? 'bg-zinc-50 border-zinc-100 opacity-50' 
                               : 'bg-white border-border-primary hover:border-gold'
                           }`}>
-                            <div className="flex items-center gap-6">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${
-                                formData.workingHours?.[day]?.closed ? 'bg-zinc-200 text-zinc-400' : 'bg-black text-white'
-                              }`}>
-                                {day.substring(0, 3).toUpperCase()}
+                            <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-start">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${
+                                  formData.workingHours?.[day]?.closed ? 'bg-zinc-200 text-zinc-400' : 'bg-black text-white'
+                                }`}>
+                                  {day.substring(0, 3).toUpperCase()}
+                                </div>
+                                <span className="font-black text-black uppercase text-sm tracking-tighter">
+                                  {t(`days.${day}`, day.charAt(0).toUpperCase() + day.slice(1))}
+                                </span>
                               </div>
-                              <span className="font-black text-black uppercase text-sm tracking-tighter">
-                                {t(`days.${day}`, day.charAt(0).toUpperCase() + day.slice(1))}
-                              </span>
+                              <label className="flex sm:hidden items-center gap-2 cursor-pointer group">
+                                <div 
+                                  onClick={() => handleWorkingHoursChange(day, 'closed', !formData.workingHours?.[day]?.closed)}
+                                  className={`w-12 h-6 rounded-full relative transition-colors ${
+                                    formData.workingHours?.[day]?.closed ? 'bg-zinc-200' : 'bg-gold'
+                                  }`}
+                                >
+                                  <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                                    formData.workingHours?.[day]?.closed ? 'translate-x-0' : 'translate-x-6'
+                                  }`} />
+                                </div>
+                              </label>
                             </div>
                             
-                            <div className="flex items-center gap-8">
-                              <label className="flex items-center gap-3 cursor-pointer group">
+                            <div className="flex items-center gap-4 sm:gap-8 w-full sm:w-auto justify-between sm:justify-start">
+                              <label className="hidden sm:flex items-center gap-3 cursor-pointer group">
                                 <div 
                                   onClick={() => handleWorkingHoursChange(day, 'closed', !formData.workingHours?.[day]?.closed)}
                                   className={`w-12 h-6 rounded-full relative transition-colors ${
@@ -370,19 +421,19 @@ const AdminSettings = () => {
                               </label>
 
                               {!formData.workingHours?.[day]?.closed && (
-                                <div className="flex items-center gap-3 bg-background-cream/50 p-2 rounded-xl border border-border-primary">
+                                <div className="flex items-center gap-3 bg-background-cream/50 p-2 rounded-xl border border-border-primary w-full sm:w-auto justify-center">
                                   <input
                                     type="time"
                                     value={formData.workingHours?.[day]?.open || '09:00'}
                                     onChange={(e) => handleWorkingHoursChange(day, 'open', e.target.value)}
-                                    className="bg-transparent font-black text-black text-sm outline-none focus:text-gold transition-colors"
+                                    className="bg-transparent font-black text-black text-sm outline-none focus:text-gold transition-colors w-24"
                                   />
                                   <span className="text-zinc-300 font-black">/</span>
                                   <input
                                     type="time"
                                     value={formData.workingHours?.[day]?.close || '17:00'}
                                     onChange={(e) => handleWorkingHoursChange(day, 'close', e.target.value)}
-                                    className="bg-transparent font-black text-black text-sm outline-none focus:text-gold transition-colors"
+                                    className="bg-transparent font-black text-black text-sm outline-none focus:text-gold transition-colors w-24"
                                   />
                                 </div>
                               )}
@@ -391,32 +442,32 @@ const AdminSettings = () => {
                         ))}
                       </div>
 
-                      <div className="flex justify-end pt-8">
-                        <Button variant="gold" onClick={handleSaveWorkingHours}>
+                      <div className="flex justify-end pt-4 sm:pt-8">
+                        <Button variant="gold" onClick={handleSaveWorkingHours} className="w-full md:w-auto">
                           Synchronize Timeline
                         </Button>
                       </div>
                     </div>
-                  )}
+                  </AccordionItem>
 
                   {/* Notifications */}
-                  {activeTab === 'notifications' && (
+                  <AccordionItem id="notifications" label={t('settings.notifications', 'Notifications')} icon="🔔">
                     <div className="space-y-6 animate-fade-in">
-                      <div className="grid grid-cols-1 gap-6">
+                      <div className="grid grid-cols-1 gap-4 sm:gap-6">
                         {[
                           { id: 'email', label: 'Electronic Dispatch', desc: 'Core system alerts via secure email servers' },
                           { id: 'sms', label: 'Tactical SMS', desc: 'Direct-to-mobile operational updates' },
                           { id: 'appointmentReminders', label: 'Engagement Pings', desc: 'Automated reminders for pending studio sessions' },
                           { id: 'marketingEmails', label: 'Portfolio Updates', desc: 'Bespoke marketing and new service catalogs' }
                         ].map((node) => (
-                          <div key={node.id} className="flex items-center justify-between p-8 bg-white border border-border-primary rounded-3xl hover:-translate-y-1 transition-all hover:shadow-xl group">
+                          <div key={node.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white border border-border-primary rounded-3xl hover:-translate-y-1 transition-all hover:shadow-xl group gap-4">
                             <div className="max-w-md">
                               <h4 className="font-black text-black uppercase text-sm tracking-widest mb-2 group-hover:text-gold transition-colors">{node.label}</h4>
                               <p className="text-xs font-bold text-secondary-brown opacity-40 italic">{node.desc}</p>
                             </div>
                             <button
                               onClick={() => handleNotificationChange(node.id, !formData.notifications?.[node.id])}
-                              className={`w-16 h-8 rounded-full relative transition-all duration-500 shadow-inner ${
+                              className={`w-16 h-8 rounded-full relative transition-all duration-500 shadow-inner flex-shrink-0 self-end sm:self-auto ${
                                 formData.notifications?.[node.id] ? 'bg-gold' : 'bg-zinc-100'
                               }`}
                             >
@@ -428,18 +479,18 @@ const AdminSettings = () => {
                         ))}
                       </div>
 
-                      <div className="flex justify-end pt-8">
-                        <Button variant="gold" onClick={handleSaveNotifications}>
+                      <div className="flex justify-end pt-4 sm:pt-8">
+                        <Button variant="gold" onClick={handleSaveNotifications} className="w-full md:w-auto">
                           Broadcast Protocols
                         </Button>
                       </div>
                     </div>
-                  )}
+                  </AccordionItem>
 
                   {/* Business Tab */}
-                  {activeTab === 'business' && (
+                  <AccordionItem id="business" label={t('settings.business', 'Business')} icon="📅">
                     <div className="space-y-10 animate-fade-in">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
                         <div className="space-y-4">
                           <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Operational Timezone</label>
                           <select
@@ -489,30 +540,30 @@ const AdminSettings = () => {
                         </div>
                       </div>
 
-                      <div className="flex justify-end pt-8">
-                        <Button variant="gold" onClick={handleSaveBusinessHours}>
+                      <div className="flex justify-end pt-4 sm:pt-8">
+                        <Button variant="gold" onClick={handleSaveBusinessHours} className="w-full md:w-auto">
                           Sync Regional Config
                         </Button>
                       </div>
                     </div>
-                  )}
+                  </AccordionItem>
 
                   {/* Security Tab */}
-                  {activeTab === 'security' && (
-                    <div className="animate-fade-in max-w-lg">
-                      <div className="mb-10">
+                  <AccordionItem id="security" label={t('settings.security', 'Security')} icon="🔒">
+                    <div className="animate-fade-in md:max-w-lg mx-auto md:mx-0">
+                      <div className="mb-8 md:mb-10 text-center md:text-left">
                         <Badge variant="gold" className="mb-4">Identity Verification</Badge>
-                        <h3 className="text-3xl font-black text-black uppercase tracking-tighter">Credential Rotation</h3>
-                        <p className="text-secondary-brown font-bold opacity-40 mt-1 italic">Update administrative access keys</p>
+                        <h3 className="text-2xl md:text-3xl font-black text-black uppercase tracking-tighter">Credential Rotation</h3>
+                        <p className="text-secondary-brown font-bold opacity-40 mt-1 italic text-xs md:text-sm">Update administrative access keys</p>
                       </div>
                       
                       {passwordError && (
-                        <div className="bg-error/10 border border-error/20 text-error px-6 py-4 rounded-2xl font-bold text-xs mb-8">
+                        <div className="bg-error/10 border border-error/20 text-error px-6 py-4 rounded-2xl font-bold text-xs mb-8 text-center md:text-left">
                           {passwordError}
                         </div>
                       )}
 
-                      <div className="space-y-8">
+                      <div className="space-y-6 md:space-y-8">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Current Authorization Key</label>
                           <input
@@ -546,44 +597,44 @@ const AdminSettings = () => {
                           />
                         </div>
 
-                        <div className="pt-4">
+                        <div className="pt-4 pb-4 lg:pb-0">
                           <Button variant="black" onClick={handleChangePassword} className="w-full">
                             Update Security Protocol
                           </Button>
                         </div>
                       </div>
                     </div>
-                  )}
+                  </AccordionItem>
 
                   {/* Audit Logs Tab */}
-                  {activeTab === 'audit' && (
-                    <div className="space-y-8 animate-fade-in">
-                      <div className="flex items-center justify-between mb-2">
+                  <AccordionItem id="audit" label={t('settings.auditLogs', 'Audit Logs')} icon="📋">
+                    <div className="space-y-6 md:space-y-8 animate-fade-in pt-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
                         <div>
-                          <h3 className="text-2xl font-black text-black uppercase tracking-tighter">System Ledger</h3>
-                          <p className="text-secondary-brown font-bold opacity-40 mt-1 italic text-xs">Immutable chronicle of system operations</p>
+                          <h3 className="text-xl md:text-2xl font-black text-black uppercase tracking-tighter">System Ledger</h3>
+                          <p className="text-secondary-brown font-bold opacity-40 mt-1 italic text-[10px] md:text-xs">Immutable chronicle of system operations</p>
                         </div>
-                        <Badge variant="dark" size="xs">Live Registry</Badge>
+                        <Badge variant="dark" size="xs" className="self-start sm:self-auto">Live Registry</Badge>
                       </div>
                       
                       <div className="space-y-3">
                         {auditLogs?.logs?.map((log, index) => (
-                          <div key={index} className="flex items-start gap-6 p-6 bg-white border border-border-primary rounded-2xl hover:bg-background-cream/10 transition-colors group">
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-[10px] border-2 ${
+                          <div key={index} className="flex items-start gap-4 sm:gap-6 p-4 sm:p-6 bg-white border border-border-primary rounded-2xl hover:bg-background-cream/10 transition-colors group">
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-black text-[8px] sm:text-[10px] border-2 flex-shrink-0 ${
                               log.action === 'CREATE' ? 'bg-success/10 border-success/20 text-success' :
                               log.action === 'UPDATE' ? 'bg-gold/10 border-gold/20 text-gold' :
                               log.action === 'DELETE' ? 'bg-error/10 border-error/20 text-error' : 'bg-zinc-100 border-zinc-200 text-zinc-500'
                             }`}>
                               {log.action}
                             </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-black text-black leading-tight uppercase tracking-tighter group-hover:text-gold transition-colors">{log.description}</p>
-                              <div className="flex items-center gap-4 mt-2">
-                                <p className="text-[10px] font-bold text-secondary-brown opacity-40 uppercase tracking-widest">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs sm:text-sm font-black text-black leading-tight uppercase tracking-tighter group-hover:text-gold transition-colors truncate">{log.description}</p>
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
+                                <p className="text-[9px] sm:text-[10px] font-bold text-secondary-brown opacity-40 uppercase tracking-widest">
                                   {formatDate(log.timestamp)}
                                 </p>
-                                <span className="w-1 h-1 rounded-full bg-zinc-200" />
-                                <p className="text-[10px] font-black text-black uppercase tracking-widest">
+                                <span className="w-1 h-1 rounded-full bg-zinc-200 hidden sm:block" />
+                                <p className="text-[9px] sm:text-[10px] font-black text-black uppercase tracking-widest truncate">
                                   Operator: {log.user}
                                 </p>
                               </div>
@@ -592,13 +643,13 @@ const AdminSettings = () => {
                         ))}
 
                         {(!auditLogs?.logs || auditLogs.logs.length === 0) && (
-                          <div className="text-center py-32 border-2 border-dashed border-border-primary rounded-3xl">
+                          <div className="text-center py-16 sm:py-32 border-2 border-dashed border-border-primary rounded-3xl">
                             <p className="text-[10px] font-black text-secondary-brown opacity-30 uppercase tracking-widest">Registry Vacuum Detected</p>
                           </div>
                         )}
                       </div>
                     </div>
-                  )}
+                  </AccordionItem>
                 </>
               )}
             </CardBody>
