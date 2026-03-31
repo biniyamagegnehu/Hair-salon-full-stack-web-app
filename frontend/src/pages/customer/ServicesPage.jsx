@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ArrowRightIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { fetchServices } from '../../store/slices/serviceSlice';
-import Button from '../../components/ui/Button/Button';
-import Card, { CardBody } from '../../components/ui/Card/Card';
-import Badge from '../../components/ui/Badge/Badge';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-import './ServicesPage.css';
+
+const blackButton = 'bg-[#0F0F0F] text-white px-6 py-3 rounded-lg hover:bg-[#2A2A2A] transition-all duration-300 font-medium shadow-md hover:shadow-lg';
+const outlineButton = 'border-2 border-[#C9A227] text-[#C9A227] px-6 py-3 rounded-lg hover:bg-[#C9A227] hover:text-[#0F0F0F] transition-all duration-300';
 
 const ServicesPage = () => {
   const { t, i18n } = useTranslation();
@@ -15,7 +15,6 @@ const ServicesPage = () => {
   const navigate = useNavigate();
   const { services, isLoading, error } = useSelector((state) => state.services);
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
     dispatch(fetchServices());
@@ -24,110 +23,109 @@ const ServicesPage = () => {
   const handleBookNow = (serviceId) => {
     if (!isAuthenticated) {
       navigate('/login');
-    } else {
-      navigate('/booking', { state: { selectedServiceId: serviceId } });
+      return;
     }
+
+    navigate('/booking', { state: { selectedServiceId: serviceId } });
   };
 
-  const getServiceIcon = (name) => {
-    const n = name.toLowerCase();
-    if (n.includes('haircut')) return '💇‍♂️';
-    if (n.includes('beard')) return '🧔';
-    if (n.includes('shave')) return '🪒';
-    if (n.includes('style') || n.includes('wax')) return '✨';
-    return '✂️';
+  const getServiceAccent = (index) => {
+    const accents = [
+      'bg-[#0F0F0F] text-[#C9A227]',
+      'bg-[#F8F4EC] text-[#0F0F0F]',
+      'bg-[#3B2F2F] text-white'
+    ];
+
+    return accents[index % accents.length];
   };
 
   if (error) {
     return (
-      <div className="container py-20 bg-cream min-h-screen">
-        <div className="bg-error/10 border border-error/20 p-8 rounded-3xl shadow-xl max-w-2xl mx-auto">
-          <div className="flex items-center gap-6">
-            <span className="text-4xl">⚠️</span>
-            <div>
-              <h3 className="text-xl font-black text-black tracking-tight uppercase mb-2">{t('common.error')}</h3>
-              <p className="text-secondary-brown font-bold opacity-60 italic">{error}</p>
-            </div>
-          </div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="max-w-2xl rounded-[32px] border border-red-200 bg-white p-8 shadow-sm">
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-red-500">Unable to load services</p>
+          <h1 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">{t('common.error')}</h1>
+          <p className="mt-4 text-base leading-7 text-gray-700">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="services-page animate-fade-in">
-      {/* Services Header */}
-      <div className="text-center mb-20">
-        <Badge variant="gold" size="lg" className="mb-4">Elegance Defined</Badge>
-        <h1 className="text-6xl font-black text-black uppercase tracking-tighter italic">
-          Master <span className="text-gold">Grooming</span>
-        </h1>
-        <p className="text-secondary-brown font-bold opacity-40 mt-2">Precision-crafted services for the modern Ethiopian man</p>
-      </div>
+    <div className="space-y-10 lg:space-y-12">
+      <section className="rounded-[32px] border border-black/5 bg-white px-6 py-10 shadow-sm sm:px-8 lg:px-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <span className="inline-flex rounded-full bg-[#C9A227] px-3 py-1 text-sm font-medium text-[#0F0F0F]">Service menu</span>
+            <h1 className="mt-4 text-4xl font-bold tracking-[-0.05em] text-[#0F0F0F] sm:text-5xl">
+              Clean service selection with clear timing, pricing, and next steps.
+            </h1>
+            <p className="mt-4 text-base leading-8 text-gray-700">
+              Explore each grooming service with transparent duration and pricing, then jump straight into booking when you are ready.
+            </p>
+          </div>
 
-      <div className="container">
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} padding={false} className="border border-border-primary/20">
-                <Skeleton height="240px" variant="rectangle" />
-                <div className="p-8">
-                  <Skeleton width="40%" height="12px" className="mb-4 opacity-20" />
-                  <Skeleton width="70%" height="32px" className="mb-6" />
-                  <Skeleton width="100%" height="60px" className="mb-8 opacity-40" />
-                  <div className="flex justify-between items-center">
-                    <Skeleton width="40%" height="40px" />
-                    <Skeleton width="25%" height="16px" />
+          <button type="button" onClick={() => navigate('/booking')} className={outlineButton}>
+            Start booking
+          </button>
+        </div>
+      </section>
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <div key={item} className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+              <Skeleton height="56px" variant="rectangle" className="rounded-2xl" />
+              <Skeleton height="30px" className="mt-6 w-2/3" />
+              <Skeleton height="90px" className="mt-4" />
+              <Skeleton height="20px" className="mt-6 w-1/3" />
+              <Skeleton height="44px" variant="rectangle" className="mt-6 rounded-xl" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {services.map((service, index) => {
+            const title = i18n.language === 'am' ? service.name?.am : service.name?.en;
+            const description = i18n.language === 'am' ? service.description?.am : service.description?.en;
+
+            return (
+              <article key={service._id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all duration-300 border border-gray-100 flex flex-col">
+                <div className="flex items-start justify-between gap-4">
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-bold ${getServiceAccent(index)}`}>
+                    {title?.charAt(0) || 'S'}
                   </div>
+                  <span className="rounded-full bg-[#F8F4EC] px-3 py-1 text-sm font-medium text-[#3B2F2F]">
+                    {service.price} ETB
+                  </span>
                 </div>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {services.map((service) => (
-              <Card key={service._id} variant="interactive" padding={false} className="h-full flex flex-col">
-                <div className="service-card-image">
-                  {getServiceIcon(service.name.en || '')}
-                </div>
-                <CardBody className="p-8">
-                  <h2 className="text-2xl font-black mb-3">
-                    {i18n.language === 'am' ? service.name.am : service.name.en}
-                  </h2>
-                  <p className="service-description flex-grow">
-                    {i18n.language === 'am' ? service.description?.am : service.description?.en}
-                  </p>
-                  
-                  <div className="flex justify-between items-end mb-8 mt-auto pt-6 border-t border-border-primary/10">
-                    <div>
-                      <span className="text-xs uppercase font-bold opacity-50 block mb-1">Investment</span>
-                      <span className="service-price">{service.price} ETB</span>
-                    </div>
-                    <div className="service-duration">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {service.duration} {t('booking.minutes')}
-                    </div>
+
+                <h2 className="mt-6 text-2xl font-bold tracking-[-0.03em] text-[#0F0F0F]">{title}</h2>
+                <p className="mt-4 flex-1 text-base leading-7 text-gray-700">{description}</p>
+
+                <div className="mt-6 flex items-center justify-between rounded-2xl bg-[#F8F4EC] px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-[#3B2F2F]">
+                    <ClockIcon className="h-4 w-4 text-[#C9A227]" />
+                    {service.duration} {t('booking.minutes')}
                   </div>
-                  
-                  <Button
-                    onClick={() => handleBookNow(service._id)}
-                    variant="black"
-                    fullWidth
-                    className="hover:!bg-accent-gold hover:!text-black group"
-                  >
+                  <span className="text-sm font-medium text-[#0F0F0F]">Professional finish</span>
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                  <button type="button" onClick={() => handleBookNow(service._id)} className={`${blackButton} flex-1`}>
                     {t('booking.confirmBooking')}
-                    <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-                  </Button>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                  </button>
+                  <button type="button" onClick={() => navigate('/queue')} className="flex h-[50px] w-[50px] items-center justify-center rounded-lg border border-gray-200 bg-white text-[#0F0F0F] transition-colors hover:border-[#C9A227] hover:text-[#C9A227]">
+                    <ArrowRightIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
 
-export default ServicesPage;
+export default ServicesPage;
