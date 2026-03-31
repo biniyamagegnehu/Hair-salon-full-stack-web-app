@@ -116,14 +116,18 @@ const AdminSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
             }
             title={isCollapsed ? item.label : ''}
           >
-            <item.icon className={`admin-icon w-6 h-6 shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} />
-            {!isCollapsed && (
-              <span className="text-sm font-black uppercase tracking-tight truncate animate-in fade-in slide-in-from-left-4 duration-300">
-                {item.label}
-              </span>
-            )}
-            {isActive && !isCollapsed && (
-              <div className="absolute right-0 w-1 h-6 bg-accent-gold rounded-l-full shadow-[0_0_10px_rgba(201,162,39,0.5)]" />
+            {({ isActive }) => (
+              <>
+                <item.icon className={`admin-icon w-6 h-6 shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} />
+                {!isCollapsed && (
+                  <span className="text-sm font-black uppercase tracking-tight truncate animate-in fade-in slide-in-from-left-4 duration-300">
+                    {item.label}
+                  </span>
+                )}
+                {isActive && !isCollapsed && (
+                  <div className="absolute right-0 w-1 h-6 bg-accent-gold rounded-l-full shadow-[0_0_10px_rgba(201,162,39,0.5)]" />
+                )}
+              </>
             )}
           </NavLink>
         ))}
