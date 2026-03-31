@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   Bars3BottomLeftIcon,
   MagnifyingGlassIcon,
@@ -10,6 +11,7 @@ import {
 
 const AdminHeader = ({ title, onMenuClick }) => {
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const today = new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
     month: 'short',
@@ -40,6 +42,17 @@ const AdminHeader = ({ title, onMenuClick }) => {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="hidden md:inline-flex items-center gap-2 rounded-2xl border border-primary-black/5 bg-white/80 px-3 py-2 text-xs font-semibold text-secondary-brown/80 shadow-sm transition hover:border-accent-gold/40 hover:text-primary-black"
+        >
+          <span className="h-6 w-6 rounded-full bg-background-cream text-xs font-bold text-primary-black flex items-center justify-center">
+            ←
+          </span>
+          <span className="tracking-wide">Back to website</span>
+        </button>
+
         <div className="hidden xl:flex items-center gap-3 rounded-2xl border border-white/65 bg-white/82 px-4 py-3 shadow-sm">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-background-cream text-accent-gold">
             <CalendarDaysIcon className="h-5 w-5" />
