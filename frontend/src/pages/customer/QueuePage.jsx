@@ -3,39 +3,44 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useSocket } from '../../contexts/SocketContext';
 import { toast } from 'react-hot-toast';
-import { 
-  fetchQueueStatus, 
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  SignalIcon,
+  UserGroupIcon
+} from '@heroicons/react/24/outline';
+import {
+  fetchQueueStatus,
   checkInToAppointment,
-  clearQueueError,
   updateQueueData
 } from '../../store/slices/queueSlice';
 import { fetchMyAppointments } from '../../store/slices/appointmentSlice';
-import Button from '../../components/ui/Button/Button';
-import Card, { CardBody } from '../../components/ui/Card/Card';
-import Badge from '../../components/ui/Badge/Badge';
-import Tabs, { TabList, TabTrigger, TabContent } from '../../components/ui/Tabs/Tabs';
-import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
-import './QueuePage.css';
+
+const primaryButton = 'bg-[#0F0F0F] text-white px-6 py-3 rounded-lg hover:bg-[#2A2A2A] transition-all duration-300 font-medium shadow-md hover:shadow-lg';
+const goldButton = 'bg-[#C9A227] text-[#0F0F0F] px-6 py-3 rounded-lg hover:bg-[#DAA520] transition-all duration-300 font-medium shadow-md';
+const outlineButton = 'border-2 border-[#C9A227] text-[#C9A227] px-6 py-3 rounded-lg hover:bg-[#C9A227] hover:text-[#0F0F0F] transition-all duration-300';
+
+const statusBadge = (status) => {
+  if (status === 'IN_PROGRESS') return 'bg-[#C9A227] text-[#0F0F0F]';
+  if (status === 'CHECKED_IN') return 'bg-[#3B2F2F] text-white';
+  return 'bg-[#0F0F0F] text-white';
+};
 
 const QueuePage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { isConnected, onQueueUpdate, onAppointmentUpdate, onCheckInConfirmed } = useSocket();
-  const { queue, stats, lastUpdated, isLoading, error } = useSelector((state) => state.queue);
+  const { queue, stats, lastUpdated } = useSelector((state) => state.queue);
   const { appointments } = useSelector((state) => state.appointments);
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
-  
-  const [activeTab, setActiveTab] = useState('live');
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [checkInLoading, setCheckInLoading] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  // Initial fetch
   useEffect(() => {
     dispatch(fetchQueueStatus());
   }, [dispatch]);
 
-  // WebSocket real-time updates
   useEffect(() => {
     const unsubscribeQueue = onQueueUpdate((data) => {
       dispatch(updateQueueData(data));
@@ -43,27 +48,16 @@ const QueuePage = () => {
 
     const unsubscribeAppointment = onAppointmentUpdate((data) => {
       dispatch(fetchMyAppointments());
-      
+
       if (data.status === 'IN_PROGRESS') {
-        toast.success(t('queue.appointmentStarted', 'Your appointment has started!'), {
-          icon: '🔄',
-          duration: 5000
-        });
+        toast.success(t('queue.appointmentStarted', 'Your appointment has started!'));
       } else if (data.status === 'COMPLETED') {
-        toast.success(t('queue.appointmentCompleted', 'Your appointment is completed! Thank you!'), {
-          icon: '✓',
-          duration: 5000
-        });
+        toast.success(t('queue.appointmentCompleted', 'Your appointment is completed! Thank you!'));
       }
     });
 
-    const unsubscribeCheckIn = onCheckInConfirmed((data) => {
-      setShowSuccessMessage(true);
-      toast.success(t('queue.checkInSuccess', 'Successfully checked in!'), {
-        icon: '✅',
-        duration: 4000
-      });
-      setTimeout(() => setShowSuccessMessage(false), 3000);
+    const unsubscribeCheckIn = onCheckInConfirmed(() => {
+      toast.success(t('queue.checkInSuccess', 'Successfully checked in!'));
     });
 
     return () => {
@@ -73,7 +67,6 @@ const QueuePage = () => {
     };
   }, [onQueueUpdate, onAppointmentUpdate, onCheckInConfirmed, dispatch, t]);
 
-  // Fallback polling
   useEffect(() => {
     if (!isConnected) {
       const interval = setInterval(() => {
@@ -108,23 +101,22 @@ const QueuePage = () => {
   const formatTime = (dateString) => {
     if (!dateString) return '';
     try {
-      return new Date(dateString).toLocaleTimeString([], { 
-        hour: '2-digit', 
+      return new Date(dateString).toLocaleTimeString([], {
+        hour: '2-digit',
         minute: '2-digit',
-        hour12: true 
+        hour12: true
       });
     } catch (e) {
       return '';
     }
   };
 
-  // Filter appointments
-  const todaysAppointments = appointments.filter(apt => {
-    if (!apt.scheduledDate) return false;
-    const aptDate = new Date(apt.scheduledDate);
+  const todaysAppointments = appointments.filter((appointment) => {
+    if (!appointment.scheduledDate) return false;
+    const aptDate = new Date(appointment.scheduledDate);
     const today = new Date();
-    return aptDate.toDateString() === today.toDateString() && 
-           ['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS', 'PENDING_PAYMENT'].includes(apt.status);
+    return aptDate.toDateString() === today.toDateString() &&
+      ['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS', 'PENDING_PAYMENT'].includes(appointment.status);
   });
 
   const canCheckIn = (appointment) => {
@@ -137,164 +129,158 @@ const QueuePage = () => {
     return minutesUntil <= 30 && minutesUntil >= -15;
   };
 
+  const myAppointment = todaysAppointments[0];
+
   return (
-    <div className="queue-page animate-fade-in">
-      <div className="container">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+    <div className="space-y-8 lg:space-y-10">
+      <section className="rounded-[32px] border border-black/5 bg-white px-6 py-10 shadow-sm sm:px-8 lg:px-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${isConnected ? 'bg-[#C9A227] text-[#0F0F0F]' : 'bg-[#3B2F2F] text-white'}`}>
+              {isConnected ? 'Live connection' : 'Polling mode'}
+            </span>
+            <h1 className="mt-4 text-4xl font-bold tracking-[-0.05em] text-[#0F0F0F] sm:text-5xl">Real-time queue visibility with a cleaner salon flow.</h1>
+            <p className="mt-4 text-base leading-8 text-gray-700">
+              Track the live queue, see average wait conditions, and check yourself in when it is time to join the active line.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-[#F8F4EC] px-5 py-4">
+            <p className="text-sm font-medium text-[#3B2F2F]/60">Last synced</p>
+            <p className="mt-1 text-2xl font-bold tracking-[-0.03em] text-[#0F0F0F]">{lastUpdated ? formatTime(lastUpdated) : '--:--'}</p>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {[
+            { label: 'Total in queue', value: stats.totalInQueue || 0, icon: UserGroupIcon },
+            { label: 'Being served', value: stats.inProgress || 0, icon: SignalIcon },
+            { label: 'Checked in', value: stats.checkedIn || 0, icon: CheckCircleIcon },
+            { label: 'Avg. wait min', value: stats.estimatedCurrentWait || 0, icon: ClockIcon }
+          ].map((item, index) => (
+            <article key={item.label} className={`rounded-3xl border p-5 shadow-sm ${index === 1 ? 'border-[#C9A227]/40 bg-[#F8F4EC]' : 'border-gray-100 bg-white'}`}>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0F0F0F] text-[#C9A227]">
+                <item.icon className="h-6 w-6" />
+              </div>
+              <p className="mt-5 text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">{item.value}</p>
+              <p className="mt-2 text-sm font-medium text-[#3B2F2F]/65">{item.label}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {isAuthenticated && myAppointment && (
+        <section className="rounded-[32px] bg-[#0F0F0F] px-6 py-8 text-white shadow-[0_24px_60px_rgba(15,15,15,0.14)] sm:px-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#C9A227]">Your position</p>
+              <p className="mt-4 text-6xl font-bold tracking-[-0.06em]">{myAppointment.queuePosition || '-'}</p>
+              <p className="mt-3 text-sm text-white/65">Current queue placement for today&apos;s appointment.</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#C9A227]">Today&apos;s booking</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-[-0.04em]">{myAppointment.service?.name?.en}</h2>
+              <p className="mt-3 text-base leading-7 text-white/68">Scheduled for {myAppointment.scheduledTime}. Follow the live queue and check in when you arrive at the salon.</p>
+
+              {canCheckIn(myAppointment) && (
+                <div className="mt-6 rounded-3xl border border-[#C9A227]/20 bg-[#C9A227]/10 p-5">
+                  <p className="text-lg font-bold text-white">You can check in now.</p>
+                  <p className="mt-2 text-base leading-7 text-white/70">Confirm your arrival to join the live queue and keep your service moving on time.</p>
+                  <button type="button" onClick={() => setSelectedAppointment(myAppointment)} className={`${goldButton} mt-4`}>
+                    Check in now
+                  </button>
+                </div>
+              )}
+
+              {myAppointment.status === 'CHECKED_IN' && (
+                <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5">
+                  <p className="text-lg font-bold text-[#C9A227]">You are checked in.</p>
+                  <p className="mt-2 text-base leading-7 text-white/70">Please stay nearby. The salon team will call you as your turn approaches.</p>
+                </div>
+              )}
+
+              {myAppointment.status === 'IN_PROGRESS' && (
+                <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5">
+                  <p className="text-lg font-bold text-white">Your service is in progress.</p>
+                  <p className="mt-2 text-base leading-7 text-white/70">You are currently being served by the salon team.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="rounded-[32px] border border-black/5 bg-white shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-gray-100 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <div>
-            <Badge variant={isConnected ? 'success' : 'error'} className="mb-4">
-              {isConnected ? 'LIVE CONNECTION' : 'POLLING MODE'}
-            </Badge>
-            <h1 className="text-5xl font-black text-black leading-tight">Live Salon Queue</h1>
-            <p className="text-secondary-brown opacity-60 font-medium">Real-time status of our master barbers at work.</p>
+            <h2 className="text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Live queue</h2>
+            <p className="mt-2 text-base text-gray-700">Current salon flow with live position and status updates.</p>
           </div>
-          <div className="text-right">
-            <p className="text-xs font-black uppercase tracking-widest opacity-40 mb-1">Last Sync</p>
-            <p className="text-lg font-bold">{lastUpdated ? formatTime(lastUpdated) : '--:--'}</p>
-          </div>
+          <span className="text-sm font-medium text-[#3B2F2F]/60">Current status</span>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          <div className="bg-white border-2 border-border-primary rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
-            <span className="text-4xl block mb-4">👥</span>
-            <span className="text-4xl font-black text-black block mb-1">{stats.totalInQueue || 0}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">Total in Queue</span>
+        {queue.length === 0 ? (
+          <div className="px-6 py-16 text-center sm:px-8">
+            <p className="text-2xl font-bold tracking-[-0.03em] text-[#0F0F0F]">The queue is clear right now.</p>
+            <p className="mt-3 text-base leading-7 text-gray-700">Book a session to reserve your place before the next busy window.</p>
+            <button type="button" onClick={() => { window.location.href = '/booking'; }} className={`${goldButton} mt-6`}>
+              Book a session
+            </button>
           </div>
-          <div className="bg-white border-2 border-gold rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
-            <span className="text-4xl block mb-4">✂️</span>
-            <span className="text-4xl font-black text-gold block mb-1">{stats.inProgress || 0}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">Being Served</span>
-          </div>
-          <div className="bg-white border-2 border-border-primary rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
-            <span className="text-4xl block mb-4">📅</span>
-            <span className="text-4xl font-black text-black block mb-1">{stats.checkedIn || 0}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">Checked In</span>
-          </div>
-          <div className="bg-white border-2 border-border-primary rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300">
-            <span className="text-4xl block mb-4">⏰</span>
-            <span className="text-4xl font-black text-black block mb-1">{stats.estimatedCurrentWait || 0}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">Avg. Wait (Min)</span>
-          </div>
-        </div>
-
-        {/* My Current Status (If serving today) */}
-        {isAuthenticated && todaysAppointments.length > 0 && (
-          <div className="bg-black text-white rounded-[40px] p-10 lg:p-16 mb-16 relative overflow-hidden shadow-2xl animate-slide-up">
-            <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
-              <span className="text-gold">Your</span> Status Today
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-              <div className="position-display">
-                <p className="text-xs uppercase font-black tracking-widest opacity-60 mb-2">Queue Position</p>
-                <p className="position-num">{todaysAppointments[0].queuePosition || '—'}</p>
-              </div>
-              <div className="lg:col-span-2">
-                <h3 className="text-xl font-bold mb-2">{todaysAppointments[0].service?.name?.en}</h3>
-                <p className="opacity-70 mb-6">Scheduled for {todaysAppointments[0].scheduledTime}</p>
-                
-                {canCheckIn(todaysAppointments[0]) && (
-                  <div className="check-in-window">
-                    <p className="font-bold">You are at the salon? Check in now to join the live queue!</p>
-                    <Button variant="black" onClick={() => setSelectedAppointment(todaysAppointments[0])}>
-                      Check In Now
-                    </Button>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {queue.map((item, index) => (
+              <article key={item._id} className={`flex flex-col gap-4 px-6 py-5 transition-colors duration-300 sm:px-8 lg:flex-row lg:items-center lg:justify-between ${item.status === 'IN_PROGRESS' ? 'bg-[#F8F4EC]' : 'hover:bg-[#F8F4EC]/45'}`}>
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0F0F0F] text-lg font-bold text-[#C9A227]">
+                    {index + 1}
                   </div>
-                )}
-                
-                {todaysAppointments[0].status === 'CHECKED_IN' && (
-                  <div className="bg-white/10 p-4 rounded-lg border border-gold/30">
-                    <p className="font-bold text-gold">✓ You are checked in and in the live queue.</p>
-                    <p className="text-sm opacity-60">Please stay in the lounge. We'll call your name soon.</p>
-                  </div>
-                )}
-
-                {todaysAppointments[0].status === 'IN_PROGRESS' && (
-                  <div className="bg-success/20 p-4 rounded-lg border border-success/30">
-                    <p className="font-bold text-white animate-pulse">✨ Your transformation is currently in progress!</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Main Queue Table */}
-        <div className="queue-table-container">
-          <div className="queue-header">
-            <h2 className="text-xl font-black uppercase tracking-widest">Live Live Flow</h2>
-            <span className="text-xs font-bold opacity-60">Current Status</span>
-          </div>
-          
-          {queue.length === 0 ? (
-            <div className="py-20 text-center">
-              <span className="text-6xl block mb-6">🪑</span>
-              <p className="text-xl font-bold opacity-40">The lounge is currently empty.</p>
-              <Button variant="gold" className="mt-6" onClick={() => window.location.href = '/booking'}>
-                Book a Session
-              </Button>
-            </div>
-          ) : (
-            <div className="divide-y divide-border-primary/50">
-              {queue.map((item, index) => (
-                <div key={item._id} className={`flex items-center gap-6 p-8 transition-all duration-300 ${item.status === 'IN_PROGRESS' ? 'bg-gold/5' : 'hover:bg-cream'}`}>
-                  <div className="text-2xl font-black text-secondary-brown opacity-20 w-8">{index + 1}</div>
-                  <div className="flex-1">
-                    <h3 className="font-black text-xl text-black uppercase tracking-tight">
-                      {item.customer?.fullName || 'Valued Customer'}
-                    </h3>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40">
-                      {item.service?.name?.en} • {item.scheduledTime}
-                    </p>
-                  </div>
-                  <div className="text-right flex flex-col items-end gap-2">
-                    <Badge variant={
-                      item.status === 'IN_PROGRESS' ? 'success' : 
-                      item.status === 'CHECKED_IN' ? 'gold' : 'brown'
-                    }>
-                      {item.status.replace('_', ' ')}
-                    </Badge>
-                    {item.estimatedWaitTime > 0 && item.status !== 'IN_PROGRESS' && (
-                      <span className="text-[10px] font-black text-gold uppercase tracking-widest">
-                        ~{item.estimatedWaitTime} MIN WAIT
-                      </span>
-                    )}
+                  <div>
+                    <h3 className="text-xl font-bold tracking-[-0.03em] text-[#0F0F0F]">{item.customer?.fullName || 'Valued Customer'}</h3>
+                    <p className="mt-1 text-sm text-[#3B2F2F]/65">{item.service?.name?.en} • {item.scheduledTime}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Check-in Modal */}
+                <div className="flex flex-col gap-2 lg:items-end">
+                  <span className={`inline-flex w-fit rounded-full px-3 py-1 text-sm font-medium ${statusBadge(item.status)}`}>
+                    {item.status.replace('_', ' ')}
+                  </span>
+                  {item.estimatedWaitTime > 0 && item.status !== 'IN_PROGRESS' && (
+                    <span className="text-sm font-medium text-[#C9A227]">Approx. {item.estimatedWaitTime} min wait</span>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
       {selectedAppointment && (
-        <Modal isOpen={!!selectedAppointment} onClose={() => setSelectedAppointment(null)}>
-          <ModalHeader>Confirm Check-In</ModalHeader>
-          <ModalContent>
-            <div className="text-center py-6">
-              <div className="w-20 h-20 bg-cream rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-gold text-4xl">
-                📍
-              </div>
-              <p className="text-lg font-bold mb-2">Ready for your transformation?</p>
-              <p className="opacity-60">Checking in confirms you are physically at the salon and ready to be served.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button type="button" className="absolute inset-0 bg-[#0F0F0F]/55 backdrop-blur-sm" onClick={() => setSelectedAppointment(null)} aria-label="Close check-in dialog" />
+          <div className="relative z-10 w-full max-w-md rounded-[32px] border border-black/5 bg-white p-8 shadow-2xl">
+            <h3 className="text-3xl font-bold tracking-[-0.04em] text-[#0F0F0F]">Confirm check-in</h3>
+            <p className="mt-4 text-base leading-7 text-gray-700">
+              Checking in confirms that you are physically at the salon and ready to join the active queue.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button type="button" onClick={() => setSelectedAppointment(null)} className={`${outlineButton} sm:flex-1`}>
+                Not yet
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCheckIn(selectedAppointment._id || selectedAppointment.id)}
+                disabled={checkInLoading}
+                className={`${goldButton} sm:flex-1 ${checkInLoading ? 'cursor-not-allowed opacity-70' : ''}`}
+              >
+                {checkInLoading ? 'Checking in...' : 'I am here'}
+              </button>
             </div>
-          </ModalContent>
-          <ModalFooter>
-            <Button variant="outline" onClick={() => setSelectedAppointment(null)}>Not Yet</Button>
-            <Button 
-              variant="gold" 
-              isLoading={checkInLoading} 
-              onClick={() => handleCheckIn(selectedAppointment.id)}
-            >
-              I Am Here
-            </Button>
-          </ModalFooter>
-        </Modal>
+          </div>
+        </div>
       )}
     </div>
   );
 };
 
-export default QueuePage;
+export default QueuePage;
