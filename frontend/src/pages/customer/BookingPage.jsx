@@ -4,14 +4,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import { format, addDays } from 'date-fns';
 import { toast } from 'react-hot-toast';
-import 'react-datepicker/dist/react-datepicker.css';
+
 import { CalendarDaysIcon, ClockIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import { fetchServices } from '../../store/slices/serviceSlice';
 import { appointmentsService } from '../../services/api/appointments';
 import { createAppointment } from '../../store/slices/appointmentSlice';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
 
-const primaryButton = 'bg-[#0F0F0F] text-white px-6 py-3 rounded-lg hover:bg-[#2A2A2A] transition-all duration-300 font-medium shadow-md hover:shadow-lg';
 const goldButton = 'bg-[#C9A227] text-[#0F0F0F] px-6 py-3 rounded-lg hover:bg-[#DAA520] transition-all duration-300 font-medium shadow-md';
 const outlineButton = 'border-2 border-[#C9A227] text-[#C9A227] px-6 py-3 rounded-lg hover:bg-[#C9A227] hover:text-[#0F0F0F] transition-all duration-300';
 
@@ -65,7 +64,7 @@ const BookingPage = () => {
         const formattedDate = format(date, 'yyyy-MM-dd');
         const response = await appointmentsService.getAvailableSlots(formattedDate, selectedService._id);
         setAvailableSlots(response.data.slots.filter((slot) => slot.available));
-      } catch (error) {
+      } catch {
         toast.error('Failed to load available slots');
       } finally {
         setLoadingSlots(false);
