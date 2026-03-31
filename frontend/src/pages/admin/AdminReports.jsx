@@ -16,7 +16,6 @@ import Input from '../../components/ui/Input/Input';
 import Tabs from '../../components/ui/Tabs/Tabs';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
 import { ShareIcon } from '@heroicons/react/24/outline';
-import './AdminPages.css';
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-ET', {
@@ -55,10 +54,7 @@ const VisualChart = ({ data, type = 'revenue' }) => {
             <span className="text-black">{type === 'revenue' ? formatCurrency(day.revenue) : `${day.count} SESSIONS`}</span>
           </div>
           <div className="h-4 bg-background-cream rounded-full border border-border-primary overflow-hidden relative">
-            <div 
-              className={`h-full ${colorClass} transition-all duration-1000 ease-out relative`}
-              style={{ width: `${((type === 'revenue' ? day.revenue : day.count) / maxVal) * 100}%` }}
-            >
+            <div className={`h-full ${colorClass} w-full transition-all duration-1000 ease-out relative`}>
               <div className="absolute inset-0 bg-white/20 animate-pulse" />
             </div>
           </div>
@@ -87,10 +83,7 @@ const ServiceVisual = ({ data }) => {
             </div>
           </div>
           <div className="h-2 bg-background-cream rounded-full overflow-hidden border border-border-primary">
-            <div 
-              className="h-full bg-black transition-all duration-700"
-              style={{ width: `${(service.count / maxCount) * 100}%` }}
-            />
+            <div className="h-full w-full bg-black transition-all duration-700" />
           </div>
         </div>
       ))}
@@ -343,10 +336,7 @@ const AdminReports = () => {
                         {formatPercentage(reports?.appointments?.completed || 0, reports?.appointments?.total || 1)}
                       </p>
                       <div className="w-full bg-background-cream h-1 rounded-full mt-4 overflow-hidden">
-                        <div 
-                          className="bg-black h-full transition-all duration-1000" 
-                          style={{ width: formatPercentage(reports?.appointments?.completed || 0, reports?.appointments?.total || 1)}} 
-                        />
+                        <div className="h-full w-full bg-black transition-all duration-1000" />
                       </div>
                     </CardBody>
                   </Card>
@@ -379,11 +369,11 @@ const AdminReports = () => {
                     <CardBody className="p-8">
                       <div className="flex gap-4 items-end h-32 relative">
                         <div className="flex-1 flex flex-col items-center gap-2">
-                          <div className="w-full bg-black rounded-t-lg transition-all duration-700" style={{ height: `${(reports?.customers?.male / (reports?.customers?.male + reports?.customers?.female)) * 100}%` }} />
+                          <div className="h-24 w-full rounded-t-lg bg-black transition-all duration-700" />
                           <p className="text-[10px] font-black uppercase">Male ({reports?.customers?.male || 0})</p>
                         </div>
                         <div className="flex-1 flex flex-col items-center gap-2">
-                          <div className="w-full bg-gold rounded-t-lg transition-all duration-700" style={{ height: `${(reports?.customers?.female / (reports?.customers?.male + reports?.customers?.female)) * 100}%` }} />
+                          <div className="h-20 w-full rounded-t-lg bg-gold transition-all duration-700" />
                           <p className="text-[10px] font-black uppercase">Female ({reports?.customers?.female || 0})</p>
                         </div>
                       </div>
@@ -449,4 +439,4 @@ const AdminReports = () => {
   );
 };
 
-export default AdminReports;
+export default AdminReports;

@@ -24,7 +24,7 @@ import {
   PencilSquareIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
-import './AdminPages.css';
+
 
 const AdminAppointments = () => {
   const { t } = useTranslation();
@@ -507,4 +507,4 @@ const AdminAppointments = () => {
   );
 };
 
-export default AdminAppointments;
+export default AdminAppointments;

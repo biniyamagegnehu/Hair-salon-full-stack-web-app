@@ -17,8 +17,9 @@ const AdminHeader = ({ title, onMenuClick }) => {
   }).format(new Date());
 
   return (
-    <header className="admin-header" aria-label="Portal Header">
-      <div className="flex items-center gap-4 min-w-0">
+    <header className="sticky top-0 z-30 border-b border-black/8 bg-background-cream/90 px-4 py-4 backdrop-blur sm:px-6 lg:pl-6 lg:pr-8" aria-label="Portal Header">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4">
+      <div className="flex min-w-0 items-center gap-4">
         <button
           onClick={onMenuClick}
           className="lg:hidden flex h-11 w-11 items-center justify-center rounded-2xl border border-black/8 bg-white/80 shadow-sm transition-all active:scale-95"
@@ -62,8 +63,8 @@ const AdminHeader = ({ title, onMenuClick }) => {
           <MagnifyingGlassIcon className="w-6 h-6" />
         </button>
 
-        <button className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-black/8 bg-white/82 text-black shadow-sm active:scale-95 group">
-          <BellIcon className="w-6 h-6 group-hover:shake transition-transform" />
+        <button className="group relative flex h-11 w-11 items-center justify-center rounded-2xl border border-black/8 bg-white/82 text-black shadow-sm active:scale-95">
+          <BellIcon className="h-6 w-6 transition-transform group-hover:scale-110" />
           <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-error border-2 border-white rounded-full" />
         </button>
 
@@ -80,6 +81,7 @@ const AdminHeader = ({ title, onMenuClick }) => {
           </div>
           <ChevronDownIcon className="hidden w-4 h-4 mr-1 text-secondary-brown/40 sm:block" />
         </div>
+      </div>
       </div>
     </header>
   );

@@ -17,7 +17,7 @@ import {
   UserIcon,
   EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
-import './AdminPages.css';
+
 
 const MobileCard = ({ appointment, status, index, setSelectedApt, setShowActionSheet }) => (
   <div 
@@ -268,4 +268,4 @@ const AdminQueue = () => {
   );
 };
 
-export default AdminQueue;
+export default AdminQueue;

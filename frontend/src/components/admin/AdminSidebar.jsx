@@ -87,7 +87,7 @@ const AdminSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
 
   return (
     <aside
-      className={`admin-sidebar ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${isCollapsed ? 'lg:w-20' : 'lg:w-[280px]'} fixed lg:static h-full transition-all duration-300 ease-in-out`}
+      className={`${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${isCollapsed ? 'lg:w-20' : 'lg:w-[280px]'} fixed inset-y-0 left-0 z-50 flex h-full w-[280px] flex-col bg-primary-black text-white transition-all duration-300 ease-in-out`}
     >
       <div className={`px-6 py-7 border-b border-white/8 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
         {!isCollapsed && (
@@ -126,21 +126,23 @@ const AdminSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
         </div>
       )}
 
-      <nav className="flex-1 py-6 overflow-y-auto custom-scrollbar" aria-label="Administrative modules">
+      <nav className="flex-1 overflow-y-auto py-6" aria-label="Administrative modules">
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             end={item.exact}
             className={({ isActive }) =>
-              `admin-menu-item ${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center px-0 mx-2' : ''}`
+              `relative mx-3 mb-2 flex items-center gap-3 rounded-2xl px-3 py-3 transition-all duration-200 ${
+                isActive ? 'bg-white/10 text-white' : 'text-white/72 hover:bg-white/8'
+              } ${isCollapsed ? 'justify-center px-0' : ''}`
             }
             title={isCollapsed ? item.label : ''}
           >
             {({ isActive }) => (
               <>
                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 ${isActive ? 'bg-accent-gold text-black shadow-[0_10px_20px_rgba(201,162,39,0.18)]' : 'bg-white/6 text-white/70'}`}>
-                  <item.icon className={`admin-icon w-5 h-5 shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} />
+                  <item.icon className={`h-5 w-5 shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} />
                 </div>
                 {!isCollapsed && (
                   <div className="min-w-0 flex-1 animate-in fade-in slide-in-from-left-4 duration-300">
@@ -164,12 +166,12 @@ const AdminSidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
       <div className="p-6 border-t border-white/8">
         <button
           onClick={handleLogout}
-          className={`admin-menu-item !mb-0 !border-none !bg-transparent hover:!text-red-300 ${isCollapsed ? 'justify-center px-0 mx-2' : ''}`}
+          className={`mx-3 mb-0 flex items-center gap-3 rounded-2xl px-3 py-3 text-white/72 transition hover:bg-white/8 hover:text-red-300 ${isCollapsed ? 'justify-center px-0' : ''}`}
           aria-label="Log out"
           title={isCollapsed ? 'Logout' : ''}
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/6">
-            <ArrowLeftOnRectangleIcon className="admin-icon w-5 h-5 shrink-0" />
+            <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" />
           </div>
           {!isCollapsed && (
             <div className="animate-in fade-in slide-in-from-left-4 duration-300 text-left">

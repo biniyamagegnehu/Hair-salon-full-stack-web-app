@@ -14,7 +14,7 @@ import Button from '../../components/ui/Button/Button';
 import Input from '../../components/ui/Input/Input';
 import Tabs from '../../components/ui/Tabs/Tabs';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-import './AdminPages.css';
+
 
 const AccordionItem = ({ id, label, icon, children, activeTab, expandedSection, setExpandedSection }) => {
   return (
@@ -709,4 +709,4 @@ const settingTabs = [
   );
 };
 
-export default AdminSettings;
+export default AdminSettings;

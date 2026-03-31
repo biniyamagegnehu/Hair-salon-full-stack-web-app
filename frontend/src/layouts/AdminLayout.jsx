@@ -7,7 +7,6 @@ import AdminSidebar from '../components/admin/AdminSidebar';
 import AdminHeader from '../components/admin/AdminHeader';
 import AdminBottomNav from '../components/admin/AdminBottomNav';
 import AdminBreadcrumbs from '../components/admin/AdminBreadcrumbs';
-import './AdminLayout.css';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -44,10 +43,10 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className={`admin-layout ${isSidebarOpen ? 'sidebar-open' : ''} ${isDesktopSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className="min-h-screen bg-background-cream text-text-black">
       {isSidebarOpen && (
         <div
-          className="admin-overlay lg:hidden"
+          className="fixed inset-0 z-40 bg-primary-black/40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -59,14 +58,14 @@ const AdminLayout = () => {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="admin-main">
+      <div className="lg:pl-0">
         <AdminHeader
           title={getPageTitle()}
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
-        <main className="admin-content">
-          <div className="admin-content-shell">
+        <main className="px-4 pb-24 pt-4 sm:px-6 lg:pl-6 lg:pr-8">
+          <div className="mx-auto max-w-[1400px]">
             <AdminBreadcrumbs />
             <AnimatePresence mode="wait">
               <motion.div
@@ -75,7 +74,7 @@ const AdminLayout = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="admin-outlet"
+                className="pb-8"
               >
                 <Outlet />
               </motion.div>

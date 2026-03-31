@@ -25,7 +25,6 @@ import {
   ArrowTrendingUpIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
-import './AdminPages.css';
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
@@ -339,7 +338,6 @@ const AdminDashboard = () => {
                 <div className="flex lg:flex-col lg:space-y-4 space-x-4 lg:space-x-0 min-w-max lg:min-w-0">
                   {analytics.trends.daily.slice(0, 7).map((day, index) => {
                     const max = Math.max(...analytics.trends.daily.map(d => d.count));
-                    const percentage = (day.count / max) * 100;
                     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
                     
                     return (
@@ -349,13 +347,7 @@ const AdminDashboard = () => {
                         
                         {/* Bar */}
                         <div className="w-6 lg:w-full h-full lg:h-8 bg-background-cream rounded-full lg:rounded-lg overflow-hidden relative border border-accent-gold/10 order-1 lg:order-2 flex flex-col lg:flex-row justify-end lg:justify-start">
-                          <div 
-                            className="bg-black group-hover:bg-accent-gold transition-all duration-500 w-full lg:h-full rounded-full lg:rounded-none relative"
-                            style={{ 
-                              height: window.innerWidth < 1024 ? `${Math.max(percentage, 5)}%` : '100%',
-                              width: window.innerWidth >= 1024 ? `${Math.max(percentage, 5)}%` : '100%'
-                            }}
-                          >
+                          <div className="relative h-full w-full rounded-full bg-black transition-all duration-500 group-hover:bg-accent-gold lg:h-full lg:rounded-none">
                             <span className="hidden lg:flex absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-black bg-accent-gold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
                               {day.count}
                             </span>
@@ -398,4 +390,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default AdminDashboard;

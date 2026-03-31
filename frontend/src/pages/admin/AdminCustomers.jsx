@@ -14,7 +14,7 @@ import Button from '../../components/ui/Button/Button';
 import Input from '../../components/ui/Input/Input';
 import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-import './AdminPages.css';
+
 
 const AdminCustomers = () => {
   const { t } = useTranslation();
@@ -378,4 +378,4 @@ const AdminCustomers = () => {
   );
 };
 
-export default AdminCustomers;
+export default AdminCustomers;

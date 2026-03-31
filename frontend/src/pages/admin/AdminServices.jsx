@@ -20,7 +20,7 @@ import {
   NoSymbolIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
-import './AdminPages.css';
+
 
 const AdminServices = () => {
   const { t } = useTranslation();
@@ -345,4 +345,4 @@ const AdminServices = () => {
   );
 };
 
-export default AdminServices;
+export default AdminServices;

@@ -7,7 +7,7 @@ import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
 import Badge from '../../components/ui/Badge/Badge';
 import Button from '../../components/ui/Button/Button';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-import './AdminPages.css';
+
 
 const AdminWorkingHours = () => {
   const { t } = useTranslation();
@@ -209,4 +209,4 @@ const AdminWorkingHours = () => {
   );
 };
 
-export default AdminWorkingHours;
+export default AdminWorkingHours;

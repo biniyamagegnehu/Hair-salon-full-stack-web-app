@@ -9,7 +9,7 @@ const AdminBreadcrumbs = () => {
   if (pathnames.length <= 1) return null;
 
   return (
-    <nav className="mb-6 overflow-x-auto no-scrollbar" aria-label="Breadcrumb">
+    <nav className="mb-6 overflow-x-auto" aria-label="Breadcrumb">
       <ol className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/65 bg-white/78 px-4 py-3 shadow-sm">
         <li>
           <div className="flex items-center">

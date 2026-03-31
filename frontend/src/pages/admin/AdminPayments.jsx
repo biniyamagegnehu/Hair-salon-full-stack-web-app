@@ -8,7 +8,7 @@ import Button from '../../components/ui/Button/Button';
 import Input from '../../components/ui/Input/Input';
 import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-import './AdminPages.css';
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
