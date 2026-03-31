@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import './BottomSheet.css';
 
 const BottomSheet = ({ 
   isOpen, 
@@ -44,37 +42,23 @@ const BottomSheet = ({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
         <div 
           className="fixed inset-0 z-[1100] flex flex-col justify-end lg:items-center lg:justify-center"
         >
           {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+          <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={handleBackdropClick}
             aria-hidden="true"
           />
 
           {/* Sheet */}
-          <motion.div
+          <div
             ref={sheetRef}
-            initial={{ y: '100%', opacity: 0.8 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0.8 }}
-            transition={{ 
-              type: 'spring', 
-              damping: 25, 
-              stiffness: 200, 
-              mass: 0.8,
-              opacity: { duration: 0.2 }
-            }}
-            className="bottom-sheet z-10 w-full lg:w-full lg:max-w-md bg-white rounded-t-3xl lg:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden overscroll-none border border-accent-gold/20 lg:border-none lg:m-4"
+            className="z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-3xl border border-accent-gold/20 bg-white shadow-2xl lg:m-4 lg:max-w-md lg:rounded-3xl lg:border-none"
             role="dialog"
             aria-modal="true"
             aria-labelledby="bottom-sheet-title"
@@ -112,7 +96,7 @@ const BottomSheet = ({
             )}
 
             {/* Content Body */}
-            <div className="bottom-sheet-content flex-1 overflow-y-auto overscroll-contain p-6 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6">
               {children}
             </div>
 
@@ -122,10 +106,8 @@ const BottomSheet = ({
                 {footer}
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
   );
 };
 

@@ -1,11 +1,4 @@
-import React from 'react';
-import './Input.css';
-
-/**
- * Input Component
- * 
- * Supports text, email, password, number, tel, textarea, select
- */
+import React, { useId } from 'react';
 const Input = ({ 
   label, 
   error, 
@@ -17,24 +10,27 @@ const Input = ({
   options = [], // For select type
   ...props 
 }) => {
-  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
-  const containerClasses = ['input-group', className].filter(Boolean).join(' ');
+  const generatedId = useId();
+  const inputId = id || generatedId;
+  const containerClasses = ['space-y-2', className].filter(Boolean).join(' ');
+  const baseInput =
+    'w-full rounded-xl border px-4 py-3 text-sm text-text-black placeholder:text-secondary-brown/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold/50';
   const inputClasses = [
-    'input-field',
-    error ? 'input-error' : '',
-    icon ? 'input-with-icon' : ''
+    baseInput,
+    error ? 'border-red-300 bg-red-50/50' : 'border-black/10 bg-white',
+    icon ? 'pl-10' : '',
   ].filter(Boolean).join(' ');
 
   return (
     <div className={containerClasses}>
       {label && (
-        <label htmlFor={inputId} className="input-label">
+        <label htmlFor={inputId} className="text-sm font-medium text-secondary-brown">
           {label}
         </label>
       )}
       
-      <div className="input-wrapper">
-        {icon && <span className="input-icon">{icon}</span>}
+      <div className="relative">
+        {icon && <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-secondary-brown/50">{icon}</span>}
         
         {type === 'textarea' ? (
           <textarea 
@@ -65,7 +61,7 @@ const Input = ({
       </div>
       
       {(error || helperText) && (
-        <p className={`input-message ${error ? 'error' : 'helper'}`}>
+        <p className={`text-xs ${error ? 'text-red-600' : 'text-secondary-brown/65'}`}>
           {error || helperText}
         </p>
       )}

@@ -1,11 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './Dropdown.css';
-
-/**
- * Dropdown Component
- * 
- * Features: gold trigger, cream menu, gold hover items, smooth transitions
- */
 const Dropdown = ({ 
   trigger, 
   items = [], 
@@ -26,27 +19,32 @@ const Dropdown = ({
   }, []);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
+  const positionClasses = {
+    'bottom-right': 'right-0 top-full mt-2',
+    'bottom-left': 'left-0 top-full mt-2',
+  };
 
   return (
-    <div className={`dropdown ${className}`} ref={dropdownRef}>
-      <div className="dropdown-trigger" onClick={toggleDropdown}>
+    <div className={`relative ${className}`} ref={dropdownRef}>
+      <button type="button" className="inline-flex" onClick={toggleDropdown}>
         {trigger}
-      </div>
+      </button>
       
       {isOpen && (
-        <div className={`dropdown-menu dropdown-pos-${position} animate-fade-in`}>
+        <div className={`absolute z-40 min-w-[180px] overflow-hidden rounded-xl border border-black/10 bg-white shadow-xl ${positionClasses[position] || positionClasses['bottom-right']}`}>
           {items.map((item, index) => (
-            <div 
+            <button
+              type="button"
               key={index} 
-              className={`dropdown-item ${item.className || ''}`}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium text-text-black transition hover:bg-background-cream ${item.className || ''}`}
               onClick={() => {
                 if (item.onClick) item.onClick();
                 setIsOpen(false);
               }}
             >
-              {item.icon && <span className="dropdown-item-icon">{item.icon}</span>}
-              <span className="dropdown-item-label">{item.label}</span>
-            </div>
+              {item.icon && <span>{item.icon}</span>}
+              <span>{item.label}</span>
+            </button>
           ))}
         </div>
       )}

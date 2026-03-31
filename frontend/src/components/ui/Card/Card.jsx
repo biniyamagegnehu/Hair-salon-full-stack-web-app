@@ -1,11 +1,3 @@
-import { motion } from 'framer-motion';
-import './Card.css';
-
-/**
- * Card Component
- * 
- * Variants: default, gold-border, brown, interactive
- */
 const Card = ({ 
   children, 
   variant = 'default', 
@@ -15,17 +7,25 @@ const Card = ({
   onClick,
   ...props 
 }) => {
+  const variantClasses = {
+    default: 'border border-black/8 bg-white',
+    black: 'border border-black bg-primary-black text-white',
+    brown: 'border border-secondary-brown/30 bg-secondary-brown text-white',
+    'gold-border': 'border border-accent-gold/40 bg-white',
+    interactive: 'border border-black/8 bg-white',
+  };
+
   const cardClasses = [
-    'card',
-    `card-${variant}`,
-    padding ? 'card-padding' : '',
-    fullHeight ? 'card-full-height' : '',
-    onClick ? 'card-clickable' : '',
-    className
+    'rounded-3xl shadow-sm transition-all duration-200',
+    variantClasses[variant] || variantClasses.default,
+    padding ? 'p-6' : '',
+    fullHeight ? 'h-full' : '',
+    onClick ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md' : '',
+    className,
   ].filter(Boolean).join(' ');
 
   return (
-    <motion.div 
+    <div 
       className={cardClasses} 
       onClick={onClick}
       role={onClick ? 'button' : undefined}
@@ -36,44 +36,34 @@ const Card = ({
           onClick();
         }
       } : undefined}
-      whileHover={onClick || variant === 'interactive' ? { 
-        y: -5, 
-        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-        borderColor: "var(--accent-gold)"
-      } : {}}
-      whileTap={onClick ? { scale: 0.98 } : {}}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
       {...props}
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 
 export const CardHeader = ({ children, className = '' }) => (
-  <div className={`card-header ${className}`}>
+  <div className={`border-b border-black/8 p-6 ${className}`}>
     {children}
   </div>
 );
 
 export const CardBody = ({ children, className = '' }) => (
-  <div className={`card-body ${className}`}>
+  <div className={className}>
     {children}
   </div>
 );
 
 export const CardFooter = ({ children, className = '' }) => (
-  <div className={`card-footer ${className}`}>
+  <div className={`border-t border-black/8 p-6 ${className}`}>
     {children}
   </div>
 );
 
 export const CardImage = ({ src, alt, className = '' }) => (
-  <div className={`card-image ${className}`}>
-    <img src={src} alt={alt} />
+  <div className={`overflow-hidden rounded-2xl ${className}`}>
+    <img src={src} alt={alt} className="h-full w-full object-cover" />
   </div>
 );
 

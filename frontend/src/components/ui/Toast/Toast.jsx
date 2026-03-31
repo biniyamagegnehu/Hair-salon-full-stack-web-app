@@ -1,12 +1,4 @@
 import React from 'react';
-import './Toast.css';
-
-/**
- * Toast Component
- * 
- * Variants: success, error, info, warning
- * Features: gold accents, icons, slide-in animation
- */
 const Toast = ({ 
   message, 
   type = 'info', 
@@ -40,15 +32,17 @@ const Toast = ({
   };
 
   return (
-    <div className={`toast toast-${type} animate-slide-in-right ${className}`}>
-      <div className="toast-icon">
+    <div className={`flex w-full max-w-sm items-start gap-3 rounded-2xl border bg-white p-4 shadow-lg ${
+      type === 'error' ? 'border-red-200' : type === 'success' ? 'border-emerald-200' : 'border-black/10'
+    } ${className}`}>
+      <div className="mt-0.5 text-accent-gold">
         {iconMap[type]}
       </div>
-      <div className="toast-content">
-        <p className="toast-message">{message}</p>
+      <div className="flex-1">
+        <p className="text-sm font-medium text-text-black">{message}</p>
       </div>
       {onClose && (
-        <button className="toast-close" onClick={onClose}>
+        <button className="rounded-lg p-1 text-secondary-brown/60 transition hover:bg-background-cream hover:text-primary-black" onClick={onClose}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>

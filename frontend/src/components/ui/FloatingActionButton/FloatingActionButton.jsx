@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import './FloatingActionButton.css';
 
 const FloatingActionButton = ({
   icon = <PlusIcon className="w-6 h-6 stroke-2" />,
@@ -52,22 +50,11 @@ const FloatingActionButton = ({
       ref={containerRef}
       className={`fixed z-[1020] flex flex-col items-end gap-3 ${positionClasses[position]}`}
     >
-      <AnimatePresence>
-        {isOpen && hasActions && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.9 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col gap-3 mb-2"
-          >
+      {isOpen && hasActions && (
+        <div className="mb-2 flex flex-col gap-3">
             {actions.map((action, index) => (
-              <motion.button
+              <button
                 key={index}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ delay: index * 0.05 }}
                 onClick={() => {
                   action.onClick();
                   setIsOpen(false);
@@ -80,15 +67,12 @@ const FloatingActionButton = ({
                 <div className="w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-accent-gold border border-accent-gold/20 hover:bg-accent-gold hover:text-white transition-colors active:scale-95">
                   {action.icon}
                 </div>
-              </motion.button>
+              </button>
             ))}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
 
-      <motion.button
-        animate={{ rotate: isOpen ? 45 : 0 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+      <button
         onClick={handleClick}
         className="w-14 h-14 rounded-full bg-black shadow-[0_4px_14px_rgba(201,162,39,0.4)] flex items-center justify-center text-accent-gold hover:scale-105 active:scale-95 transition-transform border border-accent-gold/20"
         aria-label="Primary Actions"
@@ -98,7 +82,7 @@ const FloatingActionButton = ({
         ) : (
           icon
         )}
-      </motion.button>
+      </button>
     </div>
   );
 };

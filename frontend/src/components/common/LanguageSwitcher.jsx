@@ -17,7 +17,7 @@ const LanguageSwitcher = () => {
 
     try {
       await authService.updateLanguage(lng);
-    } catch (error) {
+    } catch {
       console.log('Language preference saved locally');
     }
   };

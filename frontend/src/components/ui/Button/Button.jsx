@@ -1,12 +1,3 @@
-import { motion } from 'framer-motion';
-import './Button.css';
-
-/**
- * Button Component
- * 
- * Variants: primary, secondary, gold, outline, text
- * Sizes: sm, md, lg
- */
 const Button = ({ 
   children, 
   variant = 'primary', 
@@ -19,38 +10,51 @@ const Button = ({
   disabled,
   ...props 
 }) => {
+  const variantClasses = {
+    primary: 'bg-primary-black text-white hover:bg-black/90',
+    black: 'bg-primary-black text-white hover:bg-black/90',
+    secondary: 'bg-secondary-brown text-white hover:bg-secondary-brown/90',
+    gold: 'bg-accent-gold text-primary-black hover:bg-accent-gold/90',
+    outline: 'border border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-primary-black',
+    text: 'text-secondary-brown hover:text-primary-black',
+  };
+
+  const sizeClasses = {
+    sm: 'h-9 px-4 text-sm',
+    md: 'h-11 px-5 text-sm',
+    lg: 'h-12 px-6 text-base',
+  };
+
   const buttonClasses = [
-    'btn',
-    `btn-${variant}`,
-    `btn-${size}`,
-    fullWidth ? 'btn-full-width' : '',
-    isLoading ? 'btn-loading' : '',
-    className
+    'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold/60',
+    variantClasses[variant] || variantClasses.primary,
+    sizeClasses[size] || sizeClasses.md,
+    fullWidth ? 'w-full' : '',
+    className,
   ].filter(Boolean).join(' ');
 
   return (
-    <motion.button 
+    <button 
       className={buttonClasses} 
       disabled={disabled || isLoading}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
       aria-busy={isLoading}
       {...props}
     >
       {isLoading && (
-        <span className="btn-spinner" role="status" aria-label="Loading"></span>
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" role="status" aria-label="Loading"></span>
       )}
       
       {!isLoading && leftIcon && (
-        <span className="btn-icon-left" aria-hidden="true">{leftIcon}</span>
+        <span aria-hidden="true">{leftIcon}</span>
       )}
       
-      <span className="btn-content">{children}</span>
+      <span>{children}</span>
       
       {!isLoading && rightIcon && (
-        <span className="btn-icon-right" aria-hidden="true">{rightIcon}</span>
+        <span aria-hidden="true">{rightIcon}</span>
       )}
-    </motion.button>
+    </button>
   );
 };
 

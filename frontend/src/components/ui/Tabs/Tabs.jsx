@@ -1,11 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import './Tabs.css';
-
-/**
- * Tabs Component
- * 
- * Features: gold underline, animated indicator, smooth transitions
- */
+import React from 'react';
 const Tabs = ({ 
   tabs = [], 
   activeTab, 
@@ -13,38 +6,22 @@ const Tabs = ({
   children,
   className = ''
 }) => {
-  const [indicatorStyle, setIndicatorStyle] = useState({});
-  const tabsRef = useRef([]);
-
-  useEffect(() => {
-    if (tabs.length > 0) {
-      const activeIndex = tabs.findIndex(tab => tab.id === activeTab);
-      if (activeIndex !== -1 && tabsRef.current[activeIndex]) {
-        const element = tabsRef.current[activeIndex];
-        setIndicatorStyle({
-          width: element.offsetWidth,
-          left: element.offsetLeft
-        });
-      }
-    }
-  }, [activeTab, tabs]);
-
   return (
     <div className={`tabs-container ${className}`}>
       {tabs.length > 0 ? (
-        <div className="tabs-list">
-          {tabs.map((tab, index) => (
+        <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-black/8 bg-white p-2">
+          {tabs.map((tab) => (
             <button
               key={tab.id}
-              ref={el => tabsRef.current[index] = el}
-              className={`tab-item ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => onChange(tab.id)}
+              className={`relative z-10 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === tab.id ? 'bg-background-cream text-primary-black' : 'text-secondary-brown/65 hover:text-primary-black'
+              }`}
+              onClick={() => (onChange ? onChange(tab.id) : null)}
             >
-              {tab.icon && <span className="tab-icon">{tab.icon}</span>}
-              <span className="tab-label">{tab.label}</span>
+              {tab.icon && <span>{tab.icon}</span>}
+              <span>{tab.label}</span>
             </button>
           ))}
-          <div className="tabs-indicator" style={indicatorStyle}></div>
         </div>
       ) : children}
     </div>
@@ -52,14 +29,16 @@ const Tabs = ({
 };
 
 export const TabList = ({ children, className = '' }) => (
-  <div className={`tabs-list ${className}`}>
+  <div className={`inline-flex w-full flex-wrap gap-2 rounded-2xl border border-black/8 bg-white p-2 ${className}`}>
     {children}
   </div>
 );
 
 export const TabTrigger = ({ value, children, activeTab, onChange, className = '' }) => (
   <button
-    className={`tab-item ${activeTab === value ? 'active' : ''} ${className}`}
+    className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+      activeTab === value ? 'bg-background-cream text-primary-black' : 'text-secondary-brown/65 hover:text-primary-black'
+    } ${className}`}
     onClick={() => onChange && onChange(value)}
   >
     {children}
@@ -68,7 +47,7 @@ export const TabTrigger = ({ value, children, activeTab, onChange, className = '
 
 export const TabContent = ({ value, activeTab, children, className = '' }) => {
   if (activeTab !== value) return null;
-  return <div className={`tab-content animate-fade-in ${className}`}>{children}</div>;
+  return <div className={className}>{children}</div>;
 };
 
 export default Tabs;
