@@ -36,15 +36,17 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Handle token refresh on 401
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh') && !originalRequest.url.includes('/auth/login') && !originalRequest.url.includes('/auth/register')) {
       originalRequest._retry = true;
       
       try {
         await api.post('/auth/refresh');
         return api(originalRequest);
       } catch (refreshError) {
-        // Redirect to login
-        window.location.href = '/login';
+        // Only redirect if we are not already on login/register to avoid loops
+        if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
