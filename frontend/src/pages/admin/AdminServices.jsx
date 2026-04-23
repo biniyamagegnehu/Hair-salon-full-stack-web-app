@@ -4,14 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { fetchServices } from '../../store/slices/serviceSlice';
 import { adminService } from '../../services/api/admin';
-import Card, { CardBody } from '../../components/ui/Card/Card';
-import Badge from '../../components/ui/Badge/Badge';
-import Button from '../../components/ui/Button/Button';
-import Input from '../../components/ui/Input/Input';
-import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-import BottomSheet from '../../components/ui/BottomSheet/BottomSheet';
-import FloatingActionButton from '../../components/ui/FloatingActionButton/FloatingActionButton';
 import {
   ScissorsIcon,
   EllipsisHorizontalIcon,
@@ -20,7 +13,6 @@ import {
   NoSymbolIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
-
 
 const AdminServices = () => {
   const { t } = useTranslation();
@@ -124,223 +116,253 @@ const AdminServices = () => {
   };
 
   return (
-    <div className="admin-page animate-fade-in pb-24 lg:pb-8 relative min-h-[calc(100vh-80px)]">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 lg:pb-8 relative min-h-[calc(100vh-80px)]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 lg:mb-10 px-4 lg:px-0">
         <div>
-          <h1 className="text-3xl font-black text-black uppercase tracking-tight">Services</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm tracking-widest uppercase">Portfolio Manager</p>
+          <span className="inline-flex px-3 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-xs font-bold uppercase tracking-widest mb-4">Portfolio Manager</span>
+          <h1 className="text-3xl sm:text-5xl font-bold text-zinc-50 tracking-tight">Services</h1>
         </div>
         <div className="hidden lg:block">
-          <Button
-            variant="black"
+          <button
             onClick={() => { resetForm(); setShowModal(true); }}
-            className="group"
+            className="flex items-center justify-center gap-2 px-6 h-[44px] bg-zinc-100 hover:bg-white text-zinc-900 rounded-xl font-bold transition-all active:scale-95 shadow-sm group"
           >
-            <PlusIcon className="w-5 h-5 mr-2 inline-block group-hover:rotate-90 transition-transform" />
+            <PlusIcon className="w-5 h-5 group-hover:rotate-90 transition-transform" />
             {t('admin.addService', 'New Service')}
-          </Button>
+          </button>
         </div>
       </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 px-4 lg:px-0">
-          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} height="200px" variant="rectangle" className="rounded-3xl" />)}
+          {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-[200px] bg-zinc-900 rounded-3xl animate-pulse"></div>)}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 px-4 lg:px-0">
           {services.map((service) => (
-            <Card
+            <div
               key={service._id}
-              variant={service.isActive ? 'default' : 'outline'}
-              className={`rounded-3xl border-2 transition-all relative overflow-hidden ${
-                service.isActive ? 'border-transparent hover:border-black/5' : 'border-gray-200 grayscale opacity-60'
+              className={`rounded-3xl border transition-all relative overflow-hidden bg-zinc-900 p-5 lg:p-6 ${
+                service.isActive ? 'border-zinc-800 hover:border-zinc-700 shadow-sm' : 'border-zinc-800/50 grayscale opacity-60'
               }`}
             >
-              <CardBody className="p-5 lg:p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                    service.isActive ? 'bg-black text-accent-gold' : 'bg-gray-100 text-gray-400'
+              <div className="flex justify-between items-start mb-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${
+                  service.isActive ? 'bg-zinc-950 border-zinc-800 text-amber-500' : 'bg-zinc-950 border-zinc-800 text-zinc-600'
+                }`}>
+                  <ScissorsIcon className="w-6 h-6" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${
+                    service.isActive ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700'
                   }`}>
-                    <ScissorsIcon className="w-6 h-6" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={service.isActive ? 'success' : 'dark'} size="xs">
-                      {service.isActive ? 'LIVE' : 'ARCHIVED'}
-                    </Badge>
-                    <button 
-                      onClick={() => openActions(service)}
-                      className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center hover:bg-black hover:text-white transition-colors"
-                    >
-                      <EllipsisHorizontalIcon className="w-5 h-5" />
-                    </button>
-                  </div>
+                    {service.isActive ? 'LIVE' : 'ARCHIVED'}
+                  </span>
+                  <button 
+                    onClick={() => openActions(service)}
+                    className="w-8 h-8 rounded-full bg-zinc-950 flex items-center justify-center text-zinc-400 border border-zinc-800 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+                  >
+                    <EllipsisHorizontalIcon className="w-5 h-5" />
+                  </button>
                 </div>
+              </div>
 
-                <div className="mb-4">
-                  <h3 className="text-xl font-black text-black uppercase tracking-tight line-clamp-1">{service.name?.en}</h3>
-                  <p className="text-[10px] font-bold text-secondary-brown/50 uppercase tracking-widest mt-0.5">{service.name?.am}</p>
-                </div>
+              <div className="mb-4">
+                <h3 className="text-xl font-bold text-zinc-100 uppercase tracking-tight line-clamp-1">{service.name?.en}</h3>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">{service.name?.am}</p>
+              </div>
 
-                <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/40 mb-1">Time</p>
-                    <p className="text-sm font-black text-black">{service.duration} <span className="text-[10px] uppercase text-secondary-brown/60">min</span></p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/40 mb-1">Price</p>
-                    <p className="text-xl font-black text-accent-gold">{service.price} <span className="text-[10px] uppercase text-black">birr</span></p>
-                  </div>
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-zinc-800/50">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Time</p>
+                  <p className="text-sm font-bold text-zinc-100">{service.duration} <span className="text-[10px] uppercase text-zinc-600">min</span></p>
                 </div>
-                
-                {/* Desktop Quick Actions (hidden on mobile) */}
-                <div className="hidden lg:flex gap-2 mt-4">
-                  <Button variant="black" size="xs" className="flex-1" onClick={() => handleEdit(service)}>Edit</Button>
-                  {service.isActive ? (
-                    <Button variant="outline" size="xs" className="text-error border-error/50 hover:bg-error/10" onClick={() => handleDelete(service._id)}>Disable</Button>
-                  ) : (
-                    <Button variant="outline" size="xs" className="text-success border-success/50 hover:bg-success/10" onClick={() => handleActivate(service._id)}>Activate</Button>
-                  )}
+                <div className="text-right">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Price</p>
+                  <p className="text-xl font-bold text-amber-500">{service.price} <span className="text-[10px] uppercase text-zinc-400">birr</span></p>
                 </div>
-              </CardBody>
-            </Card>
+              </div>
+              
+              {/* Desktop Quick Actions (hidden on mobile) */}
+              <div className="hidden lg:flex gap-2 mt-4">
+                <button 
+                  className="flex-1 h-8 bg-zinc-100 text-zinc-900 rounded-lg text-xs font-bold hover:bg-white transition-colors"
+                  onClick={() => handleEdit(service)}
+                >
+                  Edit
+                </button>
+                {service.isActive ? (
+                  <button 
+                    className="flex-1 h-8 bg-transparent border border-red-500/50 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500/10 transition-colors"
+                    onClick={() => handleDelete(service._id)}
+                  >
+                    Disable
+                  </button>
+                ) : (
+                  <button 
+                    className="flex-1 h-8 bg-transparent border border-emerald-500/50 text-emerald-500 rounded-lg text-xs font-bold hover:bg-emerald-500/10 transition-colors"
+                    onClick={() => handleActivate(service._id)}
+                  >
+                    Activate
+                  </button>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       {/* Mobile FAB */}
-      <FloatingActionButton 
-        icon={<PlusIcon className="w-6 h-6" />}
+      <button 
         onClick={() => { resetForm(); setShowModal(true); }}
-        label="New Service"
-      />
+        className="lg:hidden fixed bottom-24 right-6 w-14 h-14 bg-amber-500 text-zinc-950 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:bg-amber-400 active:scale-95 transition-all z-40"
+        aria-label="New Service"
+      >
+        <PlusIcon className="w-6 h-6" />
+      </button>
 
       {/* Action BottomSheet for Mobile */}
-      <BottomSheet
-        isOpen={showActionSheet}
-        onClose={() => setShowActionSheet(false)}
-        title="Manage Service"
-      >
-        {selectedService && (
-          <div className="space-y-4 pb-6">
-            <div className="bg-background-cream p-4 rounded-2xl flex items-center gap-4">
-              <div className="w-12 h-12 bg-black text-accent-gold rounded-xl flex items-center justify-center">
-                <ScissorsIcon className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="font-black text-black uppercase">{selectedService.name?.en}</h4>
-                <p className="text-xs font-bold text-secondary-brown/60">{selectedService.price} ETB • {selectedService.duration} min</p>
-              </div>
+      {showActionSheet && selectedService && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 lg:hidden">
+          <div className="w-full bg-zinc-950 border-t sm:border border-zinc-800 rounded-t-3xl sm:rounded-3xl max-w-md p-6 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-zinc-100 uppercase tracking-widest">Manage Service</h3>
+              <button onClick={() => setShowActionSheet(false)} className="text-zinc-500 hover:text-zinc-300">✕</button>
             </div>
+            
+            <div className="space-y-4 pb-2">
+              <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center gap-4">
+                <div className="w-12 h-12 bg-zinc-950 border border-zinc-800 text-amber-500 rounded-xl flex items-center justify-center">
+                  <ScissorsIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-zinc-100 uppercase">{selectedService.name?.en}</h4>
+                  <p className="text-xs font-bold text-zinc-500">{selectedService.price} ETB • {selectedService.duration} min</p>
+                </div>
+              </div>
 
-            <div className="space-y-2">
-              <Button 
-                variant="black" 
-                className="w-full justify-start h-14"
-                onClick={() => handleEdit(selectedService)}
-              >
-                <PencilSquareIcon className="w-5 h-5 mr-3" /> Modify Details
-              </Button>
-              
-              {selectedService.isActive ? (
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-14 text-error border-error hover:bg-error/5"
-                  onClick={() => handleDelete(selectedService._id)}
+              <div className="space-y-2">
+                <button 
+                  className="w-full h-14 flex items-center px-4 bg-zinc-100 text-zinc-900 rounded-xl font-bold hover:bg-white transition-colors"
+                  onClick={() => handleEdit(selectedService)}
                 >
-                  <NoSymbolIcon className="w-5 h-5 mr-3" /> Deactivate Service
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-14 text-success border-success hover:bg-success/5"
-                  onClick={() => handleActivate(selectedService._id)}
-                >
-                  <CheckCircleIcon className="w-5 h-5 mr-3" /> Activate Service
-                </Button>
-              )}
+                  <PencilSquareIcon className="w-5 h-5 mr-3" /> Modify Details
+                </button>
+                
+                {selectedService.isActive ? (
+                  <button 
+                    className="w-full h-14 flex items-center px-4 bg-transparent border border-red-500/50 text-red-500 rounded-xl font-bold hover:bg-red-500/10 transition-colors"
+                    onClick={() => handleDelete(selectedService._id)}
+                  >
+                    <NoSymbolIcon className="w-5 h-5 mr-3" /> Deactivate Service
+                  </button>
+                ) : (
+                  <button 
+                    className="w-full h-14 flex items-center px-4 bg-transparent border border-emerald-500/50 text-emerald-500 rounded-xl font-bold hover:bg-emerald-500/10 transition-colors"
+                    onClick={() => handleActivate(selectedService._id)}
+                  >
+                    <CheckCircleIcon className="w-5 h-5 mr-3" /> Activate Service
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        )}
-      </BottomSheet>
+        </div>
+      )}
 
       {/* Create/Edit Modal */}
-      <Modal isOpen={showModal} onClose={() => { setShowModal(false); resetForm(); }}>
-        <ModalHeader>
-          <Badge variant="gold" className="mb-2 uppercase tracking-widest text-[10px]">Protocol</Badge>
-          <h2 className="text-2xl font-black text-black uppercase tracking-tight">
-            {editingService ? 'Edit Service' : 'New Service'}
-          </h2>
-        </ModalHeader>
-        <ModalContent>
-          <form className="space-y-6 py-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/60 ml-1">Name (EN)</label>
-                <Input
-                  placeholder="e.g. Buzz Cut"
-                  value={formData.name.en}
-                  onChange={(e) => handleInputChange('name', 'en', e.target.value)}
-                  noMargin
-                />
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+            <div className="p-6 border-b border-zinc-800 flex justify-between items-center sticky top-0 bg-zinc-950/90 backdrop-blur-md z-10">
+              <div>
+                <span className="inline-flex px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[10px] font-bold uppercase tracking-widest mb-1">Protocol</span>
+                <h2 className="text-xl font-bold text-zinc-100 uppercase tracking-tight">
+                  {editingService ? 'Edit Service' : 'New Service'}
+                </h2>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/60 ml-1">Name (AM)</label>
-                <Input
-                  placeholder="የጸጉር መቆረጥ"
-                  value={formData.name.am}
-                  onChange={(e) => handleInputChange('name', 'am', e.target.value)}
-                  noMargin
-                />
-              </div>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="text-zinc-500 hover:text-zinc-300">✕</button>
+            </div>
+            
+            <div className="p-6 flex-1">
+              <form className="space-y-6 py-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Name (EN)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Buzz Cut"
+                      value={formData.name.en}
+                      onChange={(e) => handleInputChange('name', 'en', e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Name (AM)</label>
+                    <input
+                      type="text"
+                      placeholder="የጸጉር መቆረጥ"
+                      value={formData.name.am}
+                      onChange={(e) => handleInputChange('name', 'am', e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Description (EN)</label>
+                    <textarea
+                      className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:border-amber-500 transition-colors outline-none font-bold text-zinc-100 text-sm placeholder:text-zinc-600"
+                      placeholder="Service description..."
+                      rows="2"
+                      value={formData.description.en}
+                      onChange={(e) => handleInputChange('description', 'en', e.target.value)}
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 p-5 bg-zinc-900 border border-zinc-800 rounded-2xl">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Price (ETB)</label>
+                    <input
+                      type="number"
+                      className="w-full bg-transparent border-b border-zinc-700 py-2 text-2xl font-bold text-amber-500 outline-none focus:border-amber-500 transition-colors"
+                      value={formData.price}
+                      onChange={(e) => handleInputChange('price', null, e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Duration (Min)</label>
+                    <input
+                      type="number"
+                      className="w-full bg-transparent border-b border-zinc-700 py-2 text-2xl font-bold text-zinc-100 outline-none focus:border-amber-500 transition-colors"
+                      value={formData.duration}
+                      onChange={(e) => handleInputChange('duration', null, e.target.value)}
+                    />
+                  </div>
+                </div>
+              </form>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/60 ml-1">Description (EN)</label>
-                <textarea
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-accent-gold focus:ring-1 focus:ring-accent-gold transition-colors outline-none font-bold text-black text-sm"
-                  placeholder="Service description..."
-                  rows="2"
-                  value={formData.description.en}
-                  onChange={(e) => handleInputChange('description', 'en', e.target.value)}
-                ></textarea>
-              </div>
+            <div className="p-6 border-t border-zinc-800 flex justify-end gap-3 bg-zinc-950 sticky bottom-0 z-10">
+              <button 
+                className="px-6 py-3 bg-transparent border border-zinc-700 text-zinc-300 rounded-xl font-bold hover:bg-zinc-800 transition-colors w-full sm:w-auto"
+                onClick={() => { setShowModal(false); resetForm(); }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="px-6 py-3 bg-zinc-100 text-zinc-900 rounded-xl font-bold hover:bg-white transition-colors w-full sm:w-auto"
+                onClick={handleSubmit}
+              >
+                {editingService ? 'Save Changes' : 'Create Service'}
+              </button>
             </div>
-
-            <div className="grid grid-cols-2 gap-4 p-5 bg-black rounded-2xl">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/50">Price (ETB)</label>
-                <input
-                  type="number"
-                  className="w-full bg-transparent border-b border-white/20 py-2 text-2xl font-black text-accent-gold outline-none focus:border-accent-gold transition-colors"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange('price', null, e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/50">Duration (Min)</label>
-                <input
-                  type="number"
-                  className="w-full bg-transparent border-b border-white/20 py-2 text-2xl font-black text-white outline-none focus:border-accent-gold transition-colors"
-                  value={formData.duration}
-                  onChange={(e) => handleInputChange('duration', null, e.target.value)}
-                />
-              </div>
-            </div>
-          </form>
-        </ModalContent>
-        <ModalFooter>
-          <div className="flex gap-3 w-full">
-            <Button variant="outline" className="flex-1" onClick={() => { setShowModal(false); resetForm(); }}>
-              Cancel
-            </Button>
-            <Button variant="black" className="flex-[2]" onClick={handleSubmit}>
-              {editingService ? 'Save Changes' : 'Create Service'}
-            </Button>
           </div>
-        </ModalFooter>
-      </Modal>
+        </div>
+      )}
     </div>
   );
 };
