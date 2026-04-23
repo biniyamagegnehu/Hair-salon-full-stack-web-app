@@ -43,10 +43,11 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-cream text-text-black">
+    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-amber-500 selection:text-zinc-950">
+      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-primary-black/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -58,14 +59,14 @@ const AdminLayout = () => {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="lg:pl-0">
+      <div className={`transition-all duration-300 ease-in-out flex flex-col min-h-screen ${isDesktopSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
         <AdminHeader
           title={getPageTitle()}
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
-        <main className="px-4 pb-24 pt-4 sm:px-6 lg:pl-6 lg:pr-8">
-          <div className="mx-auto max-w-[1400px]">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 overflow-x-hidden">
+          <div className="mx-auto max-w-7xl">
             <AdminBreadcrumbs />
             <AnimatePresence mode="wait">
               <motion.div
@@ -74,7 +75,7 @@ const AdminLayout = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="pb-8"
+                className="mt-6"
               >
                 <Outlet />
               </motion.div>
@@ -82,7 +83,10 @@ const AdminLayout = () => {
           </div>
         </main>
 
-        <AdminBottomNav onMoreClick={() => setIsSidebarOpen(true)} />
+        {/* Mobile Bottom Nav */}
+        <div className="lg:hidden">
+          <AdminBottomNav onMoreClick={() => setIsSidebarOpen(true)} />
+        </div>
       </div>
     </div>
   );
