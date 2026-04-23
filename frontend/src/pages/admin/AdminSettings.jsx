@@ -8,30 +8,24 @@ import {
   changeAdminPassword,
   fetchAuditLogs
 } from '../../store/slices/adminSlice';
-import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
-import Badge from '../../components/ui/Badge/Badge';
-import Button from '../../components/ui/Button/Button';
-import Input from '../../components/ui/Input/Input';
-import Tabs from '../../components/ui/Tabs/Tabs';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-
 
 const AccordionItem = ({ id, label, icon, children, activeTab, expandedSection, setExpandedSection }) => {
   return (
     <div className={`mb-4 lg:mb-0 lg:block ${activeTab === id ? '' : 'lg:hidden'}`}>
       <button 
-        className={`w-full p-5 flex justify-between items-center font-black uppercase text-sm lg:hidden bg-white border border-gray-100 shadow-sm ${expandedSection === id ? 'rounded-t-2xl' : 'rounded-2xl'}`}
+        className={`w-full p-5 flex justify-between items-center font-bold uppercase text-sm lg:hidden bg-zinc-900 border border-zinc-800 shadow-sm ${expandedSection === id ? 'rounded-t-2xl' : 'rounded-2xl'}`}
         onClick={() => setExpandedSection(expandedSection === id ? '' : id)}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 text-zinc-100">
           <span className="text-xl">{icon}</span> 
           <span>{label}</span>
         </div>
-        <span className="text-accent-gold text-lg">{expandedSection === id ? '−' : '+'}</span>
+        <span className="text-amber-500 text-lg">{expandedSection === id ? '−' : '+'}</span>
       </button>
       <div className={`
         ${expandedSection === id ? 'block' : 'hidden lg:block'} 
-        p-5 lg:p-0 border-x border-b lg:border-none border-gray-100 rounded-b-2xl lg:rounded-none bg-white lg:bg-transparent
+        p-5 lg:p-0 border-x border-b lg:border-none border-zinc-800 rounded-b-2xl lg:rounded-none bg-zinc-900 lg:bg-transparent
       `}>
         {children}
       </div>
@@ -221,7 +215,7 @@ const AdminSettings = () => {
     return new Date(dateString).toLocaleString();
   };
 
-const settingTabs = [
+  const settingTabs = [
     { id: 'general', label: t('settings.general', 'General'), icon: '⚙️' },
     { id: 'working-hours', label: t('settings.workingHours', 'Working Hours'), icon: '⏰' },
     { id: 'notifications', label: t('settings.notifications', 'Notifications'), icon: '🔔' },
@@ -231,18 +225,18 @@ const settingTabs = [
   ];
 
   return (
-    <div className="admin-page animate-fade-in pb-20 px-4 md:px-0">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 px-4 md:px-0">
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
-          <Badge variant="gold" className="mb-4">System Architecture</Badge>
-          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Global Settings</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Configure core salon parameters and security protocols</p>
+          <span className="inline-flex px-3 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-xs font-bold uppercase tracking-widest mb-4">System Architecture</span>
+          <h1 className="text-3xl sm:text-5xl font-bold text-zinc-50 tracking-tight">Global Settings</h1>
+          <p className="text-zinc-500 font-bold uppercase tracking-widest mt-2 text-xs">Configure core salon parameters and security protocols</p>
         </div>
-        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
-          <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50">Language</span>
+        <div className="flex items-center gap-3 bg-zinc-900 px-5 py-3 rounded-xl border border-zinc-800 shadow-sm">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Language</span>
           <select 
-            className="bg-transparent font-black text-xs outline-none focus:text-accent-gold"
+            className="bg-transparent font-bold text-xs outline-none text-zinc-100 uppercase"
             value={i18n.language}
             onChange={(e) => i18n.changeLanguage(e.target.value)}
           >
@@ -252,73 +246,85 @@ const settingTabs = [
         </div>
       </div>
 
-      <div className="hidden lg:block">
-        <Tabs 
-          tabs={settingTabs} 
-          activeTab={activeTab} 
-          onChange={setActiveTab} 
-          className="mb-12" 
-        />
+      <div className="hidden lg:flex overflow-x-auto no-scrollbar gap-2 mb-8 bg-zinc-950 p-2 rounded-2xl border border-zinc-800">
+        {settingTabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all ${
+              activeTab === tab.id 
+                ? 'bg-zinc-900 text-amber-500 shadow-sm border border-zinc-800' 
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50'
+            }`}
+          >
+            <span className="text-lg">{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
         <div className="lg:col-span-8">
-          <Card className="min-h-[600px]">
-            <CardBody className="p-8 md:p-12">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl min-h-[600px] overflow-hidden">
+            <div className="p-8 md:p-12">
               {isLoading ? (
                 <div className="space-y-8">
-                  <Skeleton height="60px" variant="rectangle" />
-                  <Skeleton height="120px" variant="rectangle" />
-                  <Skeleton height="60px" variant="rectangle" />
+                  <div className="h-[60px] bg-zinc-800 rounded-xl animate-pulse"></div>
+                  <div className="h-[120px] bg-zinc-800 rounded-xl animate-pulse"></div>
+                  <div className="h-[60px] bg-zinc-800 rounded-xl animate-pulse"></div>
                 </div>
               ) : (
                 <>
                   {/* General Settings */}
                   <AccordionItem id="general" label={t('settings.general', 'General')} icon="⚙️" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
-                    <div className="space-y-10 animate-fade-in">
+                    <div className="space-y-10 animate-in fade-in duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Salon Label (EN)</label>
-                          <Input
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Salon Label (EN)</label>
+                          <input
+                            type="text"
                             placeholder="X Men's Hair Salon"
                             value={formData.salonName?.en || ''}
                             onChange={(e) => handleInputChange('salonName', 'en', e.target.value)}
-                            noMargin
+                            className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Salon Label (AM)</label>
-                          <Input
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Salon Label (AM)</label>
+                          <input
+                            type="text"
                             placeholder="ኤክስ የወንዶች ፀጉር ቤት"
                             value={formData.salonName?.am || ''}
                             onChange={(e) => handleInputChange('salonName', 'am', e.target.value)}
-                            noMargin
+                            className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Deployment Area (EN)</label>
-                          <Input
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Deployment Area (EN)</label>
+                          <input
+                            type="text"
                             placeholder="Addis Ababa, Ethiopia"
                             value={formData.location?.en || ''}
                             onChange={(e) => handleInputChange('location', 'en', e.target.value)}
-                            noMargin
+                            className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Deployment Area (AM)</label>
-                          <Input
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Deployment Area (AM)</label>
+                          <input
+                            type="text"
                             placeholder="አዲስ አበባ ፣ ኢትዮጵያ"
                             value={formData.location?.am || ''}
                             onChange={(e) => handleInputChange('location', 'am', e.target.value)}
-                            noMargin
+                            className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Brand Manifesto</label>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Brand Manifesto</label>
                         <textarea
-                          className="w-full px-5 py-4 bg-background-cream/30 border border-border-primary rounded-2xl focus:border-gold transition-all outline-none font-bold text-black text-sm min-h-[120px]"
+                          className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:border-amber-500 transition-colors outline-none font-bold text-zinc-100 text-sm min-h-[120px] placeholder:text-zinc-600"
                           value={formData.description?.en || ''}
                           onChange={(e) => handleInputChange('description', 'en', e.target.value)}
                           placeholder="Describe the premium experience..."
@@ -327,29 +333,31 @@ const settingTabs = [
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Comms Channel (Phone)</label>
-                          <Input
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Comms Channel (Phone)</label>
+                          <input
+                            type="text"
                             value={formData.contactPhone || ''}
                             onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
                             placeholder="+251 911 223344"
-                            noMargin
+                            className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Comms Channel (Email)</label>
-                          <Input
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Comms Channel (Email)</label>
+                          <input
+                            type="email"
                             value={formData.contactEmail || ''}
                             onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                             placeholder="hq@xmensalon.com"
-                            noMargin
+                            className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
                           />
                         </div>
                       </div>
 
-                      <div className="p-8 bg-black rounded-3xl border border-white/5">
+                      <div className="p-8 bg-zinc-950 rounded-3xl border border-zinc-800">
                         <div className="flex justify-between items-center mb-6">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Engagement Deposit (%)</label>
-                          <span className="text-2xl font-black text-gold">{formData.advancePaymentPercentage || 50}%</span>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Engagement Deposit (%)</label>
+                          <span className="text-2xl font-bold text-amber-500">{formData.advancePaymentPercentage || 50}%</span>
                         </div>
                         <input
                           type="range"
@@ -357,36 +365,39 @@ const settingTabs = [
                           max="100"
                           value={formData.advancePaymentPercentage || 50}
                           onChange={(e) => setFormData({ ...formData, advancePaymentPercentage: parseInt(e.target.value) })}
-                          className="w-full accent-gold h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                          className="w-full accent-amber-500 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         />
                       </div>
 
                       <div className="flex justify-end pt-4">
-                        <Button variant="gold" onClick={handleSaveGeneral} className="w-full md:w-auto">
+                        <button 
+                          onClick={handleSaveGeneral} 
+                          className="w-full md:w-auto px-6 h-[46px] bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-bold transition-all active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                        >
                           Commit Core Settings
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   </AccordionItem>
 
                   {/* Working Hours */}
                   <AccordionItem id="working-hours" label={t('settings.workingHours', 'Working Hours')} icon="⏰" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
-                    <div className="space-y-6 animate-fade-in">
+                    <div className="space-y-6 animate-in fade-in duration-300">
                       <div className="grid grid-cols-1 gap-4">
                         {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
                           <div key={day} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 rounded-2xl border transition-all gap-4 ${
                             formData.workingHours?.[day]?.closed 
-                              ? 'bg-zinc-50 border-zinc-100 opacity-50' 
-                              : 'bg-white border-border-primary hover:border-gold'
+                              ? 'bg-zinc-950 border-zinc-800 opacity-50' 
+                              : 'bg-zinc-900 border-zinc-700 hover:border-amber-500/50'
                           }`}>
                             <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-start">
                               <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${
-                                  formData.workingHours?.[day]?.closed ? 'bg-zinc-200 text-zinc-400' : 'bg-black text-white'
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs ${
+                                  formData.workingHours?.[day]?.closed ? 'bg-zinc-900 text-zinc-600' : 'bg-zinc-950 text-zinc-100 border border-zinc-800'
                                 }`}>
                                   {day.substring(0, 3).toUpperCase()}
                                 </div>
-                                <span className="font-black text-black uppercase text-sm tracking-tighter">
+                                <span className="font-bold text-zinc-100 uppercase text-sm tracking-widest">
                                   {t(`days.${day}`, day.charAt(0).toUpperCase() + day.slice(1))}
                                 </span>
                               </div>
@@ -394,7 +405,7 @@ const settingTabs = [
                                 <div 
                                   onClick={() => handleWorkingHoursChange(day, 'closed', !formData.workingHours?.[day]?.closed)}
                                   className={`w-12 h-6 rounded-full relative transition-colors ${
-                                    formData.workingHours?.[day]?.closed ? 'bg-zinc-200' : 'bg-gold'
+                                    formData.workingHours?.[day]?.closed ? 'bg-zinc-800' : 'bg-amber-500'
                                   }`}
                                 >
                                   <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
@@ -409,32 +420,34 @@ const settingTabs = [
                                 <div 
                                   onClick={() => handleWorkingHoursChange(day, 'closed', !formData.workingHours?.[day]?.closed)}
                                   className={`w-12 h-6 rounded-full relative transition-colors ${
-                                    formData.workingHours?.[day]?.closed ? 'bg-zinc-200' : 'bg-gold'
+                                    formData.workingHours?.[day]?.closed ? 'bg-zinc-800' : 'bg-amber-500'
                                   }`}
                                 >
                                   <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
                                     formData.workingHours?.[day]?.closed ? 'translate-x-0' : 'translate-x-6'
                                   }`} />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-40 group-hover:opacity-100 transition-opacity">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-zinc-300 transition-colors">
                                   {formData.workingHours?.[day]?.closed ? 'Disabled' : 'Enabled'}
                                 </span>
                               </label>
 
                               {!formData.workingHours?.[day]?.closed && (
-                                <div className="flex items-center gap-3 bg-background-cream/50 p-2 rounded-xl border border-border-primary w-full sm:w-auto justify-center">
+                                <div className="flex items-center gap-3 bg-zinc-950 p-2 rounded-xl border border-zinc-800 w-full sm:w-auto justify-center">
                                   <input
                                     type="time"
                                     value={formData.workingHours?.[day]?.open || '09:00'}
                                     onChange={(e) => handleWorkingHoursChange(day, 'open', e.target.value)}
-                                    className="bg-transparent font-black text-black text-sm outline-none focus:text-gold transition-colors w-24"
+                                    className="bg-transparent font-bold text-zinc-100 text-sm outline-none focus:text-amber-500 transition-colors w-24"
+                                    style={{ colorScheme: 'dark' }}
                                   />
-                                  <span className="text-zinc-300 font-black">/</span>
+                                  <span className="text-zinc-600 font-bold">/</span>
                                   <input
                                     type="time"
                                     value={formData.workingHours?.[day]?.close || '17:00'}
                                     onChange={(e) => handleWorkingHoursChange(day, 'close', e.target.value)}
-                                    className="bg-transparent font-black text-black text-sm outline-none focus:text-gold transition-colors w-24"
+                                    className="bg-transparent font-bold text-zinc-100 text-sm outline-none focus:text-amber-500 transition-colors w-24"
+                                    style={{ colorScheme: 'dark' }}
                                   />
                                 </div>
                               )}
@@ -444,16 +457,19 @@ const settingTabs = [
                       </div>
 
                       <div className="flex justify-end pt-4 sm:pt-8">
-                        <Button variant="gold" onClick={handleSaveWorkingHours} className="w-full md:w-auto">
+                        <button 
+                          onClick={handleSaveWorkingHours} 
+                          className="w-full md:w-auto px-6 h-[46px] bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-bold transition-all active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                        >
                           Synchronize Timeline
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   </AccordionItem>
 
                   {/* Notifications */}
                   <AccordionItem id="notifications" label={t('settings.notifications', 'Notifications')} icon="🔔" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
-                    <div className="space-y-6 animate-fade-in">
+                    <div className="space-y-6 animate-in fade-in duration-300">
                       <div className="grid grid-cols-1 gap-4 sm:gap-6">
                         {[
                           { id: 'email', label: 'Electronic Dispatch', desc: 'Core system alerts via secure email servers' },
@@ -461,18 +477,18 @@ const settingTabs = [
                           { id: 'appointmentReminders', label: 'Engagement Pings', desc: 'Automated reminders for pending studio sessions' },
                           { id: 'marketingEmails', label: 'Portfolio Updates', desc: 'Bespoke marketing and new service catalogs' }
                         ].map((node) => (
-                          <div key={node.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white border border-border-primary rounded-3xl hover:-translate-y-1 transition-all hover:shadow-xl group gap-4">
+                          <div key={node.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-zinc-950 border border-zinc-800 rounded-3xl hover:-translate-y-1 transition-all hover:border-amber-500/50 group gap-4">
                             <div className="max-w-md">
-                              <h4 className="font-black text-black uppercase text-sm tracking-widest mb-2 group-hover:text-gold transition-colors">{node.label}</h4>
-                              <p className="text-xs font-bold text-secondary-brown opacity-40 italic">{node.desc}</p>
+                              <h4 className="font-bold text-zinc-100 uppercase text-sm tracking-widest mb-2 group-hover:text-amber-500 transition-colors">{node.label}</h4>
+                              <p className="text-xs font-bold text-zinc-500 italic">{node.desc}</p>
                             </div>
                             <button
                               onClick={() => handleNotificationChange(node.id, !formData.notifications?.[node.id])}
-                              className={`w-16 h-8 rounded-full relative transition-all duration-500 shadow-inner flex-shrink-0 self-end sm:self-auto ${
-                                formData.notifications?.[node.id] ? 'bg-gold' : 'bg-zinc-100'
+                              className={`w-16 h-8 rounded-full relative transition-all duration-500 flex-shrink-0 self-end sm:self-auto ${
+                                formData.notifications?.[node.id] ? 'bg-amber-500' : 'bg-zinc-800'
                               }`}
                             >
-                              <div className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-lg transition-transform duration-500 ${
+                              <div className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white transition-transform duration-500 ${
                                 formData.notifications?.[node.id] ? 'translate-x-8' : 'translate-x-0'
                               }`} />
                             </button>
@@ -481,26 +497,29 @@ const settingTabs = [
                       </div>
 
                       <div className="flex justify-end pt-4 sm:pt-8">
-                        <Button variant="gold" onClick={handleSaveNotifications} className="w-full md:w-auto">
+                        <button 
+                          onClick={handleSaveNotifications} 
+                          className="w-full md:w-auto px-6 h-[46px] bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-bold transition-all active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                        >
                           Broadcast Protocols
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   </AccordionItem>
 
                   {/* Business Tab */}
                   <AccordionItem id="business" label={t('settings.business', 'Business')} icon="📅" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
-                    <div className="space-y-10 animate-fade-in">
+                    <div className="space-y-10 animate-in fade-in duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
                         <div className="space-y-4">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Operational Timezone</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Operational Timezone</label>
                           <select
                             value={formData.businessHours?.timezone || 'Africa/Addis_Ababa'}
                             onChange={(e) => setFormData({
                               ...formData,
                               businessHours: { ...formData.businessHours, timezone: e.target.value }
                             })}
-                            className="w-full px-5 py-4 bg-background-cream/30 border border-border-primary rounded-2xl focus:border-gold outline-none font-black text-black text-sm appearance-none cursor-pointer"
+                            className="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-xl focus:border-amber-500 outline-none font-bold text-zinc-100 text-sm transition-colors uppercase"
                           >
                             <option value="Africa/Addis_Ababa">ADDIS ABABA (GMT+3)</option>
                             <option value="Africa/Nairobi">NAIROBI (GMT+3)</option>
@@ -510,14 +529,14 @@ const settingTabs = [
                         </div>
 
                         <div className="space-y-4">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Chronicle Format</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Chronicle Format</label>
                           <select
                             value={formData.businessHours?.dateFormat || 'MM/DD/YYYY'}
                             onChange={(e) => setFormData({
                               ...formData,
                               businessHours: { ...formData.businessHours, dateFormat: e.target.value }
                             })}
-                            className="w-full px-5 py-4 bg-background-cream/30 border border-border-primary rounded-2xl focus:border-gold outline-none font-black text-black text-sm appearance-none cursor-pointer"
+                            className="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-xl focus:border-amber-500 outline-none font-bold text-zinc-100 text-sm transition-colors uppercase"
                           >
                             <option value="MM/DD/YYYY">MM / DD / YYYY</option>
                             <option value="DD/MM/YYYY">DD / MM / YYYY</option>
@@ -526,14 +545,14 @@ const settingTabs = [
                         </div>
 
                         <div className="space-y-4">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Extraction Format</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Extraction Format</label>
                           <select
                             value={formData.businessHours?.timeFormat || '12h'}
                             onChange={(e) => setFormData({
                               ...formData,
                               businessHours: { ...formData.businessHours, timeFormat: e.target.value }
                             })}
-                            className="w-full px-5 py-4 bg-background-cream/30 border border-border-primary rounded-2xl focus:border-gold outline-none font-black text-black text-sm appearance-none cursor-pointer"
+                            className="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-xl focus:border-amber-500 outline-none font-bold text-zinc-100 text-sm transition-colors uppercase"
                           >
                             <option value="12h">12-HOUR (AM/PM)</option>
                             <option value="24h">24-HOUR MILITARY</option>
@@ -542,66 +561,72 @@ const settingTabs = [
                       </div>
 
                       <div className="flex justify-end pt-4 sm:pt-8">
-                        <Button variant="gold" onClick={handleSaveBusinessHours} className="w-full md:w-auto">
+                        <button 
+                          onClick={handleSaveBusinessHours} 
+                          className="w-full md:w-auto px-6 h-[46px] bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-bold transition-all active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                        >
                           Sync Regional Config
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   </AccordionItem>
 
                   {/* Security Tab */}
                   <AccordionItem id="security" label={t('settings.security', 'Security')} icon="🔒" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
-                    <div className="animate-fade-in md:max-w-lg mx-auto md:mx-0">
+                    <div className="animate-in fade-in duration-300 md:max-w-lg mx-auto md:mx-0">
                       <div className="mb-8 md:mb-10 text-center md:text-left">
-                        <Badge variant="gold" className="mb-4">Identity Verification</Badge>
-                        <h3 className="text-2xl md:text-3xl font-black text-black uppercase tracking-tighter">Credential Rotation</h3>
-                        <p className="text-secondary-brown font-bold opacity-40 mt-1 italic text-xs md:text-sm">Update administrative access keys</p>
+                        <span className="inline-flex px-3 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-xs font-bold uppercase tracking-widest mb-4">Identity Verification</span>
+                        <h3 className="text-2xl md:text-3xl font-bold text-zinc-50 uppercase tracking-tighter">Credential Rotation</h3>
+                        <p className="text-zinc-500 font-bold mt-2 text-xs md:text-sm uppercase tracking-widest">Update administrative access keys</p>
                       </div>
                       
                       {passwordError && (
-                        <div className="bg-error/10 border border-error/20 text-error px-6 py-4 rounded-2xl font-bold text-xs mb-8 text-center md:text-left">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-xl font-bold text-xs mb-8 text-center md:text-left uppercase tracking-widest">
                           {passwordError}
                         </div>
                       )}
 
                       <div className="space-y-6 md:space-y-8">
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Current Authorization Key</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Current Authorization Key</label>
                           <input
                             type="password"
                             value={passwordData.currentPassword}
                             onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                            className="w-full px-5 py-4 bg-background-cream/30 border border-border-primary rounded-2xl focus:border-gold outline-none font-black text-black tracking-widest"
+                            className="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-xl focus:border-amber-500 outline-none font-bold text-zinc-100 tracking-widest transition-colors"
                             placeholder="••••••••••••"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">New Deployment Key</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">New Deployment Key</label>
                           <input
                             type="password"
                             value={passwordData.newPassword}
                             onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                            className="w-full px-5 py-4 bg-background-cream/30 border border-border-primary rounded-2xl focus:border-gold outline-none font-black text-black tracking-widest"
+                            className="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-xl focus:border-amber-500 outline-none font-bold text-zinc-100 tracking-widest transition-colors"
                             placeholder="Min 8 characters"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown italic">Confirm Deployment Key</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Confirm Deployment Key</label>
                           <input
                             type="password"
                             value={passwordData.confirmPassword}
                             onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                            className="w-full px-5 py-4 bg-background-cream/30 border border-border-primary rounded-2xl focus:border-gold outline-none font-black text-black tracking-widest"
+                            className="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 rounded-xl focus:border-amber-500 outline-none font-bold text-zinc-100 tracking-widest transition-colors"
                             placeholder="Repeat new key"
                           />
                         </div>
 
                         <div className="pt-4 pb-4 lg:pb-0">
-                          <Button variant="black" onClick={handleChangePassword} className="w-full">
+                          <button 
+                            onClick={handleChangePassword} 
+                            className="w-full px-6 h-[46px] bg-zinc-100 hover:bg-white text-zinc-900 rounded-xl font-bold transition-all active:scale-95 uppercase tracking-widest text-xs"
+                          >
                             Update Security Protocol
-                          </Button>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -609,33 +634,33 @@ const settingTabs = [
 
                   {/* Audit Logs Tab */}
                   <AccordionItem id="audit" label={t('settings.auditLogs', 'Audit Logs')} icon="📋" activeTab={activeTab} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
-                    <div className="space-y-6 md:space-y-8 animate-fade-in pt-2">
+                    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-300 pt-2">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
                         <div>
-                          <h3 className="text-xl md:text-2xl font-black text-black uppercase tracking-tighter">System Ledger</h3>
-                          <p className="text-secondary-brown font-bold opacity-40 mt-1 italic text-[10px] md:text-xs">Immutable chronicle of system operations</p>
+                          <h3 className="text-xl md:text-2xl font-bold text-zinc-100 uppercase tracking-tighter">System Ledger</h3>
+                          <p className="text-zinc-500 font-bold mt-1 text-[10px] md:text-xs uppercase tracking-widest">Immutable chronicle of system operations</p>
                         </div>
-                        <Badge variant="dark" size="xs" className="self-start sm:self-auto">Live Registry</Badge>
+                        <span className="inline-flex px-2 py-0.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded text-[8px] font-bold uppercase tracking-widest self-start sm:self-auto">Live Registry</span>
                       </div>
                       
                       <div className="space-y-3">
                         {auditLogs?.logs?.map((log, index) => (
-                          <div key={index} className="flex items-start gap-4 sm:gap-6 p-4 sm:p-6 bg-white border border-border-primary rounded-2xl hover:bg-background-cream/10 transition-colors group">
-                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-black text-[8px] sm:text-[10px] border-2 flex-shrink-0 ${
-                              log.action === 'CREATE' ? 'bg-success/10 border-success/20 text-success' :
-                              log.action === 'UPDATE' ? 'bg-gold/10 border-gold/20 text-gold' :
-                              log.action === 'DELETE' ? 'bg-error/10 border-error/20 text-error' : 'bg-zinc-100 border-zinc-200 text-zinc-500'
+                          <div key={index} className="flex items-start gap-4 sm:gap-6 p-4 sm:p-6 bg-zinc-950 border border-zinc-800 rounded-2xl hover:border-zinc-700 transition-colors group">
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-bold text-[8px] sm:text-[10px] flex-shrink-0 border ${
+                              log.action === 'CREATE' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                              log.action === 'UPDATE' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
+                              log.action === 'DELETE' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-zinc-800 border-zinc-700 text-zinc-400'
                             }`}>
                               {log.action}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs sm:text-sm font-black text-black leading-tight uppercase tracking-tighter group-hover:text-gold transition-colors truncate">{log.description}</p>
+                              <p className="text-xs sm:text-sm font-bold text-zinc-100 leading-tight uppercase tracking-tighter group-hover:text-amber-500 transition-colors truncate">{log.description}</p>
                               <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
-                                <p className="text-[9px] sm:text-[10px] font-bold text-secondary-brown opacity-40 uppercase tracking-widest">
+                                <p className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                                   {formatDate(log.timestamp)}
                                 </p>
-                                <span className="w-1 h-1 rounded-full bg-zinc-200 hidden sm:block" />
-                                <p className="text-[9px] sm:text-[10px] font-black text-black uppercase tracking-widest truncate">
+                                <span className="w-1 h-1 rounded-full bg-zinc-700 hidden sm:block" />
+                                <p className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate">
                                   Operator: {log.user}
                                 </p>
                               </div>
@@ -644,8 +669,8 @@ const settingTabs = [
                         ))}
 
                         {(!auditLogs?.logs || auditLogs.logs.length === 0) && (
-                          <div className="text-center py-16 sm:py-32 border-2 border-dashed border-border-primary rounded-3xl">
-                            <p className="text-[10px] font-black text-secondary-brown opacity-30 uppercase tracking-widest">Registry Vacuum Detected</p>
+                          <div className="text-center py-16 sm:py-32 border border-dashed border-zinc-800 rounded-3xl bg-zinc-950/50">
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Registry Vacuum Detected</p>
                           </div>
                         )}
                       </div>
@@ -653,52 +678,52 @@ const settingTabs = [
                   </AccordionItem>
                 </>
               )}
-            </CardBody>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-          <Card variant="black" className="relative overflow-hidden">
-            <div className="absolute right-0 bottom-0 text-9xl opacity-10 translate-x-12 translate-y-12 pointer-events-none grayscale invert">⚙️</div>
-            <CardBody className="p-10">
-              <Badge variant="gold" className="mb-6">Global Master</Badge>
-              <h4 className="text-3xl font-black text-white uppercase tracking-tighter mb-6 leading-none">System Core</h4>
-              <p className="text-white/40 font-bold text-sm leading-relaxed italic mb-8">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl relative overflow-hidden">
+            <div className="absolute right-0 bottom-0 text-9xl opacity-[0.03] translate-x-12 translate-y-12 pointer-events-none">⚙️</div>
+            <div className="p-10">
+              <span className="inline-flex px-3 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-xs font-bold uppercase tracking-widest mb-6">Global Master</span>
+              <h4 className="text-3xl font-bold text-zinc-50 uppercase tracking-tighter mb-6 leading-none">System Core</h4>
+              <p className="text-zinc-400 font-bold text-sm leading-relaxed mb-8">
                 This console provides high-level overrides for the salon's operational parameters. Changes here propagate across all clusters in real-time.
               </p>
               
               <div className="space-y-4">
-                <div className="p-5 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-4">
-                  <span className="text-gold text-xl">🛡️</span>
+                <div className="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 flex items-center gap-4">
+                  <span className="text-amber-500 text-xl">🛡️</span>
                   <div>
-                    <h5 className="text-[10px] font-black text-white uppercase tracking-widest">Protocol Guard</h5>
-                    <p className="text-[9px] font-bold text-white/40 uppercase tracking-tighter mt-0.5">AES-256 Layer Active</p>
+                    <h5 className="text-[10px] font-bold text-zinc-100 uppercase tracking-widest">Protocol Guard</h5>
+                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">AES-256 Layer Active</p>
                   </div>
                 </div>
-                <div className="p-5 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-4">
-                  <span className="text-gold text-xl">🌐</span>
+                <div className="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 flex items-center gap-4">
+                  <span className="text-amber-500 text-xl">🌐</span>
                   <div>
-                    <h5 className="text-[10px] font-black text-white uppercase tracking-widest">Registry Sync</h5>
-                    <p className="text-[9px] font-bold text-white/40 uppercase tracking-tighter mt-0.5">Multi-Region Redundancy</p>
+                    <h5 className="text-[10px] font-bold text-zinc-100 uppercase tracking-widest">Registry Sync</h5>
+                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Multi-Region Redundancy</p>
                   </div>
                 </div>
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
 
-          <div className="p-10 bg-background-cream rounded-[40px] border-2 border-border-primary relative group overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl rounded-full -translate-y-16 translate-x-16" />
-            <h5 className="font-black text-black uppercase text-xs tracking-widest mb-6">Security Posture</h5>
-            <div className="space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-border-primary">
-                <span className="text-[10px] font-bold text-secondary-brown uppercase tracking-widest opacity-60">Auth Level</span>
-                <Badge variant="dark" size="xs">Root Admin</Badge>
+          <div className="p-10 bg-zinc-900 rounded-[40px] border border-zinc-800 relative group overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full -translate-y-16 translate-x-16" />
+            <h5 className="font-bold text-zinc-100 uppercase text-xs tracking-widest mb-6">Security Posture</h5>
+            <div className="space-y-6 relative z-10">
+              <div className="flex justify-between items-center pb-4 border-b border-zinc-800">
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Auth Level</span>
+                <span className="inline-flex px-2 py-0.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded text-[8px] font-bold uppercase tracking-widest">Root Admin</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold text-secondary-brown uppercase tracking-widest opacity-60">System Health</span>
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">System Health</span>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] font-black text-black uppercase">Optimal</span>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-zinc-100 uppercase tracking-widest">Optimal</span>
                 </div>
               </div>
             </div>
