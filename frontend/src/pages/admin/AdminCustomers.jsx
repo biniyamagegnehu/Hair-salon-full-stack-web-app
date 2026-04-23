@@ -8,13 +8,7 @@ import {
   fetchCustomerDetails,
   updateCustomerStatus 
 } from '../../store/slices/adminSlice';
-import Card, { CardHeader, CardBody } from '../../components/ui/Card/Card';
-import Badge from '../../components/ui/Badge/Badge';
-import Button from '../../components/ui/Button/Button';
-import Input from '../../components/ui/Input/Input';
-import Modal, { ModalHeader, ModalContent, ModalFooter } from '../../components/ui/Modal/Modal';
 import Skeleton from '../../components/ui/Skeleton/Skeleton';
-
 
 const AdminCustomers = () => {
   const { t } = useTranslation();
@@ -103,13 +97,13 @@ const AdminCustomers = () => {
   const pagination = customersData?.pagination || { page: 1, limit: 20, total: 0, pages: 1 };
 
   return (
-    <div className="admin-page animate-fade-in">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 sm:mb-12">
         <div>
-          <Badge variant="gold" className="mb-4">Client Relations</Badge>
-          <h1 className="text-3xl sm:text-5xl font-black text-black uppercase tracking-tight">Customer Database</h1>
-          <p className="text-secondary-brown font-bold opacity-40 mt-1 text-sm sm:text-base">Comprehensive management of your elite clientele and history</p>
+          <span className="inline-flex px-3 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-xs font-bold uppercase tracking-widest mb-4">Client Relations</span>
+          <h1 className="text-3xl sm:text-5xl font-bold text-zinc-50 tracking-tight">Customer Database</h1>
+          <p className="text-zinc-500 font-bold uppercase tracking-widest mt-2 text-xs">Comprehensive management of your elite clientele and history</p>
         </div>
         <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto">
           <select
@@ -118,262 +112,274 @@ const AdminCustomers = () => {
               setFilterStatus(e.target.value);
               setPage(1);
             }}
-            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-black text-white border-none rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest cursor-pointer hover:bg-zinc-800 transition-colors"
+            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-zinc-950 text-zinc-100 border border-zinc-800 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest cursor-pointer hover:border-amber-500/50 outline-none transition-colors"
           >
             <option value="all">All Clients</option>
             <option value="active">Active Only</option>
             <option value="inactive">Inactive</option>
           </select>
-          <Button
-            variant="gold"
+          <button
             onClick={() => window.location.href = '/admin/customers/new'}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[44px] bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-bold transition-all active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
           >
             <span className="text-xl">+</span> Add Client
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Search Matrix */}
-      <Card variant="default" className="mb-8">
-        <CardBody className="p-8">
-          <form onSubmit={handleSearch} className="flex gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search by name, email, or telephone network identifier..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                noMargin
-              />
-            </div>
-            <Button type="submit" variant="black" className="px-8">Execute Search</Button>
-            {searchTerm && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setSearchTerm('');
-                  setPage(1);
-                }}
-              >
-                Reset
-              </Button>
-            )}
-          </form>
-        </CardBody>
-      </Card>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl mb-8 p-6 sm:p-8">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search by name, email, or telephone network identifier..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 outline-none placeholder:text-zinc-600 transition-colors"
+            />
+          </div>
+          <button type="submit" className="px-8 h-[46px] bg-zinc-100 text-zinc-900 rounded-xl font-bold hover:bg-white transition-colors active:scale-95">
+            Execute Search
+          </button>
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm('');
+                setPage(1);
+              }}
+              className="px-6 h-[46px] bg-transparent border border-zinc-700 text-zinc-300 rounded-xl font-bold hover:bg-zinc-800 transition-colors active:scale-95"
+            >
+              Reset
+            </button>
+          )}
+        </form>
+      </div>
 
       {/* Database View */}
-      <Card className="overflow-visible">
-        <CardHeader className="bg-black p-6 rounded-t-xl flex justify-between items-center text-white">
-          <h3 className="text-sm font-black uppercase tracking-widest">Customer Ledger</h3>
-          <Badge variant="gold">{pagination.total} Registered</Badge>
-        </CardHeader>
-        <CardBody className="p-0">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
+        <div className="bg-zinc-950 p-6 flex justify-between items-center border-b border-zinc-800">
+          <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-widest">Customer Ledger</h3>
+          <span className="px-3 py-1 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-full text-[10px] font-bold uppercase tracking-widest">
+            {pagination.total} Registered
+          </span>
+        </div>
+        <div className="p-0 overflow-x-auto">
           {isLoading ? (
             <div className="p-8 space-y-4">
-              {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} height="70px" variant="rectangle" />)}
+              {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 bg-zinc-800 rounded-xl animate-pulse"></div>)}
             </div>
           ) : customersList.length === 0 ? (
-            <div className="py-24 text-center">
-              <p className="text-xl font-black text-secondary-brown opacity-20 uppercase tracking-widest">No matching records</p>
+            <div className="py-24 text-center border-t border-zinc-800 border-dashed">
+              <p className="text-sm font-bold text-zinc-600 uppercase tracking-widest">No matching records</p>
             </div>
           ) : (
-            <div className="admin-table-container">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Customer Identity</th>
-                    <th>Contact Details</th>
-                    <th>Engagement</th>
-                    <th>Value Assets</th>
-                    <th>Access Status</th>
-                    <th className="text-right">Operations</th>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-zinc-950/50 border-b border-zinc-800/50 text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
+                  <th className="p-4 pl-6 font-medium">Customer Identity</th>
+                  <th className="p-4 font-medium">Contact Details</th>
+                  <th className="p-4 font-medium">Engagement</th>
+                  <th className="p-4 font-medium">Value Assets</th>
+                  <th className="p-4 font-medium">Access Status</th>
+                  <th className="p-4 pr-6 text-right font-medium">Operations</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/50">
+                {customersList.map((customer) => (
+                  <tr key={customer._id} className="hover:bg-zinc-800/20 transition-colors">
+                    <td className="p-4 pl-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-zinc-950 border border-zinc-800 text-amber-500 flex items-center justify-center rounded-xl font-bold text-xl">
+                          {customer.fullName?.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-bold text-zinc-100 uppercase text-sm">{customer.fullName || 'Anonymous'}</p>
+                          <p className="text-[10px] font-bold text-zinc-600">ID: {customer._id.slice(-8).toUpperCase()}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <p className="font-bold text-zinc-100 text-sm">{customer.phoneNumber}</p>
+                      <p className="text-[10px] font-bold text-zinc-500">{customer.email || 'NO_MAIL_SYNC'}</p>
+                    </td>
+                    <td className="p-4">
+                      <p className="text-sm font-bold text-zinc-100">{formatDate(customer.createdAt)}</p>
+                      <p className="text-[10px] font-bold text-zinc-600 uppercase">Registration Date</p>
+                    </td>
+                    <td className="p-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold uppercase text-zinc-500">Sessions:</span>
+                          <span className="text-sm font-bold text-zinc-100">{customer.stats?.totalAppointments || 0}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold uppercase text-zinc-500">Revenue:</span>
+                          <span className="text-sm font-bold text-emerald-500">{formatCurrency(customer.stats?.totalSpent)}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${
+                        customer.isActive !== false ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+                      }`}>
+                        {customer.isActive !== false ? 'AUTHENTICATED' : 'RESTRICTED'}
+                      </span>
+                    </td>
+                    <td className="p-4 pr-6 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button 
+                          className="w-8 h-8 rounded-full bg-zinc-800 text-zinc-300 flex items-center justify-center hover:bg-amber-500 hover:text-zinc-950 transition-colors"
+                          title="Profile View"
+                          onClick={() => handleViewDetails(customer)}
+                        >👤</button>
+                        <button 
+                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${customer.isActive !== false ? 'bg-zinc-800 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-zinc-800 text-emerald-500 hover:bg-emerald-500 hover:text-white'}`}
+                          title={customer.isActive !== false ? 'Block' : 'Authorize'}
+                          onClick={() => handleStatusToggle(customer._id, customer.isActive)}
+                        >
+                          {customer.isActive !== false ? '🚫' : '✅'}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {customersList.map((customer) => (
-                    <tr key={customer._id}>
-                      <td>
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-black text-gold flex items-center justify-center rounded-xl font-black text-xl shadow-card">
-                            {customer.fullName?.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-black text-black uppercase text-sm">{customer.fullName || 'Anonymous'}</p>
-                            <p className="text-[10px] font-bold text-secondary-brown opacity-40">ID: {customer._id.slice(-8).toUpperCase()}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p className="font-bold text-black text-sm">{customer.phoneNumber}</p>
-                        <p className="text-[10px] font-medium text-secondary-brown">{customer.email || 'NO_MAIL_SYNC'}</p>
-                      </td>
-                      <td>
-                        <p className="text-xs font-bold text-black">{formatDate(customer.createdAt)}</p>
-                        <p className="text-[10px] font-black text-secondary-brown opacity-40 uppercase">Registration Date</p>
-                      </td>
-                      <td>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black uppercase opacity-40">Sessions:</span>
-                            <span className="text-sm font-black text-black">{customer.stats?.totalAppointments || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black uppercase opacity-40">Revenue:</span>
-                            <span className="text-sm font-black text-green-600">{formatCurrency(customer.stats?.totalSpent)}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <Badge variant={customer.isActive !== false ? 'success' : 'brown'} size="sm">
-                          {customer.isActive !== false ? 'AUTHENTICATED' : 'RESTRICTED'}
-                        </Badge>
-                      </td>
-                      <td className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <button 
-                            className="admin-btn-icon" 
-                            title="Profile View"
-                            onClick={() => handleViewDetails(customer)}
-                          >👤</button>
-                          <button 
-                            className={`admin-btn-icon ${customer.isActive !== false ? 'text-error hover:bg-error/10' : 'text-green-600 hover:bg-green-50'}`}
-                            title={customer.isActive !== false ? 'Block' : 'Authorize'}
-                            onClick={() => handleStatusToggle(customer._id, customer.isActive)}
-                          >
-                            {customer.isActive !== false ? '🚫' : '✅'}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )}
-        </CardBody>
-      </Card>
+        </div>
+      </div>
 
       {/* Pagination */}
       {pagination.pages > 1 && (
-        <div className="mt-8 flex items-center justify-between bg-black p-4 rounded-xl text-white">
-          <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
+        <div className="mt-8 flex items-center justify-between bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-zinc-100">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
             Node {page} of {pagination.pages}
           </p>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="border-white/20 text-white hover:bg-white/10"
+            <button 
+              className="px-4 py-2 border border-zinc-700 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={page === 1}
               onClick={() => setPage(p => Math.max(1, p - 1))}
             >
               Previous
-            </Button>
-            <Button 
-              variant="gold" 
-              size="sm" 
+            </button>
+            <button 
+              className="px-4 py-2 bg-zinc-100 text-zinc-900 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={page === pagination.pages}
               onClick={() => setPage(p => Math.min(pagination.pages, p + 1))}
             >
               Next
-            </Button>
+            </button>
           </div>
         </div>
       )}
 
       {/* CRM Profile Modal */}
-      <Modal isOpen={showDetailsModal} onClose={() => setShowDetailsModal(false)}>
-        <ModalHeader>Client Intelligence</ModalHeader>
-        <ModalContent>
-          {selectedCustomer && (
-            <div className="space-y-8 py-4">
-              <div className="flex items-center gap-6 bg-black p-8 rounded-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -mr-16 -mt-16 blur-3xl transition-all group-hover:bg-gold/20" />
-                <div className="w-24 h-24 bg-gold text-black flex items-center justify-center rounded-2xl font-black text-4xl shadow-xl border-4 border-zinc-900">
+      {showDetailsModal && selectedCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+            <div className="p-6 border-b border-zinc-800 flex justify-between items-center sticky top-0 bg-zinc-950/90 backdrop-blur-md z-10">
+              <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-widest">Client Intelligence</h3>
+              <button onClick={() => setShowDetailsModal(false)} className="text-zinc-500 hover:text-zinc-300">✕</button>
+            </div>
+            
+            <div className="p-6 space-y-8 flex-1">
+              <div className="flex items-center gap-6 bg-zinc-900 p-8 rounded-2xl relative overflow-hidden group border border-zinc-800">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full -mr-16 -mt-16 blur-3xl transition-all group-hover:bg-amber-500/20" />
+                <div className="w-24 h-24 bg-amber-500 text-zinc-950 flex items-center justify-center rounded-2xl font-bold text-4xl shadow-[0_0_20px_rgba(245,158,11,0.2)] border-4 border-zinc-900">
                   {selectedCustomer.fullName?.charAt(0).toUpperCase()}
                 </div>
                 <div className="relative z-10">
-                  <h4 className="text-3xl font-black text-white uppercase tracking-tight mb-2">{selectedCustomer.fullName}</h4>
+                  <h4 className="text-3xl font-bold text-zinc-50 uppercase tracking-tight mb-2">{selectedCustomer.fullName}</h4>
                   <div className="flex gap-2">
-                    <Badge variant="gold">Level: Platinum</Badge>
-                    <Badge variant={selectedCustomer.isActive !== false ? 'success' : 'error'}>
+                    <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[10px] font-bold uppercase tracking-widest">Level: Platinum</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border ${selectedCustomer.isActive !== false ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
                       {selectedCustomer.isActive !== false ? 'ACTIVE_ACCOUNT' : 'SUSPENDED'}
-                    </Badge>
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h5 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Communication nodes</h5>
+                  <h5 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Communication nodes</h5>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 bg-cream/30 p-4 rounded-xl border border-border-primary">
+                    <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
                       <span className="text-xl">📞</span>
                       <div>
-                        <p className="text-[10px] font-black uppercase opacity-40">Secure Line</p>
-                        <p className="font-bold text-black">{selectedCustomer.phoneNumber}</p>
+                        <p className="text-[10px] font-bold uppercase text-zinc-500">Secure Line</p>
+                        <p className="font-bold text-zinc-100">{selectedCustomer.phoneNumber}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 bg-cream/30 p-4 rounded-xl border border-border-primary">
+                    <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
                       <span className="text-xl">✉️</span>
                       <div>
-                        <p className="text-[10px] font-black uppercase opacity-40">Digital Relay</p>
-                        <p className="font-bold text-black">{selectedCustomer.email || 'N/A'}</p>
+                        <p className="text-[10px] font-bold uppercase text-zinc-500">Digital Relay</p>
+                        <p className="font-bold text-zinc-100">{selectedCustomer.email || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h5 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Performance metrics</h5>
+                  <h5 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Performance metrics</h5>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-black text-white p-4 rounded-xl border border-white/10">
-                      <p className="text-[10px] font-black uppercase opacity-40 mb-1">Lifetime Value</p>
-                      <p className="text-xl font-black text-gold">{formatCurrency(selectedCustomer.stats?.totalSpent)}</p>
+                    <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
+                      <p className="text-[10px] font-bold uppercase text-zinc-500 mb-1">Lifetime Value</p>
+                      <p className="text-xl font-bold text-emerald-500">{formatCurrency(selectedCustomer.stats?.totalSpent)}</p>
                     </div>
-                    <div className="bg-black text-white p-4 rounded-xl border border-white/10">
-                      <p className="text-[10px] font-black uppercase opacity-40 mb-1">Session Count</p>
-                      <p className="text-xl font-black text-gold">{selectedCustomer.stats?.totalAppointments || 0}</p>
+                    <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
+                      <p className="text-[10px] font-bold uppercase text-zinc-500 mb-1">Session Count</p>
+                      <p className="text-xl font-bold text-amber-500">{selectedCustomer.stats?.totalAppointments || 0}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h5 className="text-[10px] font-black uppercase tracking-widest text-secondary-brown opacity-50">Operational history (Recent)</h5>
+                <h5 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Operational history (Recent)</h5>
                 {selectedCustomer.recentAppointments?.length > 0 ? (
                   <div className="space-y-2">
                     {selectedCustomer.recentAppointments.slice(0, 3).map((apt) => (
-                      <div key={apt._id} className="flex items-center justify-between p-4 bg-background-cream rounded-xl border border-border-primary hover:border-accent-gold transition-colors">
+                      <div key={apt._id} className="flex items-center justify-between p-4 bg-zinc-900 rounded-xl border border-zinc-800 hover:border-amber-500/50 transition-colors">
                         <div>
-                          <p className="font-black text-black uppercase text-sm">{apt.service?.name?.en}</p>
-                          <p className="text-[10px] font-bold text-secondary-brown">{formatDate(apt.scheduledDate)} at {apt.scheduledTime}</p>
+                          <p className="font-bold text-zinc-100 uppercase text-sm">{apt.service?.name?.en}</p>
+                          <p className="text-[10px] font-bold text-zinc-400">{formatDate(apt.scheduledDate)} at {apt.scheduledTime}</p>
                         </div>
-                        <Badge variant={apt.status === 'COMPLETED' ? 'success' : 'brown'} size="xs">{apt.status}</Badge>
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${apt.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
+                          {apt.status}
+                        </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center bg-background-cream rounded-xl border border-dashed border-border-primary">
-                    <p className="text-[10px] font-black uppercase opacity-40">No historical data available</p>
+                  <div className="p-8 text-center bg-zinc-900 rounded-xl border border-dashed border-zinc-800">
+                    <p className="text-[10px] font-bold uppercase text-zinc-600">No historical data available</p>
                   </div>
                 )}
               </div>
             </div>
-          )}
-        </ModalContent>
-        <ModalFooter>
-          <Button variant="outline" onClick={() => setShowDetailsModal(false)}>Close Portal</Button>
-          <Button 
-            variant={selectedCustomer?.isActive !== false ? 'error' : 'success'}
-            onClick={() => handleStatusToggle(selectedCustomer._id, selectedCustomer.isActive)}
-          >
-            {selectedCustomer?.isActive !== false ? 'Restrain Account' : 'Re-Authorize Client'}
-          </Button>
-        </ModalFooter>
-      </Modal>
+
+            <div className="p-6 border-t border-zinc-800 flex justify-end gap-3 bg-zinc-950 sticky bottom-0 z-10">
+              <button 
+                className="px-6 py-3 bg-transparent border border-zinc-700 text-zinc-300 rounded-xl font-bold hover:bg-zinc-800 transition-colors"
+                onClick={() => setShowDetailsModal(false)}
+              >Close Portal</button>
+              <button 
+                className={`px-6 py-3 rounded-xl font-bold transition-colors ${selectedCustomer?.isActive !== false ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-zinc-950'}`}
+                onClick={() => {
+                  handleStatusToggle(selectedCustomer._id, selectedCustomer.isActive);
+                  setShowDetailsModal(false);
+                }}
+              >
+                {selectedCustomer?.isActive !== false ? 'Restrain Account' : 'Re-Authorize Client'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
