@@ -7,10 +7,7 @@ import {
   updateAppointment,
   deleteAppointment
 } from '../../store/slices/adminSlice';
-import Button from '../../components/ui/Button/Button';
-import Badge from '../../components/ui/Badge/Badge';
 import BottomSheet from '../../components/ui/BottomSheet/BottomSheet';
-import Skeleton from '../../components/ui/Skeleton/Skeleton';
 import {
   CalendarDaysIcon,
   ClockIcon,
@@ -24,7 +21,6 @@ import {
   PencilSquareIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
-
 
 const AdminAppointments = () => {
   const { t } = useTranslation();
@@ -62,18 +58,16 @@ const AdminAppointments = () => {
 
   // Status options with style mapping
   const statusOptions = [
-    { value: 'all', label: 'All', color: 'bg-black text-white border-black' },
-    { value: 'PENDING_PAYMENT', label: 'Pending', color: 'bg-white text-secondary-brown border-accent-gold/20' },
-    { value: 'CONFIRMED', label: 'Confirmed', color: 'bg-white text-success border-success/30' },
-    { value: 'CHECKED_IN', label: 'Checked In', color: 'bg-accent-gold md:text-black border-accent-gold' },
-    { value: 'IN_PROGRESS', label: 'In Progress', color: 'bg-black text-accent-gold border-black' },
-    { value: 'COMPLETED', label: 'Completed', color: 'bg-gray-100 text-gray-400 border-gray-200' },
-    { value: 'CANCELLED', label: 'Cancelled', color: 'bg-error/10 text-error border-error/20' }
+    { value: 'all', label: 'All', color: 'bg-zinc-800 text-zinc-100 border-zinc-700' },
+    { value: 'PENDING_PAYMENT', label: 'Pending', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+    { value: 'CONFIRMED', label: 'Confirmed', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+    { value: 'CHECKED_IN', label: 'Checked In', color: 'bg-zinc-100 text-zinc-900 border-zinc-300' },
+    { value: 'IN_PROGRESS', label: 'In Progress', color: 'bg-amber-500 text-zinc-950 border-amber-500' },
+    { value: 'COMPLETED', label: 'Completed', color: 'bg-zinc-900 text-zinc-500 border-zinc-800' },
+    { value: 'CANCELLED', label: 'Cancelled', color: 'bg-red-500/10 text-red-500 border-red-500/20' }
   ];
 
   const loadAppointments = React.useCallback(() => {
-    // We only fetch for the selected date on mobile for simplicity, 
-    // or we could construct a dateRange for desktop
     const activeFilters = {
       startDate: selectedDate,
       endDate: selectedDate,
@@ -136,25 +130,18 @@ const AdminAppointments = () => {
 
   const getStatusBadge = (status) => {
     const map = {
-      'PENDING_PAYMENT': { label: 'Pending', variant: 'gold' },
-      'CONFIRMED': { label: 'Confirmed', variant: 'success' },
-      'CHECKED_IN': { label: 'Checked In', variant: 'black' },
-      'IN_PROGRESS': { label: 'In Progress', variant: 'gold', pulse: true },
-      'COMPLETED': { label: 'Completed', variant: 'default' },
-      'CANCELLED': { label: 'Cancelled', variant: 'error' },
-      'NO_SHOW': { label: 'No Show', variant: 'error' }
+      'PENDING_PAYMENT': { label: 'Pending', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+      'CONFIRMED': { label: 'Confirmed', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+      'CHECKED_IN': { label: 'Checked In', color: 'bg-zinc-800 text-zinc-300 border-zinc-700' },
+      'IN_PROGRESS': { label: 'In Progress', color: 'bg-amber-500/20 text-amber-500 border-amber-500/30', pulse: true },
+      'COMPLETED': { label: 'Completed', color: 'bg-zinc-950 text-zinc-500 border-zinc-800' },
+      'CANCELLED': { label: 'Cancelled', color: 'bg-red-500/10 text-red-500 border-red-500/20' },
+      'NO_SHOW': { label: 'No Show', color: 'bg-red-500/10 text-red-500 border-red-500/20' }
     };
-    const mapped = map[status] || { label: status, variant: 'brown' };
+    const mapped = map[status] || { label: status, color: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border
-        ${mapped.variant === 'gold' ? 'bg-accent-gold/10 text-accent-gold border-accent-gold/20' : ''}
-        ${mapped.variant === 'success' ? 'bg-success/10 text-success border-success/20' : ''}
-        ${mapped.variant === 'black' ? 'bg-black text-white border-black' : ''}
-        ${mapped.variant === 'error' ? 'bg-error/10 text-error border-error/20' : ''}
-        ${mapped.variant === 'default' ? 'bg-gray-100 text-gray-500 border-gray-200' : ''}
-        ${mapped.variant === 'brown' ? 'bg-secondary-brown/10 text-secondary-brown border-secondary-brown/20' : ''}
-      `}>
-        {mapped.pulse && <span className="w-1.5 h-1.5 rounded-full bg-accent-gold animate-pulse" />}
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${mapped.color}`}>
+        {mapped.pulse && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
         {mapped.label}
       </span>
     );
@@ -176,24 +163,23 @@ const AdminAppointments = () => {
   });
 
   return (
-    <div className="admin-page animate-fade-in px-4 lg:px-0">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4 lg:mb-8">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-black text-black uppercase tracking-tight">Appointments</h1>
-          <p className="text-xs font-bold opacity-50 uppercase tracking-widest mt-1">Manage Schedule</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-zinc-50 tracking-tight">Appointments</h1>
+          <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Manage Schedule</p>
         </div>
-        <Button
-          variant="black"
+        <button
           onClick={() => window.location.href = '/admin/appointments/new'}
-          className="w-full md:w-auto flex items-center justify-center gap-2 h-[44px]"
+          className="w-full md:w-auto flex items-center justify-center gap-2 h-[44px] px-6 bg-zinc-100 hover:bg-white text-zinc-900 rounded-xl font-bold transition-all active:scale-95 shadow-sm"
         >
           <span className="text-xl">+</span> Add Booking
-        </Button>
+        </button>
       </div>
 
       {/* Sticky Horizontal Calendar */}
-      <div className="sticky top-0 z-40 bg-background-cream pb-4 pt-2 -mx-4 px-4 lg:mx-0 lg:px-0 lg:static lg:bg-transparent lg:pb-0 lg:pt-0 mb-4">
+      <div className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl pb-4 pt-2 -mx-4 px-4 lg:mx-0 lg:px-0 lg:static lg:bg-transparent lg:pb-0 lg:pt-0 mb-4 border-b lg:border-none border-zinc-800/50">
         <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
           {dateOptions.map((dateObj) => (
             <button
@@ -201,20 +187,20 @@ const AdminAppointments = () => {
               onClick={() => setSelectedDate(dateObj.dateStr)}
               className={`flex flex-col items-center justify-center w-14 h-16 rounded-2xl shrink-0 transition-all border ${
                 selectedDate === dateObj.dateStr
-                  ? 'bg-black border-black text-accent-gold shadow-md'
+                  ? 'bg-amber-500 border-amber-500 text-zinc-950 shadow-md shadow-amber-500/20'
                   : dateObj.isToday
-                    ? 'bg-white border-accent-gold text-black'
-                    : 'bg-white border-transparent text-secondary-brown/60 hover:border-accent-gold/20'
+                    ? 'bg-zinc-900 border-amber-500/50 text-zinc-100'
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
               }`}
             >
-              <span className={`text-[10px] font-black uppercase ${selectedDate === dateObj.dateStr ? 'text-white' : ''}`}>
+              <span className={`text-[10px] font-bold uppercase tracking-widest ${selectedDate === dateObj.dateStr ? 'text-zinc-900' : ''}`}>
                 {dateObj.dayName}
               </span>
-              <span className={`text-xl font-black mt-0.5 ${selectedDate === dateObj.dateStr ? 'text-accent-gold' : 'text-black'}`}>
+              <span className={`text-xl font-bold mt-0.5 ${selectedDate === dateObj.dateStr ? 'text-zinc-950' : 'text-zinc-100'}`}>
                 {dateObj.dayNum}
               </span>
               {dateObj.isToday && selectedDate !== dateObj.dateStr && (
-                <div className="w-1 h-1 rounded-full bg-accent-gold mt-1" />
+                <div className="w-1 h-1 rounded-full bg-amber-500 mt-1" />
               )}
             </button>
           ))}
@@ -226,10 +212,10 @@ const AdminAppointments = () => {
             <button
               key={opt.value}
               onClick={() => setStatusFilter(opt.value)}
-              className={`whitespace-nowrap px-4 h-8 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
+              className={`whitespace-nowrap px-4 h-8 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
                 statusFilter === opt.value
                   ? opt.color
-                  : 'bg-white border-gray-200 text-secondary-brown/60 hover:border-accent-gold/20'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'
               }`}
             >
               {opt.label}
@@ -240,13 +226,13 @@ const AdminAppointments = () => {
 
       {isLoading ? (
         <div className="space-y-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} height="120px" variant="rectangle" className="rounded-2xl" />)}
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-zinc-900 rounded-2xl animate-pulse"></div>)}
         </div>
       ) : sortedAppointments.length === 0 ? (
-        <div className="py-24 text-center bg-white rounded-3xl border border-dashed border-accent-gold/20">
-          <CalendarDaysIcon className="w-12 h-12 text-secondary-brown/20 mx-auto mb-3" />
-          <p className="text-sm font-black text-secondary-brown opacity-40 uppercase tracking-widest mb-1">No appointments</p>
-          <p className="text-xs font-bold text-secondary-brown/40">Try selecting a different date</p>
+        <div className="py-24 text-center bg-zinc-900/50 rounded-3xl border-2 border-dashed border-zinc-800">
+          <CalendarDaysIcon className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
+          <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-1">No appointments</p>
+          <p className="text-xs font-bold text-zinc-600">Try selecting a different date</p>
         </div>
       ) : (
         <div className="space-y-4 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:space-y-0 lg:gap-4">
@@ -258,39 +244,39 @@ const AdminAppointments = () => {
                 setIsEditMode(false);
                 setShowDetailsSheet(true);
               }}
-              className="bg-white p-4 rounded-2xl border border-accent-gold/10 shadow-sm hover:border-accent-gold/50 cursor-pointer transition-all active:scale-[0.98]"
+              className="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 shadow-sm hover:border-zinc-700 cursor-pointer transition-all active:scale-[0.98]"
             >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-2">
-                  <ClockIcon className="w-4 h-4 text-accent-gold" />
-                  <span className="text-lg font-black text-black">{apt.scheduledTime}</span>
+                  <ClockIcon className="w-4 h-4 text-amber-500" />
+                  <span className="text-lg font-bold text-zinc-100">{apt.scheduledTime}</span>
                 </div>
                 {getStatusBadge(apt.status)}
               </div>
               
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-background-cream flex items-center justify-center font-black text-black">
+                <div className="w-12 h-12 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-bold text-zinc-300">
                   {apt.customer?.fullName?.charAt(0).toUpperCase() || 'W'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-black text-black uppercase text-sm truncate pr-2">
+                  <h3 className="font-bold text-zinc-100 uppercase text-sm truncate pr-2">
                     {apt.customer?.fullName || 'Walk-in Client'}
                   </h3>
-                  <p className="text-xs font-bold text-secondary-brown/60 truncate flex items-center gap-1 mt-0.5">
+                  <p className="text-xs font-bold text-zinc-500 truncate flex items-center gap-1 mt-0.5">
                     <ScissorsIcon className="w-3 h-3" />
                     {apt.service?.name?.en}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-secondary-brown/50">
+              <div className="flex items-center justify-between pt-3 border-t border-zinc-800/50">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                   <CurrencyDollarIcon className="w-4 h-4" />
                   {formatCurrency(apt.payment?.totalAmount)} 
                   {apt.payment?.paymentStatus === 'COMPLETED' ? (
-                    <span className="text-success ml-1">Paid</span>
+                    <span className="text-emerald-500 ml-1">Paid</span>
                   ) : (
-                    <span className="text-error ml-1">Unpaid</span>
+                    <span className="text-red-500 ml-1">Unpaid</span>
                   )}
                 </div>
                 <button 
@@ -298,7 +284,7 @@ const AdminAppointments = () => {
                     e.stopPropagation();
                     if(apt.customer?.phoneNumber) window.location.href = `tel:${apt.customer.phoneNumber}`;
                   }}
-                  className="w-8 h-8 rounded-full bg-accent-gold/10 text-accent-gold flex items-center justify-center hover:bg-accent-gold hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center hover:bg-amber-500 hover:text-zinc-950 transition-colors"
                 >
                   <PhoneIcon className="w-4 h-4" />
                 </button>
@@ -313,7 +299,6 @@ const AdminAppointments = () => {
         isOpen={showDetailsSheet} 
         onClose={() => {
           setShowDetailsSheet(false);
-          // Wait for animation to finish before resetting mode
           setTimeout(() => setIsEditMode(false), 300);
         }}
         title={isEditMode ? "Edit Setup" : "Session Details"}
@@ -321,7 +306,7 @@ const AdminAppointments = () => {
           !isEditMode && selectedAppointment && (
             <button 
               onClick={() => setIsEditMode(true)}
-              className="p-2 text-secondary-brown hover:text-black"
+              className="p-2 text-zinc-400 hover:text-amber-500 transition-colors"
             >
               <PencilSquareIcon className="w-6 h-6" />
             </button>
@@ -330,62 +315,62 @@ const AdminAppointments = () => {
       >
         {selectedAppointment && !isEditMode && (
           <div className="space-y-6 pb-6">
-            <div className="flex items-center gap-4 bg-background-cream p-4 rounded-2xl border border-accent-gold/10">
-              <div className="w-16 h-16 bg-black text-accent-gold flex items-center justify-center rounded-2xl font-black text-3xl">
+            <div className="flex items-center gap-4 bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+              <div className="w-16 h-16 bg-zinc-950 border border-zinc-800 text-amber-500 flex items-center justify-center rounded-2xl font-bold text-3xl">
                 {selectedAppointment.customer?.fullName?.charAt(0).toUpperCase() || 'W'}
               </div>
               <div className="flex-1">
-                <h4 className="text-lg font-black text-black uppercase">{selectedAppointment.customer?.fullName || 'Walk-in Client'}</h4>
-                <p className="text-xs font-bold text-secondary-brown/60 mt-1">{selectedAppointment.customer?.phoneNumber || 'No phone provided'}</p>
+                <h4 className="text-lg font-bold text-zinc-100 uppercase">{selectedAppointment.customer?.fullName || 'Walk-in Client'}</h4>
+                <p className="text-xs font-bold text-zinc-500 mt-1">{selectedAppointment.customer?.phoneNumber || 'No phone provided'}</p>
               </div>
               <button 
                 onClick={() => { if(selectedAppointment.customer?.phoneNumber) window.location.href = `tel:${selectedAppointment.customer.phoneNumber}`; }}
-                className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black border border-gray-100 shadow-sm hover:text-accent-gold"
+                className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-300 border border-zinc-700 shadow-sm hover:text-amber-500 hover:bg-zinc-700 transition-colors"
               >
                 <PhoneIcon className="w-5 h-5" />
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
-                <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50 mb-1">Time</p>
-                <div className="flex items-center gap-1.5 font-black text-black">
-                  <ClockIcon className="w-4 h-4 text-accent-gold" />
+              <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Time</p>
+                <div className="flex items-center gap-1.5 font-bold text-zinc-100">
+                  <ClockIcon className="w-4 h-4 text-amber-500" />
                   {selectedAppointment.scheduledTime}
                 </div>
-                <p className="text-[10px] font-bold text-secondary-brown/60 mt-1">{selectedAppointment.scheduledDate.split('T')[0]}</p>
+                <p className="text-[10px] font-bold text-zinc-600 mt-1">{selectedAppointment.scheduledDate.split('T')[0]}</p>
               </div>
-              <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
-                <p className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/50 mb-1">Service</p>
-                <p className="text-xs font-black text-black line-clamp-2 leading-tight">{selectedAppointment.service?.name?.en}</p>
-                <p className="text-[10px] font-bold text-accent-gold mt-1">{selectedAppointment.service?.duration} mins</p>
+              <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Service</p>
+                <p className="text-xs font-bold text-zinc-100 line-clamp-2 leading-tight">{selectedAppointment.service?.name?.en}</p>
+                <p className="text-[10px] font-bold text-amber-500 mt-1">{selectedAppointment.service?.duration} mins</p>
               </div>
             </div>
 
-            <div className="bg-black text-white p-5 rounded-2xl">
-              <div className="flex justify-between items-center mb-3 pb-3 border-b border-white/10">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Status</span>
-                <span className="text-xs font-black uppercase text-accent-gold">{selectedAppointment.status.replace('_', ' ')}</span>
+            <div className="bg-zinc-950 border border-zinc-800 text-zinc-100 p-5 rounded-2xl shadow-sm">
+              <div className="flex justify-between items-center mb-3 pb-3 border-b border-zinc-800">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Status</span>
+                <span className="text-xs font-bold uppercase text-amber-500">{selectedAppointment.status.replace('_', ' ')}</span>
               </div>
-              <div className="flex justify-between items-center mb-3 pb-3 border-b border-white/10">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Payment</span>
-                <span className={`text-xs font-black uppercase ${selectedAppointment.payment?.paymentStatus === 'COMPLETED' ? 'text-success' : 'text-error'}`}>
+              <div className="flex justify-between items-center mb-3 pb-3 border-b border-zinc-800">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Payment</span>
+                <span className={`text-xs font-bold uppercase ${selectedAppointment.payment?.paymentStatus === 'COMPLETED' ? 'text-emerald-500' : 'text-red-500'}`}>
                   {selectedAppointment.payment?.paymentStatus}
                 </span>
               </div>
               <div className="flex justify-between items-end pt-1">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Total Bill</span>
-                <span className="text-2xl font-black text-white">{formatCurrency(selectedAppointment.payment?.totalAmount)}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total Bill</span>
+                <span className="text-2xl font-bold text-zinc-50">{formatCurrency(selectedAppointment.payment?.totalAmount)}</span>
               </div>
             </div>
 
             {selectedAppointment.notes && (
-              <div className="p-4 bg-accent-gold/10 rounded-2xl border border-accent-gold/20">
-                <div className="flex items-center gap-1.5 text-accent-gold mb-2">
+              <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+                <div className="flex items-center gap-1.5 text-amber-500 mb-2">
                   <EllipsisVerticalIcon className="w-4 h-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Notes</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Notes</span>
                 </div>
-                <p className="text-xs font-bold text-secondary-brown">{selectedAppointment.notes}</p>
+                <p className="text-xs font-bold text-amber-500/80">{selectedAppointment.notes}</p>
               </div>
             )}
 
@@ -393,40 +378,35 @@ const AdminAppointments = () => {
             <div className="pt-2 grid grid-cols-2 gap-3">
               {selectedAppointment.status === 'PENDING_PAYMENT' || selectedAppointment.status === 'CONFIRMED' ? (
                 <>
-                  <Button 
-                    variant="black" 
-                    className="w-full text-xs"
+                  <button 
+                    className="w-full h-12 bg-zinc-100 text-zinc-900 rounded-xl font-bold text-sm hover:bg-white active:scale-95 transition-all"
                     onClick={() => handleUpdateStatus(selectedAppointment._id, 'CHECKED_IN')}
                   >Check In
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full text-xs text-error border-error hover:bg-error/10"
+                  </button>
+                  <button 
+                    className="w-full h-12 bg-transparent border border-red-500 text-red-500 rounded-xl font-bold text-sm hover:bg-red-500/10 active:scale-95 transition-all"
                     onClick={() => handleUpdateStatus(selectedAppointment._id, 'CANCELLED')}
                   >Cancel
-                  </Button>
+                  </button>
                 </>
               ) : selectedAppointment.status === 'CHECKED_IN' ? (
-                <Button 
-                  variant="gold" 
-                  className="w-full col-span-2 text-xs"
+                <button 
+                  className="w-full col-span-2 h-12 bg-amber-500 text-zinc-950 rounded-xl font-bold text-sm hover:bg-amber-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)]"
                   onClick={() => handleUpdateStatus(selectedAppointment._id, 'IN_PROGRESS')}
                 >Start Service
-                </Button>
+                </button>
               ) : selectedAppointment.status === 'IN_PROGRESS' ? (
-                <Button 
-                  variant="success" 
-                  className="w-full col-span-2 text-xs"
+                <button 
+                  className="w-full col-span-2 h-12 bg-emerald-500 text-zinc-950 rounded-xl font-bold text-sm hover:bg-emerald-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]"
                   onClick={() => handleUpdateStatus(selectedAppointment._id, 'COMPLETED')}
                 >Complete Service
-                </Button>
+                </button>
               ) : (
-                <Button 
-                  variant="outline" 
-                  className="w-full col-span-2 text-xs"
+                <button 
+                  className="w-full col-span-2 h-12 bg-zinc-800 text-zinc-300 rounded-xl font-bold text-sm hover:bg-zinc-700 active:scale-95 transition-all"
                   onClick={() => setShowDetailsSheet(false)}
                 >Close
-                </Button>
+                </button>
               )}
             </div>
           </div>
@@ -435,11 +415,11 @@ const AdminAppointments = () => {
         {selectedAppointment && isEditMode && (
           <div className="space-y-5 pb-6">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/70 ml-1">Current Status</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Current Status</label>
               <select
                 value={selectedAppointment.status}
                 onChange={(e) => setSelectedAppointment({ ...selectedAppointment, status: e.target.value })}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-accent-gold focus:ring-0"
+                className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"
               >
                 {statusOptions.filter(o => o.value !== 'all').map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -449,51 +429,51 @@ const AdminAppointments = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/70 ml-1">Date</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Date</label>
                 <input
                   type="date"
                   value={selectedAppointment.scheduledDate?.split('T')[0] || ''}
                   onChange={(e) => setSelectedAppointment({ ...selectedAppointment, scheduledDate: e.target.value })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-accent-gold"
+                  className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none style-color-scheme-dark"
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/70 ml-1">Time</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Time</label>
                 <input
                   type="time"
                   value={selectedAppointment.scheduledTime || ''}
                   onChange={(e) => setSelectedAppointment({ ...selectedAppointment, scheduledTime: e.target.value })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-accent-gold"
+                  className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none"
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brown/70 ml-1">Notes</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Notes</label>
               <textarea
                 value={selectedAppointment.notes || ''}
                 onChange={(e) => setSelectedAppointment({ ...selectedAppointment, notes: e.target.value })}
                 rows="3"
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-accent-gold"
+                className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-bold text-zinc-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none placeholder:text-zinc-600"
                 placeholder="Optional notes..."
               />
             </div>
 
-            <div className="pt-4 border-t border-gray-100 space-y-3">
-              <Button 
-                variant="black" 
-                className="w-full"
+            <div className="pt-4 border-t border-zinc-800/50 space-y-3">
+              <button 
+                className="w-full h-12 bg-zinc-100 text-zinc-900 rounded-xl font-bold text-sm hover:bg-white active:scale-95 transition-all"
                 onClick={handleSaveEdit}
-              >Save Changes</Button>
+              >Save Changes</button>
               <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
+                <button 
+                  className="flex-1 h-12 bg-transparent border border-zinc-700 text-zinc-300 rounded-xl font-bold text-sm hover:bg-zinc-800 active:scale-95 transition-all"
                   onClick={() => setIsEditMode(false)}
-                >Cancel</Button>
+                >Cancel</button>
                 <button 
                   onClick={() => handleDelete(selectedAppointment._id)}
-                  className="w-12 h-[38px] rounded-xl border border-error text-error flex items-center justify-center hover:bg-error/10 active:scale-95 transition-all"
+                  className="w-12 h-12 rounded-xl border border-red-500 text-red-500 flex items-center justify-center hover:bg-red-500/10 active:scale-95 transition-all"
                   aria-label="Delete Appointment"
                 >
                   <TrashIcon className="w-5 h-5" />
