@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
-import { format, addDays } from 'date-fns';
+import { format, addDays, isSameDay } from 'date-fns';
 import { toast } from 'react-hot-toast';
 
 import { CalendarDaysIcon, ClockIcon, CreditCardIcon } from '@heroicons/react/24/outline';
@@ -211,61 +210,89 @@ const BookingPage = () => {
             </button>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[0.85fr_1.15fr] items-start">
-            <div className="rounded-3xl border border-gray-100 bg-[#F8F4EC]/55 p-5">
-              <div className="mb-4 flex items-center gap-2 text-sm font-medium text-[#3B2F2F]">
-                <CalendarDaysIcon className="h-5 w-5 text-[#C9A227]" />
-                Select date
+          <div className="mt-8 space-y-8">
+            <div className="rounded-3xl border border-gray-100 bg-[#F8F4EC]/55 p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-base font-bold text-[#3B2F2F]">
+                  <CalendarDaysIcon className="h-6 w-6 text-[#C9A227]" />
+                  Select date
+                </div>
+                {selectedDate && (
+                  <span className="text-sm font-medium text-[#C9A227]">{format(selectedDate, 'MMMM yyyy')}</span>
+                )}
               </div>
-              <div className="min-h-[320px] overflow-hidden rounded-2xl bg-white p-3 shadow-sm [&_.react-datepicker]:border-none [&_.react-datepicker]:font-sans [&_.react-datepicker]:w-full [&_.react-datepicker__current-month]:text-[#0F0F0F] [&_.react-datepicker__day--selected]:bg-[#0F0F0F] [&_.react-datepicker__day--keyboard-selected]:bg-[#C9A227] [&_.react-datepicker__header]:bg-[#F8F4EC] [&_.react-datepicker__header]:border-b [&_.react-datepicker__header]:border-gray-100">
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={handleDateChange}
-                  minDate={new Date()}
-                  maxDate={addDays(new Date(), 30)}
-                  inline
-                />
+              
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
+                {Array.from({ length: 30 }).map((_, i) => {
+                  const date = addDays(new Date(), i);
+                  const isSelected = selectedDate && isSameDay(date, selectedDate);
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleDateChange(date)}
+                      className={`flex min-w-[80px] snap-center flex-col items-center justify-center rounded-2xl border p-4 transition-all duration-300 ${
+                        isSelected
+                          ? 'border-[#C9A227] bg-[#0F0F0F] text-white shadow-lg scale-105'
+                          : 'border-gray-200 bg-white text-[#3B2F2F] hover:border-[#C9A227] hover:shadow-md'
+                      }`}
+                    >
+                      <span className={`text-sm font-medium uppercase ${isSelected ? 'text-[#C9A227]' : 'text-gray-500'}`}>
+                        {format(date, 'EEE')}
+                      </span>
+                      <span className="mt-1 text-2xl font-bold">
+                        {format(date, 'dd')}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm min-h-[320px] flex flex-col">
-              <div className="mb-4 flex items-center gap-2 text-sm font-medium text-[#3B2F2F]">
-                <ClockIcon className="h-5 w-5 text-[#C9A227]" />
+            <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm min-h-[320px] flex flex-col">
+              <div className="mb-6 flex items-center gap-2 text-base font-bold text-[#3B2F2F]">
+                <ClockIcon className="h-6 w-6 text-[#C9A227]" />
                 Available time slots
               </div>
 
               {!selectedDate ? (
-                <div className="flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-[#F8F4EC]/45 px-6 text-center">
-                  <p className="text-xl font-bold tracking-[-0.03em] text-[#0F0F0F]">Choose a date first</p>
-                  <p className="mt-3 max-w-sm text-base leading-7 text-gray-700">Once you pick a day, we will show the best available times for this service.</p>
+                <div className="flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-[#F8F4EC]/45 px-6 text-center py-12">
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
+                    <CalendarDaysIcon className="h-8 w-8 text-[#C9A227]" />
+                  </div>
+                  <p className="text-2xl font-bold tracking-[-0.03em] text-[#0F0F0F]">Choose a date first</p>
+                  <p className="mt-3 max-w-md text-base leading-7 text-gray-700">Select a day from the calendar strip above to see our best available times for this service.</p>
                 </div>
               ) : loadingSlots ? (
-                <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3">
-                  {[1, 2, 3, 4, 5, 6].map((item) => (
-                    <Skeleton key={item} height="48px" variant="rectangle" className="rounded-xl" />
+                <div className="grid flex-1 grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+                  {[...Array(12)].map((_, i) => (
+                    <Skeleton key={i} height="56px" variant="rectangle" className="rounded-2xl" />
                   ))}
                 </div>
               ) : availableSlots.length > 0 ? (
-                <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="grid flex-1 grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
                   {availableSlots.map((slot) => (
                     <button
                       key={slot.time}
                       type="button"
                       onClick={() => handleTimeSelect(slot)}
-                      className={`rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
+                      className={`flex flex-col items-center justify-center rounded-2xl px-4 py-3 transition-all duration-300 ${
                         selectedTime?.time === slot.time
-                          ? 'bg-[#0F0F0F] text-white shadow-md'
-                          : 'border border-gray-200 bg-white text-[#0F0F0F] hover:border-[#C9A227] hover:text-[#C9A227]'
+                          ? 'bg-[#0F0F0F] text-white shadow-lg scale-105 border-transparent'
+                          : 'border border-gray-200 bg-white text-[#0F0F0F] hover:border-[#C9A227] hover:bg-[#F8F4EC] hover:text-[#C9A227]'
                       }`}
                     >
-                      {slot.time}
+                      <span className="text-lg font-bold">{slot.time}</span>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-red-200 bg-red-50 px-6 text-center">
-                  <p className="text-xl font-bold tracking-[-0.03em] text-[#0F0F0F]">No slots available</p>
-                  <p className="mt-3 max-w-sm text-base leading-7 text-gray-700">Please try another date to find an open appointment window.</p>
+                <div className="flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-red-200 bg-red-50 px-6 text-center py-12">
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
+                    <ClockIcon className="h-8 w-8 text-red-400" />
+                  </div>
+                  <p className="text-2xl font-bold tracking-[-0.03em] text-[#0F0F0F]">No slots available</p>
+                  <p className="mt-3 max-w-md text-base leading-7 text-gray-700">We're fully booked on this day. Please try another date to find an open appointment window.</p>
                 </div>
               )}
             </div>
